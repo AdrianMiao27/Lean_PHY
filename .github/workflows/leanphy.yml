@@ -1,0 +1,21 @@
+name: LeanPhy verification
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lean-version: leanprover/lean4:v4.34.0
+      - name: Build and run release verification
+        run: ./scripts/verify.sh
+

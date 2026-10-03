@@ -1,0 +1,83 @@
+import LeanPhy
+
+/-!
+This file is consumed by `scripts/verify.sh`.  The declarations below are
+representative load-bearing results from the physical layers; their axiom
+reports must never contain `sorryAx` or an application-specific axiom.
+-/
+
+#print axioms LeanPhy.QuantumInfo.applyKraus_isDensity
+#print axioms LeanPhy.QuantumInfo.kraus_term_posSemidef
+#print axioms LeanPhy.Tensor.mixedTraceN_comp_comm
+#print axioms LeanPhy.Tensor.composeMixedN_assoc
+#print axioms LeanPhy.Classical.oscillatorFlow_energy
+#print axioms LeanPhy.HighEnergy.ward_identity
+#print axioms LeanPhy.FieldTheory.Pairing.wick_pairing_count
+#print axioms LeanPhy.QuantumInfo.teleportation_identity
+#print axioms LeanPhy.Quantum.conserved_commutator
+#print axioms LeanPhy.Mathematics.commutator_jacobi
+#print axioms LeanPhy.Mathematics.derivation_bianchi_apply
+#print axioms LeanPhy.Quantum.commutator_eigenvector_shift
+#print axioms LeanPhy.Mathematics.PoissonAlgebra.conserved_bracket
+#print axioms LeanPhy.Mathematics.PoissonAlgebra.hamiltonianDerivation_product
+#print axioms LeanPhy.Classical.phase_derivatives_commute
+#print axioms LeanPhy.Classical.canonical_q_p
+#print axioms LeanPhy.Mathematics.PoissonAlgebra.hamiltonianDerivation_commutator
+#print axioms LeanPhy.Classical.oscillator_hamiltonian_q
+#print axioms LeanPhy.QuantumInfo.multiOutcomeState_trace
+#print axioms LeanPhy.QuantumInfo.multiConditionalState_isDensity
+#print axioms LeanPhy.Mathematics.spinOneRepresentation_preserves_jacobi
+#print axioms LeanPhy.Mathematics.matrixGeneratorFamily_jacobi
+#print axioms LeanPhy.QuantumInfo.applyKraus_completelyPositive
+#print axioms LeanPhy.Mathematics.lorentzRepresentation_preserves_jacobi
+#print axioms LeanPhy.Quantum.cayleyHamilton
+#print axioms LeanPhy.Classical.oscillator_euler_lagrange
+#print axioms LeanPhy.Quantum.rankOneProjector_mul_self
+#print axioms LeanPhy.Quantum.rankOneProjector_posSemidef
+#print axioms LeanPhy.StatMech.compose_step
+#print axioms LeanPhy.StatMech.doubly_stochastic_uniform
+#print axioms LeanPhy.StatMech.step_expectation
+#print axioms LeanPhy.QuantumInfo.lindblad_trace_zero
+#print axioms LeanPhy.StatMech.gibbsWeight_sum
+#print axioms LeanPhy.StatMech.gibbsWeight_shift
+#print axioms LeanPhy.GaugeTheory.abelianFieldStrength_gauge_invariant
+#print axioms LeanPhy.GaugeTheory.abelianFieldStrength_bianchi
+#print axioms LeanPhy.GaugeTheory.YangMillsConnection.bianchi
+#print axioms LeanPhy.GaugeTheory.YangMillsConnection.curvature_antisym
+#print axioms LeanPhy.Mathematics.NoncommConnection.bianchi
+#print axioms LeanPhy.GaugeTheory.YangMillsConnection.bianchi_via_noncommExterior
+#print axioms LeanPhy.Mathematics.innerDerivation
+#print axioms LeanPhy.Mathematics.innerConnection
+#print axioms LeanPhy.Quantum.spectralOperator_mul_projector
+#print axioms LeanPhy.Quantum.spectralOperator_mulVec_of_projector
+#print axioms LeanPhy.Mathematics.FiniteFourierSystem.inverse_forward
+#print axioms LeanPhy.Mathematics.FiniteFourierSystem.forward_inverse
+#print axioms LeanPhy.QuantumInfo.KrausChannel.compose
+#print axioms LeanPhy.QuantumInfo.KrausChannel.compose_toFiniteChannel_apply
+#print axioms LeanPhy.QuantumInfo.KrausChannel.completelyPositive
+#print axioms LeanPhy.QuantumInfo.KrausChannel.map_isDensity
+#print axioms LeanPhy.QuantumInfo.expectation_applyKraus_adjoint
+#print axioms LeanPhy.QuantumInfo.KrausChannel.adjoint_unital
+#print axioms LeanPhy.Mathematics.FiniteFourierSystem.parseval
+#print axioms LeanPhy.Quantum.unitaryEvolve_inner
+#print axioms LeanPhy.Quantum.unitaryConjugate_isDensity
+#print axioms LeanPhy.Quantum.UnitaryOperator.compose
+#print axioms LeanPhy.QuantumInfo.unitaryChannel_apply
+#print axioms LeanPhy.QuantumInfo.unitaryChannel_isDensity
+#print axioms LeanPhy.QuantumInfo.unitaryChannel_compose_apply
+#print axioms LeanPhy.Particles.ckm_unitaryOperator
+#print axioms LeanPhy.Quantum.FiniteUnitary.tensor
+#print axioms LeanPhy.Quantum.unitary_expectation_duality
+#print axioms LeanPhy.Mathematics.FiniteFourierSystem.normalizedUnitary
+#print axioms LeanPhy.Mathematics.FiniteFourierSystem.fourier4Unitary
+#print axioms LeanPhy.Quantum.FiniteUnitary.evolve_inner
+#print axioms LeanPhy.Mathematics.BilinearIsometry.compose
+#print axioms LeanPhy.Mathematics.FinitePathIntegral.action_shift_expectation
+#print axioms LeanPhy.Mathematics.FinitePathIntegral.fromRealAction_partition_pos
+#print axioms LeanPhy.Mathematics.FinitePathIntegral.FiniteRGStep.fixedPoint_expectation
+#print axioms LeanPhy.Mathematics.FinitePathIntegral.FiniteRGStep.expectation_scales
+#print axioms LeanPhy.Mathematics.FinitePathIntegral.FiniteRGStep.expectation_preserved
+#print axioms LeanPhy.Mathematics.FinitePathIntegral.FiniteRGStep.coarsen_insertion_preserved
+#print axioms LeanPhy.Mathematics.FiniteLinearPDE.solution_unique_of_coercive
+#print axioms LeanPhy.Mathematics.FiniteLinearPDE.solution_unique_of_boundary_coercive
+#print axioms LeanPhy.Mathematics.boundary_values_agree

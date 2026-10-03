@@ -1,0 +1,85 @@
+# LeanPhy v1 architecture
+
+LeanPhy is deliberately a library on top of Lean 4 and mathlib.  It does not
+fork the Lean kernel and it does not introduce a second proof logic.  A physics
+project therefore uses the normal Lean editor, elaborator, `lake build`, and CI
+workflow.
+
+## Layers
+
+### Kernel and mathlib
+
+Lean's kernel checks every proposition and proof term.  mathlib supplies the
+trusted mathematical foundation used by the library, including algebra,
+topology, measure theory, functional analysis, and finite-dimensional linear
+algebra.  Tactics are proof-producing elaborators; their output is still
+checked by the kernel.
+
+### Mathematical certificates
+
+`LeanPhy.Mathematics` packages recurring assumptions without hiding them:
+
+- `ContinuousAnalysis`, `DominatedConvergence`, and `ContinuousPathIntegral`
+  represent limits, Bochner integrals, normalized expectations, and regulator
+  sequences;
+- `Hilbert`, `InfiniteSpectrum`, `HilbertSpectrum`, `SpectralCalculus`, and
+  `SpectralGap` represent bounded operators, resolvents, spectral bounds, and
+  discrete mixing estimates;
+- `UnboundedOperator` carries a dense domain and domain-valued resolvent;
+- `WeakPDE`, `Contraction`, `ContinuousEvolution`, and `EnergyDissipation`
+  expose weak solutions, fixed points, Duhamel estimates, and energy budgets;
+- `Approximation`, `OperatorConvergence`, `CertifiedResidual`, and
+  `Renormalization` keep truncation, discretisation, numerical residual, and
+  regulator errors explicit.
+
+A certificate is an ordinary `Prop` structure.  Its fields are inputs, and its
+theorems derive consequences from those fields.  The structure is not a way to
+turn an unchecked number or a claimed physical interpretation into a theorem.
+
+### Physics domains
+
+Domain modules provide typed objects and reusable algebra: quantum states and
+channels, CCR/CAR/Fock structures, Clifford and gauge identities, condensed
+matter and statistical models, classical/relativistic transformations, and
+surface notation.  Domain modules depend on the certificate layer where
+appropriate, but the mathematics modules do not depend on a particular physical
+model.
+
+### Research workflow
+
+`LeanPhy.Workflow` is the reproducibility boundary.  A `TheoryPackage` stores
+assumptions, models, checked claims, dependencies, scope boundaries, and open
+obligations.  `ResearchProject` composes packages and checks qualified links.
+`CheckedClaim.proof` is a Lean proof term, so metadata cannot create a claim.
+External CAS and numerical tools cross the boundary only through a
+`CertificateChecker` whose `sound` theorem is consumed by the claim.
+
+## Soundness boundary
+
+The logical statement is always conditional:
+
+```text
+declared assumptions + proof term  ──kernel──>  checked conclusion
+```
+
+The library intentionally does not infer:
+
+- existence of a path measure, PDE solution, self-adjoint extension, or
+  thermodynamic limit;
+- convergence from a finite numerical sample;
+- continuum equivalence of a truncation;
+- physical adequacy of a supplied model;
+- a sign, convention, or boundary condition that is absent from the type.
+
+These are represented as explicit hypotheses or open obligations.  This makes
+partial formalisation useful in a real paper without confusing a verified
+algebraic step with a verified physical theory.
+
+## Import policy
+
+Use a selective `LeanPhy.Entry.*` profile in research files.  Import
+`LeanPhy.Entry.Physics` only for projects that genuinely span several domains;
+the umbrella import is convenient but slower.  New public definitions should
+live in a focused module, be exported by an appropriate entry profile, and have
+at least one positive and one negative regression.
+

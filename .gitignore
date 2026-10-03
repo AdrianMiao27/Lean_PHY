@@ -1,0 +1,23 @@
+# Lean/Lake build products
+.lake/
+*.olean
+*.ilean
+*.c
+*.cpp
+
+# Editor and operating-system files
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Python caches and local reports
+__pycache__/
+*.py[cod]
+.pytest_cache/
+coverage.xml
+
+# Generated verification logs
+*.log
+verification-output/
+
