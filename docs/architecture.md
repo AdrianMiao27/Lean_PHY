@@ -54,6 +54,15 @@ checked by the kernel.
   explicit `CoversConstraintIdeal` witness for the target ideal; no surjectivity,
   gauge fixing, quotient regularity, anomaly cancellation, or physical
   equivalence is inferred.
+- `BRST` is the next algebraic layer for constrained and gauge-theory work.
+  `BRSTDifferential` stores a concrete derivation and its nilpotency proof;
+  closed, exact, and cohomologous elements are ordinary propositions.  The
+  optional `PoissonBRSTDifferential` and `ConstraintBRSTDifferential` add
+  bracket compatibility and preservation of the declared constraint ideal.
+  This layer is intentionally ungraded.  Ghost number, Koszul signs, the BV
+  antibracket, gauge-fixing data, path-integral measures, anomaly cancellation,
+  and any physical-equivalence theorem are separate future structures or open
+  obligations.
 
 A certificate is an ordinary `Prop` structure.  Its fields are inputs, and its
 theorems derive consequences from those fields.  The structure is not a way to
@@ -94,6 +103,8 @@ The library intentionally does not infer:
 - physical adequacy of a supplied model;
 - that a symmetry action admits a valid gauge fixing or that its quotient is a
   manifold;
+- that a nilpotent algebraic differential is a complete BRST/BV construction,
+  or that its cohomology equals the physical observable space;
 - a sign, convention, or boundary condition that is absent from the type.
 
 For unbounded operators, a name such as `Hamiltonian` carries no analytic

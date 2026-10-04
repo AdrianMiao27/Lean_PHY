@@ -112,6 +112,12 @@ noncomputable def missingConstraintMapLaw :
     intro i
     exact sourceConstraint.constraint_mem i'
 
+expect_failure "brst_nilpotency_required" 'import LeanPhy
+open LeanPhy
+open LeanPhy.Mathematics
+noncomputable def missingBRST : BRSTDifferential ℝ PhasePolynomial where
+  differential := 0'
+
 expect_failure "equivariant_constraint_zero_fixed_required" 'import LeanPhy.Minimal
 open LeanPhy.Mathematics
 instance : SMul Unit Nat := ⟨fun _ n => n⟩

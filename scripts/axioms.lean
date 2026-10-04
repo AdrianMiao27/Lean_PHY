@@ -88,3 +88,6 @@ reports must never contain `sorryAx` or an application-specific axiom.
 #print axioms LeanPhy.Mathematics.FirstClassConstraintAlgebra.dirac_bracket
 #print axioms LeanPhy.Mathematics.FirstClassConstraintAlgebra.ConstraintMap.map_constraintIdeal
 #print axioms LeanPhy.Mathematics.FirstClassConstraintAlgebra.ConstraintMap.map_diracObservable
+#print axioms LeanPhy.Mathematics.BRSTDifferential.exact_closed
+#print axioms LeanPhy.Mathematics.PoissonBRSTDifferential.closed_bracket
+#print axioms LeanPhy.Mathematics.ConstraintBRSTDifferential.map_weaklyEqual

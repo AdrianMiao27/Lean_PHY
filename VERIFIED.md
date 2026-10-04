@@ -25,8 +25,8 @@ The semantics are **conditional correctness**: a theorem always has the shape
 physical truth, convergence of a limit, or the validity of an unbounded-operator
 or path-integral manipulation.
 
-The current acceptance report contains **465 kernel-checked smoke
-capabilities** and 139 negative elaboration fixtures.  Recent cross-domain additions are:
+The current acceptance report contains **469 kernel-checked smoke
+capabilities** and 140 negative elaboration fixtures.  Recent cross-domain additions are:
 
 - `LeanPhy.Mathematics.SymmetryReduction`: constrained state predicates,
   group-orbit equivalence, physical-state quotients, orbit-invariant
@@ -49,6 +49,15 @@ capabilities** and 139 negative elaboration fixtures.  Recent cross-domain addit
   target constraint ideal is covered by the image of the source ideal.  The
   module does not infer surjectivity, gauge fixing, quotient regularity,
   anomaly cancellation, or physical equivalence.
+
+- `LeanPhy.Mathematics.BRST`: an explicit derivation together with a
+  kernel-checked nilpotency proof defines closed, exact, and cohomologous
+  elements.  Optional Poisson compatibility closes brackets of closed
+  elements, and explicit preservation of a constraint ideal transports weak
+  equality.  This is an ungraded algebraic seed.  It does not provide ghost
+  number, Koszul signs, a BV antibracket, a gauge-fixing fermion, a path
+  integral measure, anomaly cancellation, or a theorem identifying BRST
+  cohomology with physical observables.
 
 - `LeanPhy.Mathematics.OperatorConvergence`: uniform operator-norm and strong
   operator convergence certificates.  A radius tending to zero yields
@@ -164,7 +173,7 @@ capabilities** and 139 negative elaboration fixtures.  Recent cross-domain addit
   This layer does not infer parameter continuity, limits or physical calibration.
 
 - The negative elaboration suite is executed by
-  `scripts/run_negative_tests.py`: it runs the 139 independent fixtures in
+  `scripts/run_negative_tests.py`: it runs the 140 independent fixtures in
   parallel, accepts only a source-located Lean elaboration error, rejects
   import/API/compiler failures, and cleans up child compiler groups on
   interruption. This keeps a broken regression fixture from being reported as

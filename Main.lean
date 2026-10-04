@@ -4367,6 +4367,56 @@ example :
       qConstraintMap :=
   qConstraintMap.comp_id_left
 
+/-! ## Delimited BRST differential
+
+The zero derivation is a deliberately small concrete witness for the generic
+BRST algebra.  The API itself is parametrized by an arbitrary nilpotent
+derivation; this smoke keeps the analytic and physical interpretation boundary
+visible while checking the composition with the constraint ideal.
+-/
+
+noncomputable def qBRST : BRSTDifferential ℝ PhasePolynomial where
+  differential := 0
+  nilpotent := by intro x; simp
+
+example {f g : PhasePolynomial}
+    (hf : qBRST.IsClosed f) (hg : qBRST.IsClosed g) :
+    qBRST.IsClosed (f * g) :=
+  qBRST.closed_mul hf hg
+
+example {f : PhasePolynomial} : qBRST.IsExact (qBRST f) :=
+  ⟨f, rfl⟩
+
+example {f g : PhasePolynomial}
+    (hfg : qBRST.Cohomologous f g) :
+    qBRST.Cohomologous g f :=
+  qBRST.cohomologous_symm hfg
+
+noncomputable def qPoissonBRST :
+    PoissonBRSTDifferential qConstraint.poisson where
+  toBRSTDifferential := qBRST
+  bracket_leibniz := by
+    intro x y
+    simpa [qBRST]
+
+example {f g : PhasePolynomial}
+    (hf : qBRST.IsClosed f) (hg : qBRST.IsClosed g) :
+    qBRST.IsClosed (qConstraint.poisson f g) :=
+  qPoissonBRST.closed_bracket hf hg
+
+noncomputable def qConstraintBRST :
+    ConstraintBRSTDifferential qConstraint where
+  toPoissonBRSTDifferential := qPoissonBRST
+  maps_constraintIdeal := by
+    intro x _
+    change (0 : PhasePolynomial) ∈ qConstraint.constraintIdeal
+    exact qConstraint.constraintIdeal.zero_mem
+
+example {f g : PhasePolynomial}
+    (hfg : qConstraint.WeaklyEqual f g) :
+    qConstraint.WeaklyEqual (qConstraintBRST f) (qConstraintBRST g) :=
+  qConstraintBRST.map_weaklyEqual hfg
+
 end FirstClassConstraintSmoke
 
 /-! ## Executable acceptance report -/
@@ -4381,6 +4431,10 @@ def capabilities : List (String × String) :=
    ("weak-equality transport", "constraint-preserving maps transport equality modulo the constraint ideal"),
    ("composable constraint maps", "constraint-preserving Poisson maps compose and have a checked identity"),
    ("Dirac-observable map", "a target-ideal cover makes transport of Dirac observables a checked theorem"),
+   ("nilpotent BRST differential", "an explicit derivation whose square is zero supports kernel-checked closed and exact predicates"),
+   ("BRST cohomology relation", "cohomologous elements form a checked equivalence relation modulo exact differences"),
+   ("Poisson-compatible BRST bracket", "closed observables remain closed under a declared ungraded Poisson compatibility law"),
+   ("constraint-compatible BRST map", "a differential that preserves the constraint ideal transports weak equality"),
    ("constraint-preserving symmetry", "admissible and constrained physical states are preserved by a declared group action"),
    ("covariant constraint equation", "a value-valued equivariant constraint yields a checked zero-fibre physical-state predicate when the group fixes zero"),
    ("gauge-orbit equivalence", "the orbit relation is kernel-checked as an equivalence and transports physical-state predicates"),
