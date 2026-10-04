@@ -2,6 +2,7 @@ import LeanPhy.Quantum.Pauli
 import LeanPhy.FieldTheory.CCR
 import LeanPhy.FieldTheory.MultiWick
 import LeanPhy.HighEnergy.Gamma
+import LeanPhy.HighEnergy.EffectiveTheory
 import LeanPhy.Mathematics.FiniteParabolic
 import LeanPhy.Mathematics.FiniteEnergy
 import LeanPhy.Mathematics.FinitePathReflection
@@ -1851,6 +1852,62 @@ def gammaCliffordChecked : CheckedClaim :=
     ["finite spinor representation", "metric convention"]
     LeanPhy.HighEnergy.gamma0_anticommutes_gamma1
 
+theorem finite_eft_truncation_claim
+    {ι : Type} [Fintype ι] [DecidableEq ι]
+    (E : LeanPhy.HighEnergy.ExpansionParameter)
+    (T : LeanPhy.HighEnergy.FiniteEFT ι) (S : Finset ι) (cutoff : ℕ)
+    (horder : ∀ i ∈ Finset.univ \ S, cutoff ≤ T.order i) :
+    LeanPhy.Mathematics.ErrorCertificate (T.amplitude E)
+      (T.retainedAmplitude E S)
+      (((Finset.univ \ S).card : ℝ) * T.coefficientBound * E.value ^ cutoff) :=
+  T.truncation_error_certificate E S cutoff horder
+
+def finiteEftTruncationChecked : CheckedClaim :=
+  CheckedClaim.ofTheoremFromWithAssumptions "finite EFT truncation error"
+    "the omitted finite operator tail is bounded by its cardinality, coefficient bound, and cutoff power"
+    "LeanPhy.HighEnergy.EffectiveTheory"
+    ["finite operator basis", "expansion parameter hierarchy", "coefficient bound"]
+    (P := ∀ {ι : Type} [Fintype ι] [DecidableEq ι]
+      (E : LeanPhy.HighEnergy.ExpansionParameter)
+      (T : LeanPhy.HighEnergy.FiniteEFT ι) (S : Finset ι) (cutoff : ℕ)
+      (horder : ∀ i ∈ Finset.univ \ S, cutoff ≤ T.order i),
+      LeanPhy.Mathematics.ErrorCertificate (T.amplitude E)
+        (T.retainedAmplitude E S)
+        (((Finset.univ \ S).card : ℝ) * T.coefficientBound * E.value ^ cutoff))
+    finite_eft_truncation_claim
+
+theorem finite_eft_matching_claim
+    {ι : Type} [Fintype ι]
+    (M : LeanPhy.HighEnergy.FiniteEFT.MatchingCertificate ι)
+    (weights : ι → ℝ) (S : Finset ι) (weightBound : ℝ)
+    (weightBound_nonneg : 0 ≤ weightBound)
+    (weight_abs_le : ∀ i ∈ S, |weights i| ≤ weightBound) :
+    LeanPhy.Mathematics.ErrorCertificate
+      (LeanPhy.HighEnergy.FiniteEFT.MatchingCertificate.observable
+        M.uvCoefficient weights S)
+      (LeanPhy.HighEnergy.FiniteEFT.MatchingCertificate.observable
+        M.irCoefficient weights S)
+      ((S.card : ℝ) * weightBound * M.uniformError) :=
+  M.error_certificate weights S weightBound weightBound_nonneg weight_abs_le
+
+def finiteEftMatchingChecked : CheckedClaim :=
+  CheckedClaim.ofTheoremFromWithAssumptions "finite EFT matching error"
+    "a uniform coefficient-matching error yields an observable error budget for every bounded finite weighting"
+    "LeanPhy.HighEnergy.EffectiveTheory"
+    ["finite operator basis", "matching certificate", "observable weight bound"]
+    (P := ∀ {ι : Type} [Fintype ι]
+      (M : LeanPhy.HighEnergy.FiniteEFT.MatchingCertificate ι)
+      (weights : ι → ℝ) (S : Finset ι) (weightBound : ℝ),
+      0 ≤ weightBound →
+      (∀ i ∈ S, |weights i| ≤ weightBound) →
+      LeanPhy.Mathematics.ErrorCertificate
+        (LeanPhy.HighEnergy.FiniteEFT.MatchingCertificate.observable
+          M.uvCoefficient weights S)
+        (LeanPhy.HighEnergy.FiniteEFT.MatchingCertificate.observable
+          M.irCoefficient weights S)
+        ((S.card : ℝ) * weightBound * M.uniformError))
+    finite_eft_matching_claim
+
 theorem bounded_unitary_norm_claim
     {𝕜 E : Type} [RCLike 𝕜] [NormedAddCommGroup E]
     [InnerProductSpace 𝕜 E] [CompleteSpace E]
@@ -2015,6 +2072,14 @@ def finiteCliffordModel : ModelRegistration :=
     "finite representation labels" "finite spinor vectors and matrices"
     "Dirac bilinears and traces" "gamma-matrix multiplication"
     ["finite spinor representation", "metric convention"]
+
+def finiteEFTModel : ModelRegistration :=
+  ModelRegistration.text "finite-eft" "finite effective-theory expansion model"
+    "finite operator labels and a dimensionless expansion parameter"
+    "finite real coefficient vectors"
+    "truncated amplitudes and matching observables" "power counting and finite weighted sums"
+    ["finite operator basis", "expansion parameter hierarchy", "coefficient bound",
+      "matching certificate", "observable weight bound"]
 
 def boundedHilbertModel : ModelRegistration :=
   ModelRegistration.text "bounded-hilbert" "bounded Hilbert/numerical bridge"
@@ -2220,19 +2285,28 @@ def FieldTheoryPackage : TheoryPackage where
 
 def HighEnergyTheoryPackage : TheoryPackage where
   name := "finite high-energy algebra"
-  domain := "Dirac/Clifford matrices / spinor identities"
+  domain := "Dirac/Clifford matrices / spinor identities / finite EFT power counting"
   assumptions := [
     { name := "finite spinor representation", statement := "spinors are represented by explicit 4-component complex vectors and matrices", source := "model declaration" },
-    { name := "metric convention", statement := "the gamma-matrix signs encode the declared (+---) convention", source := "physics convention" }
+    { name := "metric convention", statement := "the gamma-matrix signs encode the declared (+---) convention", source := "physics convention" },
+    { name := "finite operator basis", statement := "the EFT coefficient basis and every omitted sector are finite index sets", source := "model declaration" },
+    { name := "expansion parameter hierarchy", statement := "the dimensionless expansion parameter lies in [0,1] and omitted terms have the declared cutoff order", source := "power-counting hypothesis" },
+    { name := "coefficient bound", statement := "Wilson coefficients have the supplied uniform absolute bound", source := "matching or model certificate" },
+    { name := "matching certificate", statement := "UV and IR coefficients have the supplied uniform difference bound", source := "matching calculation" },
+    { name := "observable weight bound", statement := "the finite observable weights have the supplied absolute bound", source := "observable definition" }
   ]
-  claims := [gammaCliffordChecked.withModels ["finite-clifford"]]
-  models := [finiteCliffordModel]
+  claims := [gammaCliffordChecked.withModels ["finite-clifford"],
+    finiteEftTruncationChecked.withModels ["finite-eft"],
+    finiteEftMatchingChecked.withModels ["finite-eft"]]
+  models := [finiteCliffordModel, finiteEFTModel]
   outOfScope := [
     { label := "scattering analysis", explanation := "asymptotic states, distributions and cross-section limits are not inferred" },
-    { label := "gauge dynamics", explanation := "renormalisation and non-perturbative dynamics require separate inputs" }
+    { label := "gauge dynamics", explanation := "renormalisation and non-perturbative dynamics require separate inputs" },
+    { label := "continuum EFT", explanation := "the finite bounds do not establish existence of a UV completion, continuum limit, or regulator-independent matching" }
   ]
   obligations := [
-    { name := "spinor-to-field bridge", statement := "supply the analytic and representation-theoretic hypotheses connecting finite matrices to the target field theory", source := "external QFT analysis" }
+    { name := "spinor-to-field bridge", statement := "supply the analytic and representation-theoretic hypotheses connecting finite matrices to the target field theory", source := "external QFT analysis" },
+    { name := "EFT continuum bridge", statement := "supply the model-specific operator basis, matching derivation, and regulator or continuum estimates before interpreting the finite error budget physically", source := "external EFT analysis" }
   ]
 
 def AnalysisBridgeTheoryPackage : TheoryPackage where

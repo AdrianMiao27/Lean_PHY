@@ -25,8 +25,8 @@ The semantics are **conditional correctness**: a theorem always has the shape
 physical truth, convergence of a limit, or the validity of an unbounded-operator
 or path-integral manipulation.
 
-The current acceptance report contains **446 kernel-checked smoke
-capabilities** and 130 negative elaboration fixtures.  Recent cross-domain additions are:
+The current acceptance report contains **448 kernel-checked smoke
+capabilities** and 131 negative elaboration fixtures.  Recent cross-domain additions are:
 
 - `LeanPhy.Mathematics.OperatorConvergence`: uniform operator-norm and strong
   operator convergence certificates.  A radius tending to zero yields
@@ -52,6 +52,12 @@ capabilities** and 130 negative elaboration fixtures.  Recent cross-domain addit
   scheme-independence lemmas.  The module accepts explicit limits and vanishing
   scheme differences; it does not construct a path measure, prove BPHZ or
   establish a non-perturbative QFT limit.
+
+- `LeanPhy.HighEnergy.EffectiveTheory`: finite EFT expansions expose an explicit
+  amplitude/retained-amplitude decomposition, a power-counting tail bound,
+  and a coefficient-matching `ErrorCertificate` for bounded finite observables.
+  The module does not construct a UV completion, a continuum limit, or a
+  regulator-independent matching theorem.
 
 - `LeanPhy.Mathematics.Contraction`: `ContractionCertificate` wraps the Banach
   contraction theorem for nonempty complete metric spaces.  The kernel checks

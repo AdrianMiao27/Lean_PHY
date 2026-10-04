@@ -11,6 +11,7 @@ import LeanPhy.HighEnergy.SpinorCovariant
 import LeanPhy.HighEnergy.DiracFierz
 import LeanPhy.HighEnergy.Lorentz
 import LeanPhy.HighEnergy.Scattering
+import LeanPhy.HighEnergy.EffectiveTheory
 import LeanPhy.Particles.AnomalyCancellation
 import LeanPhy.Particles.CKM
 import LeanPhy.Particles.ColorAlgebra

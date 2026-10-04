@@ -38,6 +38,19 @@ example (μ : MeasureTheory.Measure ℝ) :
     IntegralCertificate μ (fun _ : ℝ => (0 : ℝ)) 0 :=
   { integral_eq := by simp }'
 
+expect_failure "eft_truncation_requires_hierarchy" 'import LeanPhy.Entry.HighEnergy
+open LeanPhy.HighEnergy
+open LeanPhy.Mathematics
+def epsilon : ExpansionParameter :=
+  { value := (1 : ℝ) / 10, nonneg := by norm_num, le_one := by norm_num }
+def eft : FiniteEFT (Fin 1) :=
+  { order := fun _ => 2, coefficient := fun _ => 1,
+    coefficientBound := 1, coefficientBound_nonneg := by norm_num,
+    coefficient_abs_le := by intro i; simp }
+example : ErrorCertificate (eft.amplitude epsilon)
+    (eft.retainedAmplitude epsilon (∅ : Finset (Fin 1))) 1 := by
+  exact eft.truncation_error_certificate epsilon (∅ : Finset (Fin 1)) 1'
+
 expect_failure "continuous_path_integral_requires_weight_integrability" 'import LeanPhy.Entry.Analysis
 open LeanPhy.Mathematics
 def badPath : ContinuousPathIntegral Unit (MeasureTheory.Measure.dirac ()) :=

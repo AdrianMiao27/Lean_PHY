@@ -119,6 +119,7 @@ import LeanPhy.FieldTheory.Wick
 import LeanPhy.FieldTheory.Pairing
 import LeanPhy.HighEnergy.Clifford
 import LeanPhy.HighEnergy.Gamma
+import LeanPhy.HighEnergy.EffectiveTheory
 import LeanPhy.HighEnergy.Gamma5
 import LeanPhy.HighEnergy.Trace
 import LeanPhy.HighEnergy.Supersymmetry

@@ -4637,6 +4637,8 @@ def capabilities : List (String × String) :=
    ("proof-producing cross-package derivation", "ResearchProject.addDerivedTheorem consumes a source claim proof and inserts a qualified dependency into the target package"),
    ("proof-producing two-package derivation", "ResearchProject.addDerivedTheorem2 combines proof terms from two packages while retaining both qualified links"),
    ("cross-domain theory adapters", "quantum, finite PDE, Euclidean, classical, gauge, condensed, relativity and statistical packages consume the same ledger API"),
+   ("finite EFT truncation certificates", "a finite Wilson-operator tail is connected to the retained expansion through an explicit ErrorCertificate and cutoff power bound"),
+   ("finite EFT matching certificates", "a uniform UV/IR coefficient mismatch becomes a kernel-checked observable error budget for bounded finite weights"),
    ("conditional verification report", "the leanphy_check executable reports VERIFIED-CONDITIONAL only for compiled proof-bearing packages")]
 
 example : QuantumTheoryPackage.claimCount = 4 := rfl
@@ -4850,6 +4852,84 @@ example :
   native_decide
 
 end JsonUniverseSmoke
+
+/-! ## Finite EFT power counting and matching certificates
+
+The high-energy interface turns two common exploratory-workflow steps into
+proof-bearing objects: a finite Wilson-operator tail receives a uniform
+power-counting bound, and coefficient matching receives an observable error
+bound.  The expansion parameter and coefficient bounds remain explicit; no
+continuum EFT or UV-completion claim is inferred.
+-/
+namespace EffectiveTheorySmoke
+
+open scoped BigOperators
+open LeanPhy.HighEnergy
+
+noncomputable def epsilon : ExpansionParameter where
+  value := (1 : ℝ) / 10
+  nonneg := by norm_num
+  le_one := by norm_num
+
+noncomputable def toy : FiniteEFT (Fin 2) where
+  order := fun i => if i = 0 then 5 else 6
+  coefficient := fun i => if i = 0 then 2 else -3
+  coefficientBound := 3
+  coefficientBound_nonneg := by norm_num
+  coefficient_abs_le := by
+    intro i
+    fin_cases i <;> norm_num
+
+example :
+    |toy.tailAmplitude epsilon ({0, 1} : Finset (Fin 2))| ≤
+      (({0, 1} : Finset (Fin 2)).card : ℝ) * toy.coefficientBound * epsilon.value ^ 5 := by
+  apply toy.tail_bound epsilon ({0, 1} : Finset (Fin 2)) 5
+  intro i hi
+  fin_cases i <;> simp [toy]
+
+example :
+    LeanPhy.Mathematics.ErrorCertificate (toy.amplitude epsilon)
+      (toy.retainedAmplitude epsilon (∅ : Finset (Fin 2)))
+      (((Finset.univ : Finset (Fin 2)).card : ℝ) * toy.coefficientBound *
+        epsilon.value ^ 5) := by
+  apply toy.truncation_error_certificate epsilon (∅ : Finset (Fin 2)) 5
+  intro i hi
+  fin_cases i <;> simp [toy]
+
+noncomputable def matching : FiniteEFT.MatchingCertificate (Fin 2) where
+  uvCoefficient := fun i => if i = 0 then 1 else 2
+  irCoefficient := fun i => if i = 0 then (9 : ℝ) / 10 else (21 : ℝ) / 10
+  uniformError := (1 : ℝ) / 10
+  uniformError_nonneg := by norm_num
+  coefficient_error := by
+    intro i
+    fin_cases i <;> norm_num
+
+example :
+    |∑ i ∈ ({0, 1} : Finset (Fin 2)),
+      (if i = 0 then (1 : ℝ) else -1) *
+        (matching.uvCoefficient i - matching.irCoefficient i)| ≤
+      (({0, 1} : Finset (Fin 2)).card : ℝ) * 1 * matching.uniformError := by
+  apply matching.weighted_error_bound
+    (fun i => if i = 0 then (1 : ℝ) else -1)
+    ({0, 1} : Finset (Fin 2)) 1 (by norm_num)
+  intro i hi
+  fin_cases i <;> norm_num
+
+example :
+    LeanPhy.Mathematics.ErrorCertificate
+      (FiniteEFT.MatchingCertificate.observable matching.uvCoefficient
+        (fun i => if i = 0 then (1 : ℝ) else -1) ({0, 1} : Finset (Fin 2)))
+      (FiniteEFT.MatchingCertificate.observable matching.irCoefficient
+        (fun i => if i = 0 then (1 : ℝ) else -1) ({0, 1} : Finset (Fin 2)))
+      ((({0, 1} : Finset (Fin 2)).card : ℝ) * 1 * matching.uniformError) := by
+  apply matching.error_certificate
+    (fun i => if i = 0 then (1 : ℝ) else -1)
+    ({0, 1} : Finset (Fin 2)) 1 (by norm_num)
+  intro i hi
+  fin_cases i <;> norm_num
+
+end EffectiveTheorySmoke
 
 def projectProducer : TheoryPackage :=
   TheoryPackage.empty "producer" "finite algebra"
