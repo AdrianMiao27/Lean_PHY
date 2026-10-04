@@ -26,6 +26,7 @@ lake build LeanPhy.Minimal \
   LeanPhy.Entry.StatMech LeanPhy.Entry.FinitePDE LeanPhy.Entry.Analysis \
   LeanPhy.Mathematics.SpectralCalculus LeanPhy.Mathematics.SpectralGap \
   LeanPhy.Entry.Physics \
+  LeanPhy.Mathematics.SymmetryReduction \
   LeanPhy.CLI LeanPhy.Examples.ClosedLoop \
   LeanPhy.Examples.PhysicsTactic \
   LeanPhy.Library \
@@ -100,8 +101,8 @@ fi
 SMOKE_LOG="$(mktemp /tmp/leanphy-smoke.XXXXXX.log)"
 lake exe leanphy_smoke | tee "${SMOKE_LOG}"
 OK_COUNT="$(rg -c '^  \[ok\]' "${SMOKE_LOG}")"
-if (( OK_COUNT < 446 )); then
-  echo "verification failed: expected at least 446 smoke capabilities, got ${OK_COUNT}" >&2
+if (( OK_COUNT < 450 )); then
+  echo "verification failed: expected at least 450 smoke capabilities, got ${OK_COUNT}" >&2
   exit 1
 fi
 

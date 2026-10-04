@@ -25,12 +25,24 @@ checked by the kernel.
 - `Hilbert`, `InfiniteSpectrum`, `HilbertSpectrum`, `SpectralCalculus`, and
   `SpectralGap` represent bounded operators, resolvents, spectral bounds, and
   discrete mixing estimates;
-- `UnboundedOperator` carries a dense domain and domain-valued resolvent;
+- `UnboundedOperator` carries a dense domain and domain-valued resolvent.  Its
+  `asPMap` adapter exposes the same object as mathlib's `LinearPMap`, while
+  preserving the domain in the type.  The module also provides explicit
+  certificates for formal adjoints, closedness, closability, self-adjointness,
+  graph-norm relative bounds, and bounded maps that preserve the domain;
 - `WeakPDE`, `Contraction`, `ContinuousEvolution`, and `EnergyDissipation`
   expose weak solutions, fixed points, Duhamel estimates, and energy budgets;
 - `Approximation`, `OperatorConvergence`, `CertifiedResidual`, and
   `Renormalization` keep truncation, discretisation, numerical residual, and
   regulator errors explicit.
+- `SymmetryReduction` is the shared constraint boundary for gauge systems,
+  constrained Hamiltonian models, quantum symmetries, and lattice reductions.
+  `ConstrainedSymmetry` stores admissibility and constraint predicates together
+  with their preservation proofs; `ConstrainedDynamics` adds an equivariant
+  proof-preserving step; `ConstrainedObservable` records invariance on physical
+  orbits and can be lifted to an explicit quotient. The quotient is built from
+  the proved group-orbit equivalence relation, so no gauge slice or manifold
+  structure is assumed.
 
 A certificate is an ordinary `Prop` structure.  Its fields are inputs, and its
 theorems derive consequences from those fields.  The structure is not a way to
@@ -69,7 +81,16 @@ The library intentionally does not infer:
 - convergence from a finite numerical sample;
 - continuum equivalence of a truncation;
 - physical adequacy of a supplied model;
+- that a symmetry action admits a valid gauge fixing or that its quotient is a
+  manifold;
 - a sign, convention, or boundary condition that is absent from the type.
+
+For unbounded operators, a name such as `Hamiltonian` carries no analytic
+meaning by itself.  A user must supply the relevant domain, density, inverse,
+adjoint equality, graph bound, or domain-preservation proof.  The current
+bridge does not implement Stone's theorem, general self-adjoint extensions,
+spectral measures, or the passage from a resolvent certificate to a time
+evolution.  Those are separate research obligations.
 
 These are represented as explicit hypotheses or open obligations.  This makes
 partial formalisation useful in a real paper without confusing a verified
@@ -82,4 +103,3 @@ Use a selective `LeanPhy.Entry.*` profile in research files.  Import
 the umbrella import is convenient but slower.  New public definitions should
 live in a focused module, be exported by an appropriate entry profile, and have
 at least one positive and one negative regression.
-

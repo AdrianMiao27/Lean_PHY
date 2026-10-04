@@ -81,3 +81,6 @@ reports must never contain `sorryAx` or an application-specific axiom.
 #print axioms LeanPhy.Mathematics.FiniteLinearPDE.solution_unique_of_coercive
 #print axioms LeanPhy.Mathematics.FiniteLinearPDE.solution_unique_of_boundary_coercive
 #print axioms LeanPhy.Mathematics.boundary_values_agree
+#print axioms LeanPhy.Mathematics.ConstrainedSymmetry.orbitEquivalent_trans
+#print axioms LeanPhy.Mathematics.ConstrainedSymmetry.ConstrainedDynamics.evolve_equivariant
+#print axioms LeanPhy.Mathematics.ConstrainedSymmetry.ConstrainedObservable.descend_mk

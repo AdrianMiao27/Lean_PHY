@@ -8,6 +8,7 @@ import LeanPhy.Surface.Variance
 import LeanPhy.Surface.GenericTensor
 import LeanPhy.Mathematics.Approximation
 import LeanPhy.Mathematics.FiniteProcess
+import LeanPhy.Mathematics.SymmetryReduction
 import LeanPhy.Mathematics.Model
 import LeanPhy.Mathematics.ApproximateModel
 import LeanPhy.Mathematics.ParametricModel
@@ -34,6 +35,6 @@ namespace LeanPhy
 
 /- A stable marker for tools that want to report the selected import profile. -/
 def minimalProfile : String :=
-  "dimensions + surface + models + parametric-models + approximation + certificates + tactics"
+  "dimensions + surface + models + parametric-models + approximation + symmetry-reduction + certificates + tactics"
 
 end LeanPhy

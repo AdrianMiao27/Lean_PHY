@@ -25,8 +25,15 @@ The semantics are **conditional correctness**: a theorem always has the shape
 physical truth, convergence of a limit, or the validity of an unbounded-operator
 or path-integral manipulation.
 
-The current acceptance report contains **448 kernel-checked smoke
-capabilities** and 131 negative elaboration fixtures.  Recent cross-domain additions are:
+The current acceptance report contains **457 kernel-checked smoke
+capabilities** and 137 negative elaboration fixtures.  Recent cross-domain additions are:
+
+- `LeanPhy.Mathematics.SymmetryReduction`: constrained state predicates,
+  group-orbit equivalence, physical-state quotients, orbit-invariant
+  observables, and equivariant finite dynamics.  The preservation and
+  invariance proofs are explicit and kernel-checked.  The module does not
+  construct gauge fixing, quotient regularity, anomaly cancellation, or a
+  physical interpretation of the symmetry.
 
 - `LeanPhy.Mathematics.OperatorConvergence`: uniform operator-norm and strong
   operator convergence certificates.  A radius tending to zero yields
@@ -43,9 +50,13 @@ capabilities** and 131 negative elaboration fixtures.  Recent cross-domain addit
 
 - `LeanPhy.Mathematics.UnboundedOperator`: dense-domain operators, symmetry on
   the declared domain and two-sided domain-valued resolvents.  The inverse is
-  stored as actual domain data, so uniqueness is kernel-checked.  Closedness,
-  self-adjointness, essential self-adjointness and resolvent existence remain
-  separate obligations.
+  stored as actual domain data, so uniqueness is kernel-checked.  The
+  `LinearPMap` bridge exposes mathlib's graph and formal-adjoint API without
+  erasing the declared domain.  Closedness, closability, self-adjointness,
+  graph-norm relative bounds, and bounded domain-preserving composition are
+  available as explicit certificates.  Essential self-adjointness, general
+  self-adjoint extensions, Stone's theorem, spectral measures, and resolvent
+  existence remain separate obligations.
 
 - `LeanPhy.Mathematics.Renormalization`: regulator-wise bare/counterterm/
   renormalized relations, supplied renormalized limits, limit uniqueness and
@@ -138,7 +149,7 @@ capabilities** and 131 negative elaboration fixtures.  Recent cross-domain addit
   This layer does not infer parameter continuity, limits or physical calibration.
 
 - The negative elaboration suite is executed by
-  `scripts/run_negative_tests.py`: it runs the 130 independent fixtures in
+  `scripts/run_negative_tests.py`: it runs the 137 independent fixtures in
   parallel, accepts only a source-located Lean elaboration error, rejects
   import/API/compiler failures, and cleans up child compiler groups on
   interruption. This keeps a broken regression fixture from being reported as

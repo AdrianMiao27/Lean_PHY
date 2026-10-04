@@ -4070,6 +4070,53 @@ example : DomainResolventCertificate smokeDenseZero 1 where
     rw [show (1 : ℂ) • (↑x : ℂ) - (0 : ℂ) = ↑x by simp]
     rfl
 
+/-! The `LinearPMap` bridge keeps the dense domain visible while exposing
+mathlib's formal-adjoint and graph-operator interfaces.  This smoke object is
+deliberately bounded as a map, but is represented through the same domain-aware
+API used by unbounded Hamiltonians. -/
+
+noncomputable section UnboundedOperatorBridgeSmoke
+
+def smokeZeroSymmetric : SymmetricDomainCertificate smokeDenseZero where
+  inner_eq := by
+    intro x y
+    change (y : ℂ) * star (0 : ℂ) = (0 : ℂ) * star (x : ℂ)
+    simp
+
+example :
+    smokeDenseZero.asPMap.IsFormalAdjoint smokeDenseZero.asPMap :=
+  DenseDomainOperator.symmetric_formalAdjoint smokeDenseZero smokeZeroSymmetric
+
+example : (LinearPMap.adjoint smokeDenseZero.asPMap).IsClosed :=
+  DenseDomainOperator.formalAdjoint_isClosed smokeDenseZero
+
+def smokeZeroGraphBound :
+    DenseDomainOperator.GraphBoundCertificate smokeDenseZero
+      smokeDenseZero.operator 0 0 := by
+  refine ⟨by norm_num, by norm_num, ?_⟩
+  intro x
+  change ‖(0 : ℂ)‖ ≤ 0 * ‖(x : ℂ)‖ + 0 * ‖(0 : ℂ)‖
+  norm_num
+
+example (x : smokeDenseZero.domain) :
+    ‖smokeDenseZero.operator x‖ ≤
+      max 0 0 * smokeDenseZero.graphNorm x := by
+  exact smokeZeroGraphBound.by_graphNorm x
+
+def smokeIdentityPreserving :
+    DenseDomainOperator.DomainPreserving smokeDenseZero where
+  bounded := ContinuousLinearMap.id ℂ ℂ
+  maps_domain := by
+    intro x
+    exact x.property
+
+example (x : smokeDenseZero.domain) :
+    (smokeIdentityPreserving.onDomain x : ℂ) = (x : ℂ) := by
+  simpa [smokeIdentityPreserving] using
+    smokeIdentityPreserving.onDomain_coe x
+
+end UnboundedOperatorBridgeSmoke
+
 def smokeRenormalization : RenormalizationCertificate
     (fun _ : ℕ => (0 : ℝ)) (fun _ : ℕ => (0 : ℝ))
     (fun _ : ℕ => (0 : ℝ)) 0 where
@@ -4189,15 +4236,86 @@ example (L : ℂ →L[ℂ] ℂ) (x : ℂ) :
 
 end SpectralGapSmoke
 
+/-! ## Constrained symmetry and gauge-orbit smoke -/
+
+namespace ConstrainedSymmetrySmoke
+
+instance : SMul Unit Nat := ⟨fun _ n => n⟩
+instance : MulAction Unit Nat where
+  one_smul := by intro n; rfl
+  mul_smul := by intro _ _ n; rfl
+
+def system : ConstrainedSymmetry Unit Nat where
+  admissible := fun n => n ≤ 10
+  constrained := fun n => n % 2 = 0
+  admissible_preserved := by intro _ n hn; exact hn
+  constrained_preserved := by intro _ n hn; exact hn
+
+def parityConstraint : EquivariantConstraint Unit Nat Nat where
+  value := fun n => n % 2
+  equivariant := by intro _ n; rfl
+  zero_fixed := by intro _; rfl
+
+def equationSystem : ConstrainedSymmetry Unit Nat :=
+  parityConstraint.toConstrainedSymmetry (fun n => n ≤ 10)
+    (by intro _ n hn; exact hn)
+
+example : equationSystem.physical 2 := by
+  refine ⟨?_, ?_⟩
+  · change 2 ≤ 10
+    norm_num
+  change parityConstraint.value 2 = 0
+  norm_num [parityConstraint]
+
+def dynamics : ConstrainedSymmetry.ConstrainedDynamics system where
+  step := id
+  preserves_physical := by intro n hn; exact hn
+  equivariant := by intro _ n; rfl
+
+def observable : ConstrainedSymmetry.ConstrainedObservable system Nat where
+  eval := fun n => n % 2
+  invariant_on_physical := by intro _ n _; rfl
+
+def physicalTwo : system.physical 2 := by
+  simpa [ConstrainedSymmetry.physical, system] using
+    (show 2 ≤ 10 ∧ 2 % 2 = 0 by norm_num)
+
+def physicalTwoState : ConstrainedSymmetry.PhysicalState system :=
+  ⟨2, physicalTwo⟩
+
+example : system.physical (dynamics.evolve 12 2) :=
+  dynamics.evolve_physical 12 physicalTwo
+
+example : system.orbitEquivalent 2 2 :=
+  ConstrainedSymmetry.orbitEquivalent_refl system 2
+
+example : observable.eval (dynamics.evolve 12 2) = observable.eval 2 := by
+  apply dynamics.observable_evolve_eq observable 12 physicalTwo
+  exact ConstrainedSymmetry.orbitEquivalent_refl system 2
+
+example : observable.descend (Quotient.mk _ physicalTwoState) = 0 := by
+  simp [physicalTwoState, observable]
+
+end ConstrainedSymmetrySmoke
+
 /-! ## Executable acceptance report -/
 
 def capabilities : List (String × String) :=
    [("Banach contraction fixed point", "a certified contraction on any nonempty complete metric space has a kernel-checked unique fixed point and convergent iteration"),
+   ("constraint-preserving symmetry", "admissible and constrained physical states are preserved by a declared group action"),
+   ("covariant constraint equation", "a value-valued equivariant constraint yields a checked zero-fibre physical-state predicate when the group fixes zero"),
+   ("gauge-orbit equivalence", "the orbit relation is kernel-checked as an equivalence and transports physical-state predicates"),
+   ("orbit-invariant observables", "a physical observable descends along declared symmetry orbits only after its invariance proof"),
+   ("equivariant constrained dynamics", "finite iterates preserve constraints and carry orbit-equivalent states to orbit-equivalent states"),
    ("uniform operator approximation", "operator-norm error radii imply checked vector and bounded-observable convergence; the radius-to-zero hypothesis is explicit"),
    ("strong operator convergence", "pointwise convergence of bounded operators transports through every bounded observable"),
    ("energy dissipation budget", "nonnegative dissipation and forcing integrability give a checked integrated energy bound"),
    ("residual energy budget", "a numerical or finite-volume residual is carried as an explicit nonnegative energy error budget"),
    ("dense-domain unbounded operator", "a declared dense domain keeps unbounded operators separate from bounded maps and records symmetry/resolvent equations"),
+   ("LinearPMap domain bridge", "a declared dense-domain operator is exposed as mathlib's partially defined LinearPMap without erasing its domain"),
+   ("formal adjoint and closedness", "symmetry, formal-adjoint maximality and adjoint closedness are available only through kernel-checked domain-aware interfaces"),
+   ("graph-norm relative bounds", "explicit graph-norm estimates compose relative perturbation bounds without treating an unbounded operator as ambiently bounded"),
+   ("domain-preserving bounded composition", "bounded maps can be restricted and composed on an unbounded operator domain only after maps-domain proofs are supplied"),
    ("renormalisation limit certificate", "bare quantity, counterterm, regulator relation and limit remain explicit; uniqueness and scheme independence are derived only from supplied limits"),
    ("contraction a priori error", "Picard iterates carry an explicit geometric distance bound from the fixed point"),
    ("contraction perturbation stability", "uniform map error gives a checked C divided by one-minus-K bound between fixed points"),

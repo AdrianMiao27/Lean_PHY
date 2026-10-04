@@ -1,14 +1,20 @@
 # LeanPhy v1
 
-LeanPhy 是建立在 Lean 4 和 mathlib 之上的理论物理形式化验证库。它沿用 Lean 的语法、
-编辑器、定理库、证明自动化和构建工具，让物理推导能够写成可检查的 Lean 命题。
+LeanPhy 是一个面向理论物理的 Lean 4 / mathlib 形式化验证库。它复用 Lean 的语言、类型系统、编辑器、定理库、tactic、Lake 构建和 CI；在此基础上提供物理对象、记法、可复用定理、领域入口和研究账本。
 
-LeanPhy 验证的是**条件性正确性**：在明确列出的假设下，结论是否确实由这些假设推出。
-它检查的是推导的逻辑有效性，不判断模型是否描述真实世界，也不会自动证明连续极限、
-热力学极限、路径积分的良定义性或物理解释的正确性。只有写成 Lean 命题并提供通过
-检查的证明项，或通过可信接口导入经验证的外部证书，相关内容才会进入已验证结论；
-尚未完成的分析论证和物理前提会保留在开放义务账本中。模型说明中的文字本身不会获得
-定理地位。
+LeanPhy 的目标是让理论物理推导成为**可编译、可复现、可审计**的 Lean 项目。它是 Lean 的物理领域扩展，不另造一套与 Lean 并行的证明逻辑或运行时模型。
+
+## 验证边界
+
+LeanPhy 验证的是**条件性正确性**：在明确写出的假设下，结论是否由这些假设推出。LeanPhy 不会因为模型声称描述真实世界，就把这一点变成定理；也不会自动证明连续极限、热力学极限或路径积分存在，更不会替研究者决定物理解释是否成立。
+
+只有写成 Lean 命题并提交通过 Lean kernel 检查的证明项，或通过具有 `sound` 证明的外部证书接口导入的结果，才进入已验证层。未完成的分析论证、数值可靠性论证和物理前提会保留在开放义务账本中。换句话说：
+
+```text
+显式假设 + Lean 证明项  ── Lean kernel ──>  条件性已验证结论
+```
+
+运行时布尔值、未检查的 JSON、未经证书化的 CAS/数值输出和隐含的极限，都不会自动获得定理地位。
 
 [![Lean](https://img.shields.io/badge/Lean-4.34.0-5f5f5f.svg)](https://lean-lang.org/)
 [![mathlib](https://img.shields.io/badge/mathlib-v4.34.0-7b68ee.svg)](https://github.com/leanprover-community/mathlib4)
@@ -17,37 +23,27 @@ LeanPhy 验证的是**条件性正确性**：在明确列出的假设下，结�
 
 English documentation: [README.md](README.md)
 
-## 项目定位
+## 当前版本能做什么
 
-LeanPhy 使用 Lean 的原生语法、类型系统、代码精化器（elaborator）、证明自动化（tactic）、
-Lake 构建和 CI 工作流。物理专用模块提供可复用的对象、定理、记法、自动化工具和研究
-账本，但不另造一套与 Lean 并行的证明逻辑。已有 Lean 项目可以按领域逐步引入这些模块，
-也可以继续直接使用普通 Lean 和 mathlib 定理。
+v1 重点覆盖有限维、有限截断和有界对象；对无界算子、连续分析和数值桥接提供带显式假设的接口。当前回归基线为 **205 个 Lean 源文件、457 个 smoke 检查项、137 条负向 elaboration 测试**；研究账本包含 13 个领域包、28 条带 kernel 证明的结论和 14 条开放义务。这些数字反映库与回归测试的规模，不等同于已经形式化的论文数量。
 
-v1 重点覆盖有限维、有限截断和有界对象。连续分析接口可以表达积分、算子、谱和收敛
-条件，但结论只有在相应假设或证明项存在时才会被接受。当前回归基线包括 204 个 Lean
-源文件、448 个 smoke 检查项、131 条负向 elaboration（代码精化）测试，以及覆盖 13 个
-领域包的研究账本（28 条经 Lean kernel 检查的结论、14 条开放义务）。这些数字表示库和
-回归测试的规模，不表示已经形式化了同等数量的完整物理论文。
-
-## 能力范围与边界
-
-| 领域 | v1 已提供 | 仍需显式假设或外部工作 |
+| 领域 | 已提供的基础 | 明确的边界 |
 | --- | --- | --- |
-| 量子力学与量子信息 | Pauli/Dirac 记法、密度矩阵、POVM、CPTP/Kraus、Bell/CHSH、有限 Lindblad、振子与 CCR 代数 | 以有限矩阵和显式代数假设为主；无界算子定义域与测量解释仍需前提 |
-| 场论与高能物理 | 有限 Fock/CAR/CCR/Wick 恒等式、Clifford/gamma 矩阵、自旋量、迹、Ward 风格代数步骤；有限 EFT 展开、截断误差和系数匹配预算 | 不自动推出场的存在性、无穷维极限、UV 完备性、重整化或非微扰结论 |
-| 凝聚态与统计物理 | 格点、Hubbard、BdG、Berry、Jordan–Wigner、有限 Gibbs/Markov 核和转移矩阵 | 热力学极限、相变和实验参数标定是独立义务 |
-| 规范、经典、相对论、光学与流体 | 离散 Maxwell/Yang–Mills、外微分与 plaquette 恒等式、辛和 Lorentz 代数、ABCD/Jones 光学、有限体积守恒和离散涡量 | 连续场方程的正则性、全局存在性、边界物理和湍流闭合不会由有限模型自动产生 |
-| 数学与数值桥接 | Bochner 积分、支配收敛、Lax–Milgram、Banach 不动点、有界 Hilbert 算子、谱演算、谱隙、算子收敛、残差/能量预算、有限路径积分和逐 regulator 证书 | 数值/CAS 输出必须经过 Lean 侧的 CertificateChecker；数据和 JSON 本身不是证明 |
+| 量子力学与量子信息 | Pauli/Dirac 记法、有限维态与密度矩阵、POVM、CPTP/Kraus、Bell/CHSH、有限 Lindblad、振子和 CCR 代数 | 结果主要针对有限矩阵、有界对象和显式代数假设；无界定义域、自伴性和测量解释仍需单独证明或登记为义务 |
+| 场论与高能代数 | 有限 Fock/CAR/CCR/Wick 恒等式、Clifford/gamma 矩阵、自旋量、迹、Ward 风格代数步骤、有限 EFT 展开和截断误差证书 | 不自动推出场的存在性、无穷维极限、UV 完备性、重整化极限或非微扰结论 |
+| 凝聚态与统计物理 | 格点、Hubbard、BdG、Berry、Jordan–Wigner、有限 Gibbs/Markov 核和转移矩阵 | 热力学极限、相变和实验参数标定仍是独立义务 |
+| 规范、经典、相对论、光学与流体 | 离散 Maxwell/Yang–Mills、外微分与 plaquette 恒等式、辛和 Lorentz 代数、ABCD/Jones 光学、有限体积守恒和离散涡量 | 连续正则性、全局存在性、边界物理和湍流闭合不会由有限模型自动产生 |
+| 数学与数值桥接 | Bochner 积分、支配收敛、Lax–Milgram、Banach 不动点、有界 Hilbert 算子、谱演算、谱隙、算子收敛、残差/能量预算、有限路径积分和逐 regulator 证书 | 外部程序只能提交可追溯数据；只有 Lean 侧 `CertificateChecker` 的 soundness 证明能把结果提升为定理 |
 
-以下主题在 v1 中仍属于开放或条件性接口：一般无界 Hamiltonian 的自伴性、
-Stone 定理、一般谱测度、无穷维路径测度、Osterwalder–Schrader 重构、完整重整化
-极限、Navier–Stokes 正则性和非微扰 QFT 存在性。详见
-[VERIFIED.md](VERIFIED.md) 和 [docs/verified-scope.md](docs/verified-scope.md)。
+无界算子层通过 mathlib 的 `LinearPMap` 保留显式定义域。`DenseDomainOperator` 提供形式伴随、闭性/可闭性、自伴证书、图范数相对界和定义域保持的有界算子组合；每一项都要求用户提交相应证明。把一个对象命名为 Hamiltonian 不会自动得到自伴性，也不会自动产生时间演化。Stone 定理、一般自伴扩张、谱测度和从 resolvent 到演化群的桥接仍在开放义务中。
+
+`LeanPhy.Mathematics.SymmetryReduction` 为约束系统提供统一接口：用户声明可接受态、约束、群作用以及保持这些结构的证明，库据此验证有限步约束保持、轨道传输和不变可观测量在物理态商空间上的下降。它不会自动构造规范切片、证明商空间是流形，或把“规范等价”解释成物理等价。
+
+更完整的逐模块清单和限制见 [VERIFIED.md](VERIFIED.md) 与 [docs/verified-scope.md](docs/verified-scope.md)。
 
 ## 快速开始
 
-安装与仓库工具链一致的 Lean 4.34.0 后，在仓库根目录运行：
+安装与仓库一致的 Lean 4.34.0（项目已在 `lean-toolchain` 固定版本），然后在仓库根目录运行：
 
 ```bash
 lake build
@@ -56,20 +52,17 @@ lake exe leanphy_prototype
 lake exe leanphy_check --broad --project-json
 ```
 
-完整发布门禁还会运行公共入口、下游客户端、研究账本、声明审计、脚手架和负向
-elaboration 测试：
+发布验证脚本会进一步检查公共入口、下游客户端、研究账本、声明审计、脚手架和负向测试：
 
 ```bash
 ./scripts/verify.sh
 ```
 
-首次构建建议使用本地 ext4 或 overlay 文件系统。mathlib 导入和缓存访问在 FUSE 或
-网络挂载上可能明显变慢。
+首次构建建议使用本地 ext4 或 overlay 文件系统；在 FUSE 或网络挂载上，mathlib 导入和缓存访问可能明显变慢。
 
-## 一个最小的已验证推导
+## 最小示例：带 CCR 假设的对易子推导
 
-下面使用普通 Lean 语法，把 CCR 假设交给已经通过 kernel 检查的对易子定理。变量
-`adag` 表示产生算符 `a†`：
+下面是普通 Lean 代码。`hCCR` 是明确给出的 CCR 假设，结论由已编译并通过 kernel 检查的定理得到：
 
 ```lean
 import LeanPhy.Entry.Quantum
@@ -82,73 +75,42 @@ example {R : Type} [Ring R] (a adag : R)
   exact LeanPhy.FieldTheory.number_commutator a adag hCCR
 ```
 
-对于有限 EFT，截断接口把层级和误差写进定理参数：
+有限 EFT 接口把截断层级和误差预算放进定理参数；有限路径积分接口同样要求显式的归一化证书。缺少这些假设时，代码会在 elaboration 阶段失败，而不是生成一个无条件结论。
 
-```lean
-import LeanPhy.Entry.HighEnergy
-open LeanPhy.HighEnergy
-open LeanPhy.Mathematics
-
-example {ι : Type} [Fintype ι] [DecidableEq ι]
-    (E : ExpansionParameter) (T : FiniteEFT ι) (S : Finset ι) (cutoff : ℕ)
-    (horder : ∀ i ∈ Finset.univ \ S, cutoff ≤ T.order i) :
-    ErrorCertificate (T.amplitude E) (T.retainedAmplitude E S)
-      (((Finset.univ \ S).card : ℝ) * T.coefficientBound * E.value ^ cutoff) := by
-  exact T.truncation_error_certificate E S cutoff horder
-```
-
-这里的结论只针对给定的有限系数表、展开参数、截断集合和阶数假设；它不声称存在
-连续 EFT、UV 完备理论或与 regulator 无关的匹配极限。
-
-公共入口包括 LeanPhy.Minimal、按领域选择的 LeanPhy.Entry.* profile，以及组合
-多个领域时使用的 LeanPhy.Entry.Physics。工作流模块 LeanPhy/Workflow.lean 记录命名
-假设、模型、带证明的结论、依赖、证书和开放义务。
-
-## 研究工作流
+## 推荐的研究工作流
 
 1. 选择最小的 `LeanPhy.Entry.*` 入口，减少无关依赖和编译时间。
 2. 把数学前提、物理约定、边界条件、截断范围和近似参数写成类型、结构字段或定理参数。
-3. 使用可复用定理和 tactic 完成代数步骤。若使用 CAS 或数值程序，必须通过带有
-   `CertificateChecker.sound` 定理的接口导入结果。
-4. 将结果登记为 `TheoryPackage` 或 `ResearchProject` 中的 checked claim（带证明的结论），
-   并把尚未完成的分析、物理解释和连续极限写入 open obligation（开放义务）。
+3. 用可复用定理和 tactic 完成代数步骤。若使用 CAS 或数值程序，通过带有 `CertificateChecker.sound` 定理的接口导入结果。
+4. 将结果登记为 `TheoryPackage` 或 `ResearchProject` 中的 checked claim；把尚未完成的分析、物理解释和连续极限写入 open obligation。
 5. 运行 `leanphy_check` 和 `scripts/verify.sh`，同时检查人类可读报告与 JSON 报告。
 
-信任边界可以概括为：
-
-```text
-显式假设 + Lean 证明项  ── Lean kernel ──>  条件性已验证结论
-```
-
-运行时布尔值、未检查的 JSON、未经证书化的数值输出和隐含的连续极限都不会直接
-获得定理地位。报告中的 `VERIFIED-CONDITIONAL` 表示账本中的证明项已经编译并通过
-kernel 检查，同时仍有明确列出的开放义务。
+账本中的 `VERIFIED-CONDITIONAL` 表示相关证明项已经编译并通过 kernel 检查，同时仍可能存在明确列出的开放义务。
 
 ## 仓库结构
 
 ```text
 LeanPhy/                 按物理领域组织的库源码
-  Mathematics/            分析、算子、谱、极限和证书
+  Mathematics/            分析、算子、谱、极限、证书与通用模型
   Quantum/ QuantumInfo/   量子力学与量子信息
   FieldTheory/            CCR/CAR/Fock/Wick 代数
   HighEnergy/             Clifford、gamma、自旋量和有限 EFT
   GaugeTheory/            规范场与离散几何代数
-  Condensed/ StatMech/     凝聚态和统计模型
+  Condensed/ StatMech/    凝聚态与统计模型
   Classical/ Relativity/  经典力学与相对论结构
   Surface/                Dirac、Einstein、指标和量纲记法
   Entry/                  按领域选择的公共入口
   Examples/               工作流和研究项目示例
-Main.lean                内核回归入口
+Main.lean                kernel 回归入口
 Prototype.lean           端到端闭环原型
 Check.lean               研究账本 CLI
 scripts/                 发布验证和负向测试
 docs/                    架构、路线图和详细范围
-.github/                 CI、Issue 模板和 PR 模板
 ```
 
-## 报告、开发和引用
+常用入口包括 `LeanPhy.Minimal`、各领域的 `LeanPhy.Entry.*` 以及组合多领域时使用的 `LeanPhy.Entry.Physics`。
 
-`leanphy_check` 支持人类可读和机器可读的账本：
+## 报告、开发与引用
 
 ```bash
 lake exe leanphy_check --project-json
@@ -156,11 +118,6 @@ lake exe leanphy_check --broad --claims-json
 lake exe leanphy_check --extended --manifest-json
 ```
 
-默认报告保留开放义务并标记为 `VERIFIED-CONDITIONAL`；`--strict` 用于在仍有开放义务
-时让 CI 失败。新增模块应提供可复用定理、明确假设、正向 smoke、必要的负向测试和
-文档，具体要求见 [CONTRIBUTING.md](CONTRIBUTING.md)、[docs/architecture.md](docs/architecture.md)
-和 [docs/roadmap.md](docs/roadmap.md)。
+新增模块应提供可复用定理、明确假设、正向 smoke、必要的负向测试和文档。开发规范见 [CONTRIBUTING.md](CONTRIBUTING.md)、[docs/architecture.md](docs/architecture.md) 和 [docs/roadmap.md](docs/roadmap.md)。
 
-版本为 1.0.0，Lean 和 mathlib 版本固定在 lean-toolchain 和 lakefile.toml。研究引用
-时请同时记录提交号、工具链、mathlib 修订、入口 profile 和生成的账本 JSON；引用格式
-见 CITATION.cff。项目采用 Apache License 2.0。
+版本为 1.0.0，Lean 与 mathlib 版本固定在 `lean-toolchain` 和 `lakefile.toml`。引用 LeanPhy 时请记录提交号、工具链、mathlib 修订、入口 profile 和生成的账本 JSON；引用信息见 [CITATION.cff](CITATION.cff)。项目采用 Apache License 2.0。

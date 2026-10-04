@@ -70,6 +70,45 @@ open LeanPhy.Workflow
 def missingProof : CheckedClaim :=
   { name := "invalid", statement := "True", proposition := True }'
 
+expect_failure "constrained_dynamics_equivariance_required" 'import LeanPhy.Minimal
+open LeanPhy.Mathematics
+instance : SMul Unit Nat := ⟨fun _ n => n⟩
+instance : MulAction Unit Nat where
+  one_smul := by intro n; rfl
+  mul_smul := by intro _ _ n; rfl
+def system : ConstrainedSymmetry Unit Nat where
+  admissible := fun _ => True
+  constrained := fun _ => True
+  admissible_preserved := by intro _ _ _; trivial
+  constrained_preserved := by intro _ _ _; trivial
+def missingEquivariance : ConstrainedSymmetry.ConstrainedDynamics system where
+  step := id
+  preserves_physical := by intro _ _; trivial'
+
+expect_failure "equivariant_constraint_zero_fixed_required" 'import LeanPhy.Minimal
+open LeanPhy.Mathematics
+instance : SMul Unit Nat := ⟨fun _ n => n⟩
+instance : MulAction Unit Nat where
+  one_smul := by intro n; rfl
+  mul_smul := by intro _ _ n; rfl
+def missingZeroFixed : EquivariantConstraint Unit Nat Nat where
+  value := fun n => n
+  equivariant := by intro _ n; rfl'
+
+expect_failure "constrained_observable_invariance_required" 'import LeanPhy.Minimal
+open LeanPhy.Mathematics
+instance : SMul Unit Nat := ⟨fun _ n => n⟩
+instance : MulAction Unit Nat where
+  one_smul := by intro n; rfl
+  mul_smul := by intro _ _ n; rfl
+def system : ConstrainedSymmetry Unit Nat where
+  admissible := fun _ => True
+  constrained := fun _ => True
+  admissible_preserved := by intro _ _ _; trivial
+  constrained_preserved := by intro _ _ _; trivial
+def missingInvariant : ConstrainedSymmetry.ConstrainedObservable system Nat where
+  eval := id'
+
 expect_failure "model_map_dynamics_proof_required" 'import LeanPhy.Minimal
 open LeanPhy.Mathematics
 def idStep : Process Nat (fun _ => True) where
@@ -1183,6 +1222,34 @@ def badUnboundedResolvent : DomainResolventCertificate badDenseZero 1 where
     intro y
     change (1 : ℂ) • y - 0 = y
     simp'
+
+expect_failure "domain_preserving_requires_domain_map" 'import LeanPhy
+open LeanPhy.Mathematics
+noncomputable def domainMap : DenseDomainOperator (𝕜 := ℂ) (E := ℂ) where
+  domain := ⊤
+  dense := by simpa using (dense_univ : Dense (Set.univ : Set ℂ))
+  operator := (0 : (⊤ : Submodule ℂ ℂ) →ₗ[ℂ] ℂ)
+def missingDomainMap : DenseDomainOperator.DomainPreserving domainMap where
+  bounded := ContinuousLinearMap.id ℂ ℂ'
+
+expect_failure "graph_bound_requires_bound" 'import LeanPhy
+open LeanPhy.Mathematics
+noncomputable def graphMap : DenseDomainOperator (𝕜 := ℂ) (E := ℂ) where
+  domain := ⊤
+  dense := by simpa using (dense_univ : Dense (Set.univ : Set ℂ))
+  operator := (0 : (⊤ : Submodule ℂ ℂ) →ₗ[ℂ] ℂ)
+def missingGraphBound : DenseDomainOperator.GraphBoundCertificate graphMap
+    graphMap.operator 0 0 where
+  a_nonneg := by norm_num
+  b_nonneg := by norm_num'
+
+expect_failure "self_adjoint_requires_adjoint_equality" 'import LeanPhy
+open LeanPhy.Mathematics
+noncomputable def selfAdjointMap : DenseDomainOperator (𝕜 := ℂ) (E := ℂ) where
+  domain := ⊤
+  dense := by simpa using (dense_univ : Dense (Set.univ : Set ℂ))
+  operator := (0 : (⊤ : Submodule ℂ ℂ) →ₗ[ℂ] ℂ)
+def missingAdjointEquality : DenseDomainOperator.SelfAdjointCertificate selfAdjointMap := {}'
 
 expect_failure "renormalization_requires_limit" 'import LeanPhy
 open LeanPhy.Mathematics

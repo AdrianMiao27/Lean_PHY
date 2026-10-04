@@ -5,24 +5,34 @@ research workflows a result unlocks, not by the number of isolated examples.
 
 ## v1.x priorities
 
-1. **Unbounded Hilbert operators**: connect the existing dense-domain wrapper
-   to mathlib's `LinearPMap`, expose closedness and adjoint compatibility, and
-   add explicit self-adjoint-extension obligations.
-2. **Continuous dynamics**: strengthen the bounded-flow and Duhamel interfaces,
+1. **Constraints and symmetry reduction**: extend `SymmetryReduction` with
+  covariant constraint maps, first-class constraint algebras, and adapters for
+  gauge, Hamiltonian, lattice, and quantum-symmetry workflows.  Gauge fixing,
+  quotient regularity, and anomaly cancellation remain explicit obligations.
+2. **Unbounded Hilbert operators**: build on the current `LinearPMap` bridge,
+  formal-adjoint/closedness certificates, graph-norm bounds, and
+  domain-preserving composition.  Next add explicit self-adjoint-extension
+  obligations and a carefully delimited resolvent-to-dynamics interface.
+3. **Continuous dynamics**: strengthen the bounded-flow and Duhamel interfaces,
    then connect a supplied generator/resolvent estimate to semigroup stability
    and exponential decay certificates.
-3. **PDE and approximation**: add reusable Sobolev/distribution weak-form
+4. **PDE and approximation**: add reusable Sobolev/distribution weak-form
    contracts and composable stability-plus-consistency-to-error bridges for
    finite volume, finite element, Galerkin, and lattice approximations.
-4. **Spectral and statistical limits**: formalize more compact/resolvent
+5. **Spectral and statistical limits**: formalize more compact/resolvent
    perturbation lemmas and finite-volume-to-limit obligations while retaining
    all uniformity and tightness hypotheses explicitly.
-5. **Path integrals and QFT**: extend finite Schwinger–Dyson, Ward, reflection,
+6. **Path integrals and QFT**: extend finite Schwinger–Dyson, Ward, reflection,
    and renormalization certificates to function-space interfaces; measure
    existence and Osterwalder–Schrader reconstruction remain separate obligations.
-6. **Research usability**: stabilize Dirac/index elaboration, improve Chinese
+7. **Research usability**: stabilize Dirac/index elaboration, improve Chinese
    diagnostics and semantic lemma search, add real-paper end-to-end benchmarks,
    and preserve native Lean interoperability.
+
+The order is deliberate: the reusable domain and certificate contracts come
+before automation that could make an analytic claim look unconditional.  Each
+extension must keep the missing existence, regularity, limit, and physical
+interpretation premises visible in the ledger.
 
 ## Deferred topics
 
@@ -43,4 +53,3 @@ Every new public module should provide:
 - an entry-point export and documentation showing how the theorem composes
   with existing models or certificates;
 - a passing `scripts/verify.sh` run.
-
