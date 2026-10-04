@@ -84,3 +84,5 @@ reports must never contain `sorryAx` or an application-specific axiom.
 #print axioms LeanPhy.Mathematics.ConstrainedSymmetry.orbitEquivalent_trans
 #print axioms LeanPhy.Mathematics.ConstrainedSymmetry.ConstrainedDynamics.evolve_equivariant
 #print axioms LeanPhy.Mathematics.ConstrainedSymmetry.ConstrainedObservable.descend_mk
+#print axioms LeanPhy.Mathematics.FirstClassConstraintAlgebra.bracket_mem_constraintIdeal
+#print axioms LeanPhy.Mathematics.FirstClassConstraintAlgebra.dirac_bracket

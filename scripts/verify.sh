@@ -26,7 +26,7 @@ lake build LeanPhy.Minimal \
   LeanPhy.Entry.StatMech LeanPhy.Entry.FinitePDE LeanPhy.Entry.Analysis \
   LeanPhy.Mathematics.SpectralCalculus LeanPhy.Mathematics.SpectralGap \
   LeanPhy.Entry.Physics \
-  LeanPhy.Mathematics.SymmetryReduction \
+  LeanPhy.Mathematics.SymmetryReduction LeanPhy.Mathematics.ConstraintAlgebra \
   LeanPhy.CLI LeanPhy.Examples.ClosedLoop \
   LeanPhy.Examples.PhysicsTactic \
   LeanPhy.Library \

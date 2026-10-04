@@ -5,8 +5,10 @@ research workflows a result unlocks, not by the number of isolated examples.
 
 ## v1.x priorities
 
-1. **Constraints and symmetry reduction**: extend `SymmetryReduction` with
-  covariant constraint maps, first-class constraint algebras, and adapters for
+1. **Constraints and symmetry reduction**: `SymmetryReduction` now provides
+  constrained states, orbit transport, and invariant observables; and
+  `ConstraintAlgebra` provides first-class ideals, weak equality, and Dirac
+  observable closure.  Next add covariant constraint maps and adapters for
   gauge, Hamiltonian, lattice, and quantum-symmetry workflows.  Gauge fixing,
   quotient regularity, and anomaly cancellation remain explicit obligations.
 2. **Unbounded Hilbert operators**: build on the current `LinearPMap` bridge,

@@ -4,6 +4,7 @@ import LeanPhy.Classical.Hamiltonian
 import LeanPhy.Classical.PolynomialPhaseSpace
 import LeanPhy.Classical.Lagrangian
 import LeanPhy.Classical.Vorticity
+import LeanPhy.Mathematics.ConstraintAlgebra
 
 /-! Classical-mechanics entry point for finite symplectic, Poisson, variational
 and discrete differential calculations. -/

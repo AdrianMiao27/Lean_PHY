@@ -43,6 +43,11 @@ checked by the kernel.
   orbits and can be lifted to an explicit quotient. The quotient is built from
   the proved group-orbit equivalence relation, so no gauge slice or manifold
   structure is assumed.
+- `ConstraintAlgebra` complements the state-level interface with a commutative
+  Poisson algebra, a generated constraint ideal, first-class closure, weak
+  equality, and the Dirac-observable normalizer. Its closure theorems are
+  algebraic; constraint classification, gauge fixing, quotient regularity,
+  Hamiltonian flow, and physical reduction remain model-specific obligations.
 
 A certificate is an ordinary `Prop` structure.  Its fields are inputs, and its
 theorems derive consequences from those fields.  The structure is not a way to

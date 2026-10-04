@@ -4298,10 +4298,59 @@ example : observable.descend (Quotient.mk _ physicalTwoState) = 0 := by
 
 end ConstrainedSymmetrySmoke
 
+/-! ## First-class constraint algebra
+
+This finite polynomial example exercises the algebraic Dirac-constraint
+boundary.  The constraint ideal and first-class closure are explicit inputs;
+weak equality and closure of Dirac observables are derived in the kernel.  No
+gauge fixing, quotient regularity, or Hamiltonian flow is inferred.
+-/
+namespace FirstClassConstraintSmoke
+
+open LeanPhy.Classical
+
+noncomputable def qConstraint :
+    FirstClassConstraintAlgebra ℝ PhasePolynomial Unit where
+  poisson := canonicalPolynomialPoisson
+  constraint := fun _ => qPolynomial
+  first_class := by
+    intro _ _
+    simpa [qPolynomial] using canonical_q_q
+
+example : qPolynomial ∈ qConstraint.constraintIdeal :=
+  qConstraint.constraint_mem ()
+
+example : qConstraint.poisson qPolynomial qPolynomial ∈ qConstraint.constraintIdeal :=
+  qConstraint.bracket_constraint_mem () ()
+
+example : qConstraint.WeaklyEqual qPolynomial 0 := by
+  exact qConstraint.weaklyEqual_zero_iff.mpr (qConstraint.constraint_mem ())
+
+example : qConstraint.IsDiracObservable qPolynomial :=
+  qConstraint.constraint_isDiracObservable ()
+
+example {f g : PhasePolynomial}
+    (hf : qConstraint.IsDiracObservable f)
+    (hg : qConstraint.IsDiracObservable g) :
+    qConstraint.IsDiracObservable (f * g) :=
+  qConstraint.dirac_mul hf hg
+
+example {f g : PhasePolynomial}
+    (hf : qConstraint.IsDiracObservable f)
+    (hg : qConstraint.IsDiracObservable g) :
+    qConstraint.IsDiracObservable (qConstraint.poisson f g) :=
+  qConstraint.dirac_bracket hf hg
+
+end FirstClassConstraintSmoke
+
 /-! ## Executable acceptance report -/
 
 def capabilities : List (String × String) :=
    [("Banach contraction fixed point", "a certified contraction on any nonempty complete metric space has a kernel-checked unique fixed point and convergent iteration"),
+   ("first-class constraint ideal", "declared constraint generators form a first-class ideal whose Poisson bracket closure is checked"),
+   ("Dirac weak equality", "equality modulo the generated constraint ideal is an explicit equivalence relation"),
+   ("Dirac observable normalizer", "observables whose brackets with every constraint are weakly zero are represented by a checked predicate"),
+   ("constraint observable closure", "Dirac observables are closed under scalar action, products, sums and Poisson brackets"),
    ("constraint-preserving symmetry", "admissible and constrained physical states are preserved by a declared group action"),
    ("covariant constraint equation", "a value-valued equivariant constraint yields a checked zero-fibre physical-state predicate when the group fixes zero"),
    ("gauge-orbit equivalence", "the orbit relation is kernel-checked as an equivalence and transports physical-state predicates"),

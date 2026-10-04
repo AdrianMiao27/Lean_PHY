@@ -85,6 +85,15 @@ def missingEquivariance : ConstrainedSymmetry.ConstrainedDynamics system where
   step := id
   preserves_physical := by intro _ _; trivial'
 
+expect_failure "first_class_constraint_closure_required" 'import LeanPhy
+open LeanPhy
+open LeanPhy.Mathematics
+open LeanPhy.Classical
+noncomputable def missingFirstClass :
+    FirstClassConstraintAlgebra ℝ PhasePolynomial Unit where
+  poisson := canonicalPolynomialPoisson
+  constraint := fun _ => qPolynomial'
+
 expect_failure "equivariant_constraint_zero_fixed_required" 'import LeanPhy.Minimal
 open LeanPhy.Mathematics
 instance : SMul Unit Nat := ⟨fun _ n => n⟩

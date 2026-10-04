@@ -69,6 +69,7 @@ import LeanPhy.Mathematics.BilinearIsometry
 import LeanPhy.Mathematics.FiniteFourier
 import LeanPhy.Mathematics.FiniteResponse
 import LeanPhy.Mathematics.Poisson
+import LeanPhy.Mathematics.ConstraintAlgebra
 import LeanPhy.Mathematics.OperatorConvergence
 import LeanPhy.Mathematics.EnergyDissipation
 import LeanPhy.Mathematics.UnboundedOperator
