@@ -63,6 +63,13 @@ checked by the kernel.
   antibracket, gauge-fixing data, path-integral measures, anomaly cancellation,
   and any physical-equivalence theorem are separate future structures or open
   obligations.
+- `GradedBRST` refines this boundary for ghost-bearing calculations.  A
+  `GradedRing` declares homogeneous pieces, parity, and an explicitly odd
+  differential degree; `GradedDerivation` then requires the corresponding
+  signed Leibniz law on homogeneous inputs.  `GradedBRSTDifferential` adds
+  nilpotency and the same closed/exact/cohomology vocabulary.  The declaration
+  of a grading is a model input: it does not construct a ghost polynomial
+  algebra or a BV theory.
 
 A certificate is an ordinary `Prop` structure.  Its fields are inputs, and its
 theorems derive consequences from those fields.  The structure is not a way to
@@ -105,6 +112,8 @@ The library intentionally does not infer:
   manifold;
 - that a nilpotent algebraic differential is a complete BRST/BV construction,
   or that its cohomology equals the physical observable space;
+- that a declared graded differential has a physical ghost interpretation, or
+  that its parity laws imply anomaly cancellation;
 - a sign, convention, or boundary condition that is absent from the type.
 
 For unbounded operators, a name such as `Hamiltonian` carries no analytic

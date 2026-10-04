@@ -25,8 +25,8 @@ The semantics are **conditional correctness**: a theorem always has the shape
 physical truth, convergence of a limit, or the validity of an unbounded-operator
 or path-integral manipulation.
 
-The current acceptance report contains **469 kernel-checked smoke
-capabilities** and 140 negative elaboration fixtures.  Recent cross-domain additions are:
+The current acceptance report contains **473 kernel-checked smoke
+capabilities** and 141 negative elaboration fixtures.  Recent cross-domain additions are:
 
 - `LeanPhy.Mathematics.SymmetryReduction`: constrained state predicates,
   group-orbit equivalence, physical-state quotients, orbit-invariant
@@ -57,6 +57,13 @@ capabilities** and 140 negative elaboration fixtures.  Recent cross-domain addit
   number, Koszul signs, BV data, gauge fixing, path-integral measures,
   anomaly cancellation, and physical equivalence remain outside its verified
   scope.
+
+- `LeanPhy.Mathematics.GradedBRST`: a declared family of homogeneous pieces
+  carries an explicit odd degree shift and parity-dependent signed Leibniz
+  law.  The square-zero graded differential supports the basic cohomology
+  predicates and closed products.  No concrete ghost algebra, BV bracket,
+  gauge fixing, path-integral measure, anomaly cancellation, or physical
+  equivalence is inferred.
 
 - `LeanPhy.Mathematics.OperatorConvergence`: uniform operator-norm and strong
   operator convergence certificates.  A radius tending to zero yields
@@ -172,7 +179,7 @@ capabilities** and 140 negative elaboration fixtures.  Recent cross-domain addit
   This layer does not infer parameter continuity, limits or physical calibration.
 
 - The negative elaboration suite is executed by
-  `scripts/run_negative_tests.py`: it runs the 140 independent fixtures in
+  `scripts/run_negative_tests.py`: it runs the 141 independent fixtures in
   parallel, accepts only a source-located Lean elaboration error, rejects
   import/API/compiler failures, and cleans up child compiler groups on
   interruption. This keeps a broken regression fixture from being reported as

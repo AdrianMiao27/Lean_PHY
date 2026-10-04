@@ -91,3 +91,5 @@ reports must never contain `sorryAx` or an application-specific axiom.
 #print axioms LeanPhy.Mathematics.BRSTDifferential.exact_closed
 #print axioms LeanPhy.Mathematics.PoissonBRSTDifferential.closed_bracket
 #print axioms LeanPhy.Mathematics.ConstraintBRSTDifferential.map_weaklyEqual
+#print axioms LeanPhy.Mathematics.GradedBRSTDifferential.exact_closed
+#print axioms LeanPhy.Mathematics.GradedBRSTDifferential.closed_mul

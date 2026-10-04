@@ -12,11 +12,12 @@ research workflows a result unlocks, not by the number of isolated examples.
   weak-equality transport, and Dirac-observable transport under an explicit
   target-ideal cover.  `BRST` now provides a deliberately ungraded,
   nilpotent-differential seed with optional Poisson and constraint-ideal
-  compatibility.  Next add adapters for gauge, Hamiltonian, lattice, and
-  quantum-symmetry workflows, then introduce ghost grading and Koszul signs
-  only with independent kernel-checked laws.  Gauge fixing, quotient
-  regularity, anomaly cancellation, and the identification of cohomology with
-  physical observables remain explicit obligations.
+  compatibility.  `GradedBRST` now provides homogeneous pieces, an explicitly
+  odd degree shift and a signed Leibniz boundary.  Next add concrete finite
+  ghost-polynomial and gauge-algebra adapters, then a separately specified BV
+  interface.  Gauge fixing, quotient regularity, anomaly cancellation, and the
+  identification of cohomology with physical observables remain explicit
+  obligations.
 2. **Unbounded Hilbert operators**: build on the current `LinearPMap` bridge,
   formal-adjoint/closedness certificates, graph-norm bounds, and
   domain-preserving composition.  Next add explicit self-adjoint-extension

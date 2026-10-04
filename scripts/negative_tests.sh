@@ -118,6 +118,12 @@ open LeanPhy.Mathematics
 noncomputable def missingBRST : BRSTDifferential ℝ PhasePolynomial where
   differential := 0'
 
+expect_failure "graded_brst_nilpotency_required" 'import LeanPhy
+open LeanPhy.Mathematics
+noncomputable def missingGradedNilpotent :
+    GradedBRSTDifferential (GradedRing.parityTrivial ℤ) where
+  toGradedDerivation := GradedDerivation.zero _'
+
 expect_failure "equivariant_constraint_zero_fixed_required" 'import LeanPhy.Minimal
 open LeanPhy.Mathematics
 instance : SMul Unit Nat := ⟨fun _ n => n⟩

@@ -4417,6 +4417,62 @@ example {f g : PhasePolynomial}
     qConstraint.WeaklyEqual (qConstraintBRST f) (qConstraintBRST g) :=
   qConstraintBRST.map_weaklyEqual hfg
 
+/-! ## Graded BRST boundary
+
+The grading interface keeps homogeneous pieces, the odd degree shift and the
+Koszul sign as explicit data.  This smoke uses the deliberately trivial
+homogeneous decomposition to exercise the generic API; a ghost polynomial
+model must provide its own decomposition and signed Leibniz proof.
+-/
+
+def qParityGrading : GradedRing (ZMod 2) PhasePolynomial where
+  homogeneous := fun _ => Set.univ
+  zero_mem := by intro g; simp
+  add_mem := by intro g x y _ _; simp
+  neg_mem := by intro g x _; simp
+  one_mem := by simp
+  mul_mem := by intro g h x y _ _; simp
+  parity := fun g => if g = 0 then Parity.even else Parity.odd
+  parity_add := by
+    intro g h
+    fin_cases g <;> fin_cases h <;> rfl
+  differential_degree := 1
+  differential_is_odd := by rfl
+
+noncomputable def qGradedBRST : GradedBRSTDifferential qParityGrading where
+  toGradedDerivation := {
+    differential := 0
+    map_zero' := by simp
+    map_add' := by intro x y; simp
+    map_neg' := by intro x; simp
+    maps_grade' := by intro g x _; simp [GradedRing.IsHomogeneous, qParityGrading]
+    leibniz' := by
+      intro g h x y _ _
+      change (0 : PhasePolynomial) =
+        0 * y + Parity.sign (qParityGrading.parity g) (x * 0)
+      simp only [mul_zero, Parity.sign_zero, zero_mul, add_zero]
+  }
+  nilpotent := by intro x; simp
+
+example {f : PhasePolynomial} :
+    qParityGrading.IsHomogeneous 0 f := by
+  simp [GradedRing.IsHomogeneous, qParityGrading]
+
+example {f g : PhasePolynomial}
+    (hf : qGradedBRST.IsClosed f) (hg : qGradedBRST.IsClosed g) :
+    qGradedBRST.IsClosed (f * g) := by
+  apply qGradedBRST.closed_mul (g := 0) (h := 0)
+  · simp [GradedRing.IsHomogeneous, qParityGrading]
+  · simp [GradedRing.IsHomogeneous, qParityGrading]
+  · exact hf
+  · exact hg
+
+example {f : PhasePolynomial} : qGradedBRST.IsExact (qGradedBRST f) :=
+  ⟨f, rfl⟩
+
+example (f : PhasePolynomial) :
+    Parity.sign Parity.odd f = -f := rfl
+
 end FirstClassConstraintSmoke
 
 /-! ## Executable acceptance report -/
@@ -4435,6 +4491,10 @@ def capabilities : List (String × String) :=
    ("BRST cohomology relation", "cohomologous elements form a checked equivalence relation modulo exact differences"),
    ("Poisson-compatible BRST bracket", "closed observables remain closed under a declared ungraded Poisson compatibility law"),
    ("constraint-compatible BRST map", "a differential that preserves the constraint ideal transports weak equality"),
+   ("graded BRST differential", "homogeneous pieces, an odd degree shift and the signed Leibniz law are explicit inputs"),
+   ("Koszul parity sign", "the even/odd sign action is kernel-checked and reusable by ghost-algebra models"),
+   ("graded BRST closed products", "closed homogeneous factors have a kernel-checked closed product under the signed law"),
+   ("graded BRST exactness", "a square-zero graded differential makes every differential image explicitly exact"),
    ("constraint-preserving symmetry", "admissible and constrained physical states are preserved by a declared group action"),
    ("covariant constraint equation", "a value-valued equivariant constraint yields a checked zero-fibre physical-state predicate when the group fixes zero"),
    ("gauge-orbit equivalence", "the orbit relation is kernel-checked as an equivalence and transports physical-state predicates"),
