@@ -5,14 +5,14 @@ in theoretical physics. A derivation is represented as a Lean proposition with
 explicit assumptions, and its proof term is checked by the Lean kernel.
 
 LeanPhy verifies **conditional correctness**: whether a conclusion follows from
-the assumptions that were stated. It does not decide whether a model describes
-the physical world, whether a continuum or thermodynamic limit exists, whether
-a path integral is well-defined, or whether a physical interpretation is
-appropriate. Those questions must appear as Lean-checkable hypotheses, proof
-terms, external certificates, or open research obligations. Prose in a model
-description does not become a theorem. Every checked claim has a proof term
-accepted by the Lean kernel; unfinished analysis and physical premises remain
-visible in the obligation ledger.
+the assumptions that have been stated. It checks the logical validity of a
+derivation; it does not decide physical truth. A model description does not, by
+itself, prove that a model describes the physical world, that a continuum or
+thermodynamic limit exists, that a path integral is well-defined, or that a
+physical interpretation is correct. Such statements enter the verified layer
+only as Lean propositions with proof terms or through a trusted certificate
+interface. Unfinished analysis and physical premises remain visible in the open
+obligation ledger.
 
 [![Lean](https://img.shields.io/badge/Lean-4.34.0-5f5f5f.svg)](https://lean-lang.org/)
 [![mathlib](https://img.shields.io/badge/mathlib-v4.34.0-7b68ee.svg)](https://github.com/leanprover-community/mathlib4)
@@ -28,7 +28,7 @@ builds, and CI workflow. Physics modules add reusable objects, theorems,
 notation, tactics, and research ledgers; they do not introduce a second proof
 logic. Existing Lean projects can adopt one domain entry point at a time.
 
-The v1 library is strongest for finite-dimensional, truncated, and bounded
+Version 1 is designed first for finite-dimensional, truncated, and bounded
 objects. Analysis interfaces are available when the user supplies the required
 continuity, integrability, domain, stability, or convergence proof. The current
 regression baseline contains 204 Lean source files, 448 smoke capabilities, 131
