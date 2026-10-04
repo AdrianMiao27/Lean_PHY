@@ -4341,6 +4341,32 @@ example {f g : PhasePolynomial}
     qConstraint.IsDiracObservable (qConstraint.poisson f g) :=
   qConstraint.dirac_bracket hf hg
 
+noncomputable def qConstraintMap :
+    FirstClassConstraintAlgebra.ConstraintMap qConstraint qConstraint :=
+  FirstClassConstraintAlgebra.ConstraintMap.id qConstraint
+
+theorem qConstraintCover :
+    FirstClassConstraintAlgebra.ConstraintMap.CoversConstraintIdeal
+      qConstraintMap := by
+  intro c hc
+  exact ⟨c, hc, rfl⟩
+
+example {f g : PhasePolynomial}
+    (hfg : qConstraint.WeaklyEqual f g) :
+    qConstraint.WeaklyEqual (qConstraintMap f) (qConstraintMap g) :=
+  qConstraintMap.map_weaklyEqual hfg
+
+example {f : PhasePolynomial}
+    (hf : qConstraint.IsDiracObservable f) :
+    qConstraint.IsDiracObservable (qConstraintMap f) :=
+  qConstraintMap.map_diracObservable qConstraintCover hf
+
+example :
+    FirstClassConstraintAlgebra.ConstraintMap.comp
+      (FirstClassConstraintAlgebra.ConstraintMap.id qConstraint) qConstraintMap =
+      qConstraintMap :=
+  qConstraintMap.comp_id_left
+
 end FirstClassConstraintSmoke
 
 /-! ## Executable acceptance report -/
@@ -4351,6 +4377,10 @@ def capabilities : List (String × String) :=
    ("Dirac weak equality", "equality modulo the generated constraint ideal is an explicit equivalence relation"),
    ("Dirac observable normalizer", "observables whose brackets with every constraint are weakly zero are represented by a checked predicate"),
    ("constraint observable closure", "Dirac observables are closed under scalar action, products, sums and Poisson brackets"),
+   ("constraint-ideal map", "a Poisson algebra map sends the generated source constraint ideal into the target ideal"),
+   ("weak-equality transport", "constraint-preserving maps transport equality modulo the constraint ideal"),
+   ("composable constraint maps", "constraint-preserving Poisson maps compose and have a checked identity"),
+   ("Dirac-observable map", "a target-ideal cover makes transport of Dirac observables a checked theorem"),
    ("constraint-preserving symmetry", "admissible and constrained physical states are preserved by a declared group action"),
    ("covariant constraint equation", "a value-valued equivariant constraint yields a checked zero-fibre physical-state predicate when the group fixes zero"),
    ("gauge-orbit equivalence", "the orbit relation is kernel-checked as an equivalence and transports physical-state predicates"),

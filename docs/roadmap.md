@@ -8,9 +8,11 @@ research workflows a result unlocks, not by the number of isolated examples.
 1. **Constraints and symmetry reduction**: `SymmetryReduction` now provides
   constrained states, orbit transport, and invariant observables; and
   `ConstraintAlgebra` provides first-class ideals, weak equality, and Dirac
-  observable closure.  Next add covariant constraint maps and adapters for
-  gauge, Hamiltonian, lattice, and quantum-symmetry workflows.  Gauge fixing,
-  quotient regularity, and anomaly cancellation remain explicit obligations.
+  observable closure.  `ConstraintMap` now provides composable Poisson maps,
+  weak-equality transport, and Dirac-observable transport under an explicit
+  target-ideal cover.  Next add adapters for gauge, Hamiltonian, lattice, and
+  quantum-symmetry workflows.  Gauge fixing, quotient regularity, and anomaly
+  cancellation remain explicit obligations.
 2. **Unbounded Hilbert operators**: build on the current `LinearPMap` bridge,
   formal-adjoint/closedness certificates, graph-norm bounds, and
   domain-preserving composition.  Next add explicit self-adjoint-extension

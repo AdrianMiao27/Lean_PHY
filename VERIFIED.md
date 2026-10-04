@@ -25,8 +25,8 @@ The semantics are **conditional correctness**: a theorem always has the shape
 physical truth, convergence of a limit, or the validity of an unbounded-operator
 or path-integral manipulation.
 
-The current acceptance report contains **461 kernel-checked smoke
-capabilities** and 138 negative elaboration fixtures.  Recent cross-domain additions are:
+The current acceptance report contains **465 kernel-checked smoke
+capabilities** and 139 negative elaboration fixtures.  Recent cross-domain additions are:
 
 - `LeanPhy.Mathematics.SymmetryReduction`: constrained state predicates,
   group-orbit equivalence, physical-state quotients, orbit-invariant
@@ -42,6 +42,13 @@ capabilities** and 138 negative elaboration fixtures.  Recent cross-domain addit
   the algebraic operations exposed by the module.  Constraint classification,
   gauge fixing, quotient regularity, Hamiltonian flow, and physical reduction
   remain separate obligations.
+
+- `LeanPhy.Mathematics.ConstraintMap`: a composable Poisson algebra map can
+  preserve the generated constraint ideal and therefore transport weak
+  equality.  Dirac-observable transport requires an explicit witness that the
+  target constraint ideal is covered by the image of the source ideal.  The
+  module does not infer surjectivity, gauge fixing, quotient regularity,
+  anomaly cancellation, or physical equivalence.
 
 - `LeanPhy.Mathematics.OperatorConvergence`: uniform operator-norm and strong
   operator convergence certificates.  A radius tending to zero yields
@@ -157,7 +164,7 @@ capabilities** and 138 negative elaboration fixtures.  Recent cross-domain addit
   This layer does not infer parameter continuity, limits or physical calibration.
 
 - The negative elaboration suite is executed by
-  `scripts/run_negative_tests.py`: it runs the 138 independent fixtures in
+  `scripts/run_negative_tests.py`: it runs the 139 independent fixtures in
   parallel, accepts only a source-located Lean elaboration error, rejects
   import/API/compiler failures, and cleans up child compiler groups on
   interruption. This keeps a broken regression fixture from being reported as

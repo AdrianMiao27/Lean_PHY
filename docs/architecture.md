@@ -48,6 +48,12 @@ checked by the kernel.
   equality, and the Dirac-observable normalizer. Its closure theorems are
   algebraic; constraint classification, gauge fixing, quotient regularity,
   Hamiltonian flow, and physical reduction remain model-specific obligations.
+- `ConstraintMap` represents a composable Poisson algebra map that sends source
+  constraints into the target constraint ideal. It transports weak equality by
+  ideal membership. Transporting a Dirac observable additionally requires an
+  explicit `CoversConstraintIdeal` witness for the target ideal; no surjectivity,
+  gauge fixing, quotient regularity, anomaly cancellation, or physical
+  equivalence is inferred.
 
 A certificate is an ordinary `Prop` structure.  Its fields are inputs, and its
 theorems derive consequences from those fields.  The structure is not a way to

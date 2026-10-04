@@ -27,6 +27,7 @@ lake build LeanPhy.Minimal \
   LeanPhy.Mathematics.SpectralCalculus LeanPhy.Mathematics.SpectralGap \
   LeanPhy.Entry.Physics \
   LeanPhy.Mathematics.SymmetryReduction LeanPhy.Mathematics.ConstraintAlgebra \
+  LeanPhy.Mathematics.ConstraintMap \
   LeanPhy.CLI LeanPhy.Examples.ClosedLoop \
   LeanPhy.Examples.PhysicsTactic \
   LeanPhy.Library \

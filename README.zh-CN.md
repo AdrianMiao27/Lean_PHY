@@ -1,6 +1,6 @@
 # LeanPhy v1
 
-LeanPhy 是建立在 Lean 4 与 mathlib 之上的理论物理形式化库。它沿用 Lean 的语法、类型系统、编辑器、定理库、tactic、Lake 构建和 CI；在这些基础上补充物理对象、记法、可复用定理、领域入口和研究账本。
+LeanPhy 是建立在 Lean 4 与 mathlib 之上的理论物理形式化库。它沿用 Lean 的语法、类型系统、编辑器、定理库、tactic、Lake 构建和 CI，并在此基础上提供物理对象、记法、可复用定理、按领域组织的入口模块和研究账本。
 
 项目的目标是把理论物理推导写成**可编译、可复现、可审计**的 Lean 文件。LeanPhy 是 Lean 的物理领域扩展，与现有 Lean 项目使用同一套语言和内核，不另设一套证明逻辑。
 
@@ -13,7 +13,7 @@ English documentation: [README.md](README.md)
 
 ## 验证边界
 
-LeanPhy 验证的是**条件性正确性**：在明确写出的假设下，结论是否确实由这些假设推出。LeanPhy 不把模型是否描述真实世界、连续极限是否存在、路径积分是否存在或物理解释是否成立自动变成定理。它检查推导的逻辑有效性，不替研究者判断模型的物理适用性。
+LeanPhy 验证的是**条件性正确性**：在明确写出的假设下，结论是否确实由这些假设推出。它不会替模型是否对应真实世界、连续极限是否存在、路径积分是否存在或物理解释是否成立作出自动判定，也不会把这些前提默认为定理。它检查推导的逻辑有效性，不替研究者判断模型的物理适用性。
 
 结论只有在以下情况下才进入已验证层：它是一个由 Lean kernel 检查过证明项的 Lean 命题，或由带有 Lean 侧 `sound` 定理的外部证书接口导入。尚未完成的分析论证、数值可靠性论证和物理前提会保留在开放义务账本中。
 
@@ -21,23 +21,23 @@ LeanPhy 验证的是**条件性正确性**：在明确写出的假设下，结�
 显式假设 + Lean 证明项  ── Lean kernel ──>  条件性已验证结论
 ```
 
-运行时布尔值、未经检查的 JSON、没有证书的 CAS/数值输出，以及没有写入命题的极限或近似，都不会自动获得定理地位。
+运行时布尔值、未经检查的 JSON、没有证书的 CAS/数值输出，以及未在命题中明确陈述的极限或近似，都不会自动获得定理地位。
 
 ## 当前版本的范围
 
-v1.0.0 主要面向有限维、有限截断和有界对象；对于无界算子、连续分析、数值计算和外部程序，库提供了要求用户提交证明或证书的接口。当前回归基线包含 **206 个 Lean 源文件、461 个 smoke 检查项和 138 条负向 elaboration 测试**；研究账本包含 13 个领域包、28 条通过 kernel 检查的结论和 14 条开放义务。这些数字描述库和回归测试的规模，不代表已经形式化了多少篇完整论文。
+v1.0.0 主要面向有限维、有限截断和有界对象；对于无界算子、连续分析、数值计算和外部程序，库提供了要求用户提交证明或证书的接口。当前回归基线包含 **207 个 Lean 源文件、465 项 smoke 回归检查和 139 条负向 elaboration 回归**；研究账本包含 13 个领域包、28 条通过 kernel 检查的结论和 14 条开放义务。这些数字描述库和回归测试的规模，不代表已经形式化了多少篇完整论文。
 
 | 领域 | 已提供的基础 | 需要单独证明或登记的边界 |
 | --- | --- | --- |
 | 量子力学与量子信息 | Pauli/Dirac 记法、有限维态与密度矩阵、POVM、CPTP/Kraus 通道、Bell/CHSH、有限 Lindblad 模型、振子和 CCR 代数 | 无界算子定义域、自伴性、连续测量解释以及从有限模型到物理系统的对应关系 |
 | 场论与高能代数 | 有限 Fock、CAR/CCR、Wick 恒等式、Clifford/gamma 矩阵、自旋量、迹、Ward 风格代数步骤、有限 EFT 展开和截断误差证书 | 场的存在性、无穷维极限、UV 完备性、重整化极限和非微扰结论 |
-| 经典、规范、相对论、光学与流体 | Poisson 代数、第一类约束理想、弱等式、Dirac 可观测量、离散 Maxwell/Yang–Mills、外微分与 plaquette 恒等式、辛和 Lorentz 代数、ABCD/Jones 光学、有限体积守恒和离散涡量 | 规范固定、约化空间的正则性、连续正则性、全局存在性、边界物理和湍流闭合 |
+| 经典、规范、相对论、光学与流体 | Poisson 代数、第一类约束理想、约束保持映射、弱等式、Dirac 可观测量、离散 Maxwell/Yang–Mills、外微分与 plaquette 恒等式、辛和 Lorentz 代数、ABCD/Jones 光学、有限体积守恒和离散涡量 | 规范固定、约化空间的正则性、连续正则性、全局存在性、边界物理和湍流闭合 |
 | 凝聚态与统计物理 | 格点、Hubbard、BdG、Berry、Jordan–Wigner、有限 Gibbs/Markov 核和转移矩阵 | 热力学极限、相变、实验参数标定及其与连续理论的等价性 |
 | 数学与数值桥接 | Bochner 积分、支配收敛、Lax–Milgram、Banach 不动点、有界 Hilbert 算子、谱演算、谱隙、算子收敛、残差/能量预算、有限路径积分和逐 regulator 证书 | 外部程序只能提供可追溯数据；必须有 Lean 侧 `CertificateChecker` 的 `sound` 证明，结果才可进入已验证层 |
 
 无界算子层使用 mathlib 的 `LinearPMap`，并在类型中保留声明的定义域。`DenseDomainOperator` 提供形式伴随、闭性/可闭性、自伴证书、图范数相对界和定义域保持的有界组合；这些接口都要求用户提交相应证明。把对象命名为 Hamiltonian 不会自动得到自伴性，也不会自动产生时间演化。Stone 定理、一般自伴扩张、谱测度以及从 resolvent 到演化群的桥接仍是开放义务。
 
-`LeanPhy.Mathematics.SymmetryReduction` 处理受约束系统中的可接受态、群作用、轨道传输和不变可观测量。`LeanPhy.Mathematics.ConstraintAlgebra` 进一步处理交换 Poisson 代数中的约束生成理想、第一类闭合、弱等式和 Dirac 可观测量的代数闭合。两个模块都不自动构造规范切片、证明商空间是流形，或把规范等价解释成物理等价。
+`LeanPhy.Mathematics.SymmetryReduction` 处理受约束系统中的可接受态、群作用、轨道传输和不变可观测量。`LeanPhy.Mathematics.ConstraintAlgebra` 进一步处理交换 Poisson 代数中的约束生成理想、第一类闭合、弱等式和 Dirac 可观测量的代数闭合；`ConstraintMap` 则要求映射保持 Poisson 括号并把源约束理想映入目标约束理想，从而传输弱等式。传输 Dirac 可观测量还必须显式提供目标约束理想的覆盖证明。上述模块都不自动构造规范切片、证明商空间是流形，或把规范等价解释成物理等价。
 
 完整的逐模块清单和限制见 [VERIFIED.md](VERIFIED.md) 与 [docs/verified-scope.md](docs/verified-scope.md)。
 
@@ -82,7 +82,7 @@ example {R : Type} [Ring R] (a adag : R)
 1. 选择最小的 `LeanPhy.Entry.*` 入口，减少无关依赖和编译时间。
 2. 把数学前提、物理约定、边界条件、截断范围和近似参数写成类型、结构字段或定理参数。
 3. 使用可复用定理和 tactic 完成代数步骤。若使用 CAS 或数值程序，通过带有 `CertificateChecker.sound` 定理的接口导入结果。
-4. 将结果登记为 `TheoryPackage` 或 `ResearchProject` 中的 checked claim；把尚未完成的分析、物理解释和连续极限写入 open obligation。
+4. 将结果登记为 `TheoryPackage` 或 `ResearchProject` 中的 `checked claim`；把尚未完成的分析、物理解释和连续极限写入 `open obligation`。
 5. 运行 `leanphy_check` 和 `scripts/verify.sh`，并同时检查人类可读报告与 JSON 报告。
 
 账本中的 `VERIFIED-CONDITIONAL` 表示相关证明项已经编译并通过 kernel 检查，同时仍可能存在明确列出的开放义务。

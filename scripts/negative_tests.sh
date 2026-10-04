@@ -94,6 +94,24 @@ noncomputable def missingFirstClass :
   poisson := canonicalPolynomialPoisson
   constraint := fun _ => qPolynomial'
 
+expect_failure "constraint_map_bracket_compatibility_required" 'import LeanPhy
+open LeanPhy
+open LeanPhy.Mathematics
+open LeanPhy.Classical
+noncomputable def sourceConstraint :
+    FirstClassConstraintAlgebra ℝ PhasePolynomial Unit where
+  poisson := canonicalPolynomialPoisson
+  constraint := fun _ => qPolynomial
+  first_class := by
+    intro _ _
+    simpa [qPolynomial] using canonical_q_q
+noncomputable def missingConstraintMapLaw :
+    FirstClassConstraintAlgebra.ConstraintMap sourceConstraint sourceConstraint where
+  map := AlgHom.id ℝ PhasePolynomial
+  maps_constraint := by
+    intro i
+    exact sourceConstraint.constraint_mem i'
+
 expect_failure "equivariant_constraint_zero_fixed_required" 'import LeanPhy.Minimal
 open LeanPhy.Mathematics
 instance : SMul Unit Nat := ⟨fun _ n => n⟩
