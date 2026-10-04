@@ -1,12 +1,12 @@
 # LeanPhy
 
-LeanPhy 是一个建立在 **Lean 4 与 mathlib** 之上的理论物理形式化库。它不是
-Lean 的 fork，也不是另一套证明逻辑：研究者仍然使用 Lean 的语法、类型检查器、
-编辑器支持、定理库、tactic、Lake 构建和 CI 工作流；LeanPhy 只增加物理对象、
-记号、可复用定理以及记录研究边界的账本。
+LeanPhy 是一个基于 **Lean 4 与 mathlib** 的理论物理形式化库。它沿用 Lean 的
+语法、类型检查器、编辑器支持、定理库、tactic、Lake 构建和 CI 工作流；LeanPhy
+在此基础上提供物理对象、记号、可复用定理，以及记录研究边界的账本。它不是
+Lean 的 fork，也没有另起一套证明逻辑。
 
-> **定位**：把理论物理推导中可以形式化的数学步骤编译为 Lean 证明，并把尚未
-> 解决的分析问题和物理前提明确登记为开放义务。
+> **定位**：把理论物理推导中可以形式化的数学步骤交给 Lean 检查，并把尚未解决
+> 的分析问题、建模假设和物理解释明确记录为开放义务。
 
 [![Lean](https://img.shields.io/badge/Lean-4.34.0-5f5f5f.svg)](https://lean-lang.org/)
 [![mathlib](https://img.shields.io/badge/mathlib-v4.34.0-7b68ee.svg)](https://github.com/leanprover-community/mathlib4)
@@ -17,35 +17,35 @@ English version: [README.md](README.md)
 
 ## 先明确验证边界
 
-LeanPhy 检查的是**条件性正确性**：在明确列出的数学假设、物理约定和证书成立
-时，结论是否由这些前提推出。因而，一个 `checked claim` 应读作：
+LeanPhy 验证的是**条件性正确性**：在明确列出的数学假设、物理约定和证书下，
+结论是否能由这些前提推出。`checked claim` 应理解为：
 
-> 在所列前提下，该结论可以由 Lean 的证明规则推出。
+> 在所列前提成立时，该结论由 Lean 的证明规则推出。
 
-LeanPhy 不会把下列问题自动变成定理：
+LeanPhy 不会替研究者判断模型是否描述真实世界或某个具体实验系统，也不会把下列
+问题自动提升为定理：
 
-- 模型是否足以描述真实世界或某个具体实验系统；
 - 连续极限、热力学极限或重整化极限是否存在；
-- 路径积分是否存在、收敛，或具有所需的物理解释；
+- 路径积分是否存在、收敛，或是否具有预期的物理解释；
 - 无界算子的定义域、自伴性和时间演化条件是否满足；
-- 一个形式化对象是否确实对应研究者所赋予的物理意义。
+- 一个形式化对象是否确实对应研究者赋予它的物理意义。
 
-这些内容必须以显式命题、结构字段、用户提供的证书，或研究账本中的**开放义务**
-出现。每个已检查结论都包含 Lean 证明项，并由 Lean kernel 重新检查。CAS、数值
-程序或外部脚本只有在 Lean 侧提供 `CertificateChecker.sound` 之类的正确性定理
-后，才能把结果带入已验证层；未经检查的布尔值、JSON、数值输出、极限或近似，
-本身不会获得定理地位。
+这些内容必须写成显式命题、结构字段或用户提供的证书；尚未完成的分析性质、物理
+前提和解释工作则登记为研究账本中的**开放义务**。每条已验证结论都包含 Lean
+证明项，并由 Lean kernel 重新检查。CAS、数值程序和外部脚本只有在 Lean 侧存在
+`CertificateChecker.sound` 一类的正确性定理时，才能把结果带入已验证层；未经检查
+的布尔值、JSON、数值输出、极限或近似不会自动获得定理地位。
 
 ```text
 显式假设/证书 ──> Lean 证明项 ──> Lean kernel ──> 条件性已验证结论
-                         └── 未完成的分析与物理前提 ──> 开放义务账本
+                         └── 未完成的分析性质与物理前提 ──> 开放义务账本
 ```
 
 ## 当前版本与适用范围
 
-LeanPhy v1.0.0 的主要工作范围是有限维、有限截断和有界对象；对无界算子、连续
-分析、数值计算和外部程序，项目提供的是带明确输入边界的接口，而不是自动完成的
-物理定理。
+LeanPhy v1.0.0 的设计目标是有限维、有限截断和有界对象。对于无界算子、连续分析、
+数值计算和外部程序，项目提供带明确输入边界的接口；缺失的数学证明和物理前提仍
+由用户补充，不会由接口自动填上。
 
 当前回归基线为 **209 个 Lean 源文件、473 项 smoke 检查和 141 条预期失败的
 elaboration 测试**。默认运行 `leanphy_check --project-json` 会报告 **8 个领域
@@ -68,11 +68,11 @@ elaboration 测试**。默认运行 `leanphy_check --project-json` 会报告 **8
 的桥接，仍是开放义务。
 
 规范系统的 `ConstraintAlgebra` 与 `ConstraintMap` 处理约束生成理想、第一类闭合、
-弱等式、Dirac 可观测量以及保持约束理想的 Poisson 映射。`BRST` 提供用户给出导子
-和幂零证明后的非分次代数接口；`GradedBRST` 增加齐次子空间、奇次数移位、带
-Koszul 符号的 Leibniz 规则和分次同调接口。它们都不声称已经构造完整的 ghost 代数、
-BV 反括号、规范固定、路径积分测度、异常消除或“BRST 同调等于物理可观测量”；这些
-内容必须在具体模型中补充，或留在开放义务账本中。
+弱等式、Dirac 可观测量以及保持约束理想的 Poisson 映射。`BRST` 要求用户给出导子
+和幂零证明，`GradedBRST` 进一步提供齐次子空间、奇次数移位、带 Koszul 符号的
+Leibniz 规则和分次同调接口。它们都不声称已经构造完整的 ghost 代数、BV 反括号、
+规范固定、路径积分测度、异常消除，或证明“BRST 同调等于物理可观测量”。这些内容
+必须在具体模型中补充，暂未完成的部分应留在开放义务账本中。
 
 详细的逐模块清单和限制见 [VERIFIED.md](VERIFIED.md) 与
 [docs/verified-scope.md](docs/verified-scope.md)。
@@ -99,9 +99,9 @@ lake exe leanphy_check --broad --project-json
 首次构建建议使用本地 ext4 或 overlay 文件系统。mathlib 导入和缓存访问在 FUSE 或
 网络挂载上可能明显变慢。
 
-## 最小示例：从 CCR 假设推出对易子结论
+## 最小示例：从 CCR 前提推出对易子恒等式
 
-下面是普通的 Lean 代码。`hCCR` 是显式给出的 CCR 假设；结论来自已经编译并通过
+下面是普通的 Lean 代码。`hCCR` 是显式给出的 CCR 前提；结论来自已经编译并通过
 kernel 检查的定理：
 
 ```lean
@@ -115,10 +115,10 @@ example {R : Type} [Ring R] (a adag : R)
   exact LeanPhy.FieldTheory.number_commutator a adag hCCR
 ```
 
-这个例子验证的是“由 CCR 假设推出对易子恒等式”。它不证明存在满足 CCR 的无界
+这个例子验证的是“由 CCR 前提推出对易子恒等式”。它不证明存在满足 CCR 的无界
 Hilbert 空间表示，也不证明该表示就是某个实验系统。有限 EFT 接口同样把截断阶数、
 系数界和误差预算写入定理参数；有限路径积分接口要求显式的归一化证书。缺少必要
-前提时，代码会在 elaboration 阶段失败，而不是生成无条件结论。
+前提时，代码会在 elaboration 阶段失败，不会生成无条件结论。
 
 ## 推荐的研究工作流
 
@@ -127,11 +127,11 @@ Hilbert 空间表示，也不证明该表示就是某个实验系统。有限 EF
 3. 使用可复用定理和 tactic 完成代数步骤；若使用 CAS 或数值程序，通过带
    `CertificateChecker.sound` 定理的接口导入结果。
 4. 将结果登记为 `TheoryPackage` 或 `ResearchProject` 中的 `checked claim`，把尚未
-   完成的分析、物理解释和连续极限写入 `open obligation`。
+   完成的分析、物理解释、连续极限和其他建模前提写入 `open obligation`。
 5. 运行 `leanphy_check` 和 `scripts/verify.sh`，同时检查人类可读报告与 JSON 报告。
 
-账本中的 `VERIFIED-CONDITIONAL` 表示证明项已经编译并通过 kernel 检查，同时仍可能
-存在明确列出的开放义务。
+账本中的 `VERIFIED-CONDITIONAL` 表示证明项已经编译并通过 kernel 检查；这不等于
+模型已被实验验证，也不表示相关开放义务已经完成。
 
 可信性审计可以单独运行：
 

@@ -1,14 +1,15 @@
 # LeanPhy
 
 LeanPhy is a theoretical-physics formalisation library built on **Lean 4 and
-mathlib**. It is not a fork of Lean and it does not introduce a second proof
-logic. A project still uses Lean's syntax, type checker, editor support,
-theorem library, tactics, Lake build, and CI workflow; LeanPhy adds physics
-objects and notation, reusable theorems, and a ledger for research boundaries.
+mathlib**. It keeps Lean's syntax, type checker, editor support, theorem
+library, tactics, Lake build, and CI workflow, and adds physics objects,
+notation, reusable theorems, and a ledger for research boundaries. It is not a
+Lean fork and it does not introduce a second proof logic.
 
-> **Positioning:** compile the mathematical steps of a theoretical-physics
-> derivation that can be formalised, and record unfinished analysis and
-> physical premises as explicit open obligations.
+> **Positioning:** have Lean check the mathematical steps of a theoretical-
+> physics derivation that can be formalised, while recording unfinished
+> analysis, modelling assumptions, and physical interpretation as explicit open
+> obligations.
 
 [![Lean](https://img.shields.io/badge/Lean-4.34.0-5f5f5f.svg)](https://lean-lang.org/)
 [![mathlib](https://img.shields.io/badge/mathlib-v4.34.0-7b68ee.svg)](https://github.com/leanprover-community/mathlib4)
@@ -20,40 +21,42 @@ objects and notation, reusable theorems, and a ledger for research boundaries.
 ## Read the verification boundary first
 
 LeanPhy checks **conditional correctness**: whether a conclusion follows from
-the mathematical assumptions, physical conventions, and certificates that
-have been stated. A `checked claim` should therefore be read as:
+the mathematical assumptions, physical conventions, and certificates that are
+explicitly stated. A `checked claim` should therefore be read as:
 
 > Under the listed premises, the conclusion follows from Lean's proof rules.
 
-LeanPhy does not silently turn any of the following into a theorem:
+LeanPhy does not decide whether a model describes the real world or a particular
+experiment. It also does not silently turn any of the following into a theorem:
 
-- that a model describes the real world or a particular experiment;
-- that a continuum, thermodynamic, or renormalisation limit exists;
-- that a path integral exists, converges, or has the intended physical meaning;
-- that an unbounded-operator calculation satisfies domain and self-adjointness
-  conditions;
-- that a formal object has the physical interpretation assigned to it.
+- the existence of a continuum, thermodynamic, or renormalisation limit;
+- the existence or convergence of a path integral, or its intended physical
+  interpretation;
+- the domain, self-adjointness, or time-evolution conditions of an unbounded
+  operator;
+- the physical meaning assigned to a formal object.
 
-Such matters must appear as explicit propositions, structure fields,
-user-supplied certificates, or **open obligations** in the research ledger.
-Every checked conclusion carries a Lean proof term that the Lean kernel checks.
-A CAS, numerical program, or external script crosses into the verified layer
-only through a Lean-side soundness theorem such as
+These matters must be stated as explicit propositions, structure fields, or
+user-supplied certificates. Unfinished analytical properties, physical premises,
+and interpretation work are recorded as **open obligations** in the research
+ledger. Every checked conclusion contains a Lean proof term, and the Lean
+kernel checks that term. A CAS, numerical program, or external script crosses
+into the verified layer only through a Lean-side soundness theorem such as
 `CertificateChecker.sound`; an unchecked Boolean, JSON file, numerical output,
 limit, or approximation does not become a theorem by itself.
 
 ```text
 explicit assumptions/certificates -> Lean proof term -> Lean kernel -> checked conditional conclusion
-                                             └ unfinished analysis and physical premises -> open-obligation ledger
+                                             └ unfinished analysis and modelling premises -> open-obligation ledger
 ```
 
 ## Version 1.0 scope
 
-LeanPhy v1.0.0 primarily targets finite-dimensional, truncated, and bounded
-objects. It also provides interfaces for unbounded operators, continuous
-analysis, numerical computation, and external programs, but those interfaces
-require proofs or certificates supplied by the user; they do not manufacture
-the missing physics.
+LeanPhy v1.0.0 targets finite-dimensional, truncated, and bounded objects.
+It also provides interfaces for unbounded operators, continuous analysis,
+numerical computation, and external programs. Those interfaces require proofs
+or certificates supplied by the user; they do not fill in missing mathematics
+or physics.
 
 The current regression baseline contains **209 Lean source files, 473 smoke
 checks, and 141 expected-failure elaboration tests**. The default
@@ -81,14 +84,13 @@ obligations.
 
 For constrained and gauge systems, `ConstraintAlgebra` and `ConstraintMap`
 cover generated constraint ideals, first-class closure, weak equality, Dirac
-observables, and Poisson maps preserving constraint ideals. `BRST` provides an
-ungraded algebraic interface once the user supplies a derivation and a
-nilpotency proof; `GradedBRST` adds homogeneous pieces, an odd degree shift,
-the signed Koszul Leibniz rule, and graded cohomology vocabulary. Neither
-module claims to construct a complete ghost algebra, BV antibracket, gauge
-fixing, path-integral measure, anomaly cancellation, or an equivalence between
-BRST cohomology and physical observables. Those belong in a concrete model or
-in the open-obligation ledger.
+observables, and Poisson maps preserving constraint ideals. `BRST` requires the
+user to supply a derivation and a nilpotency proof. `GradedBRST` adds homogeneous
+pieces, an odd degree shift, the signed Koszul Leibniz rule, and graded
+cohomology vocabulary. Neither module claims to construct a complete ghost
+algebra, BV antibracket, gauge fixing, path-integral measure, anomaly
+cancellation, or an equivalence between BRST cohomology and physical
+observables. Those belong in a concrete model or in the open-obligation ledger.
 
 See [VERIFIED.md](VERIFIED.md) and [docs/verified-scope.md](docs/verified-scope.md)
 for the module-by-module inventory and limitations.
@@ -116,7 +118,7 @@ negative tests:
 A local ext4 or overlay filesystem is recommended. Mathlib imports and cache
 access can be substantially slower on FUSE or network-mounted filesystems.
 
-## Minimal example: derive a commutator from a CCR premise
+## Minimal example: derive a commutator identity from a CCR premise
 
 This is ordinary Lean code. `hCCR` is an explicit CCR premise, and the
 conclusion comes from a theorem that has compiled and passed kernel checking:
@@ -151,13 +153,14 @@ instead of producing an unconditional conclusion.
    program is used, import its result through an interface with a
    `CertificateChecker.sound` theorem.
 4. Register the result as a `checked claim` in a `TheoryPackage` or
-   `ResearchProject`; record unfinished analysis, interpretation, and continuum
-   work as `open obligations`.
+   `ResearchProject`; record unfinished analysis, interpretation, continuum
+   work, and other modelling premises as `open obligations`.
 5. Run `leanphy_check` and `scripts/verify.sh`, then inspect both the human-
    readable and JSON reports.
 
 `VERIFIED-CONDITIONAL` means that the proof terms compiled and passed kernel
-checking while explicitly listed open obligations may remain.
+checking. It does not mean that the model has been experimentally validated or
+that the listed open obligations have been discharged.
 
 Run the soundness audit separately when reviewing a release:
 
