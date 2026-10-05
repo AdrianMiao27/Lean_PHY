@@ -141,6 +141,15 @@ noncomputable def missingFiniteGhostGrade :
   nilpotent := finiteGhostDifferential_sq
 "
 
+expect_failure "lie_module_representation_required" "import LeanPhy.Entry.Gauge
+open LeanPhy.Mathematics
+def missingLieModule (L : LieAlgebra ℝ ℝ) : LieModule L ℝ where
+  act := fun _ _ => 0
+  act_add_left' := by intro; simp
+  act_smul_left' := by intro; simp
+  act_add_right' := by intro; simp
+  act_smul_right' := by intro; simp"
+
 expect_failure "equivariant_constraint_zero_fixed_required" 'import LeanPhy.Minimal
 open LeanPhy.Mathematics
 instance : SMul Unit Nat := ⟨fun _ n => n⟩

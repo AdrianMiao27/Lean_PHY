@@ -15,11 +15,14 @@ research workflows a result unlocks, not by the number of isolated examples.
   compatibility.  `GradedBRST` now provides homogeneous pieces, an explicitly
   odd degree shift and a signed Leibniz boundary.  A finite `2 × 2` CAR
   ghost–antighost adapter now supplies a concrete grading, odd differential,
-  and signed Leibniz regression.  Next add finite ghost-polynomial and
-  gauge-algebra adapters, then a separately specified BV interface.  Gauge
-  fixing, quotient regularity, anomaly cancellation, and the
-  identification of cohomology with physical observables remain explicit
-  obligations.
+  and signed Leibniz regression.  `LieCohomology` now supplies a low-degree
+  Chevalley--Eilenberg boundary with explicit representation hypotheses, which
+  can be shared by gauge, representation and anomaly-candidate developments.
+  Next add finite ghost-polynomial and gauge-algebra adapters, then a separately
+  specified BV interface.  Gauge fixing, quotient regularity, anomaly
+  cancellation, and the identification of cohomology with physical observables
+  remain explicit obligations; the current Lie interface does not construct a
+  cohomology quotient or integrate a Lie algebra to a Lie group.
 2. **Unbounded Hilbert operators**: build on the current `LinearPMap` bridge,
   formal-adjoint/closedness certificates, graph-norm bounds, and
   domain-preserving composition.  Next add explicit self-adjoint-extension

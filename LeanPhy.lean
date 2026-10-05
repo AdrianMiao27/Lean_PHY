@@ -11,6 +11,7 @@ import LeanPhy.Quantum.Spectral
 import LeanPhy.Quantum.Symmetry
 import LeanPhy.Mathematics.Lie
 import LeanPhy.Mathematics.LieRepresentation
+import LeanPhy.Mathematics.LieCohomology
 import LeanPhy.Mathematics.LieAdapters
 import LeanPhy.Mathematics.FiniteRepresentation
 import LeanPhy.Mathematics.Derivation

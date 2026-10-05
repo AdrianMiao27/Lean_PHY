@@ -25,8 +25,8 @@ The semantics are **conditional correctness**: a theorem always has the shape
 physical truth, convergence of a limit, or the validity of an unbounded-operator
 or path-integral manipulation.
 
-The current acceptance report contains **476 kernel-checked smoke
-capabilities** and 142 negative elaboration fixtures.  Recent cross-domain additions are:
+The current acceptance report contains **478 kernel-checked smoke
+capabilities** and 143 negative elaboration fixtures.  Recent cross-domain additions are:
 
 - `LeanPhy.Mathematics.SymmetryReduction`: constrained state predicates,
   group-orbit equivalence, physical-state quotients, orbit-invariant
@@ -72,6 +72,14 @@ capabilities** and 142 negative elaboration fixtures.  Recent cross-domain addit
   identity in this finite algebra.  It is not a full ghost-polynomial algebra,
   BV construction, gauge fixing, path-integral measure, anomaly theorem,
   continuum field, or physical cohomology equivalence.
+
+- `LeanPhy.Mathematics.LieCohomology`: `LieModule` makes the action and its
+  representation law explicit.  The degree-zero and degree-one
+  Chevalley--Eilenberg maps are defined for finite cochains, and the kernel
+  checks `d₁ d₀ = 0`, coboundary-to-cocycle inclusion, and the cohomology
+  relation's equivalence laws.  The module retains the witnesses instead of
+  silently quotienting; it does not compute `H¹`/`H²`, classify anomalies,
+  integrate a Lie algebra, or identify cocycles with physical observables.
 
 - `LeanPhy.Mathematics.OperatorConvergence`: uniform operator-norm and strong
   operator convergence certificates.  A radius tending to zero yields
@@ -187,7 +195,7 @@ capabilities** and 142 negative elaboration fixtures.  Recent cross-domain addit
   This layer does not infer parameter continuity, limits or physical calibration.
 
 - The negative elaboration suite is executed by
-  `scripts/run_negative_tests.py`: it runs the 142 independent fixtures in
+  `scripts/run_negative_tests.py`: it runs the 143 independent fixtures in
   parallel, accepts only a source-located Lean elaboration error, rejects
   import/API/compiler failures, and cleans up child compiler groups on
   interruption. This keeps a broken regression fixture from being reported as
@@ -1372,6 +1380,15 @@ Associative-algebra Lie core and conserved observables
   conservation layer for spin, Lorentz, gauge, QFT and lattice models. The
   commutator and conservation interfaces are universe-polymorphic, so named
   finite-index matrices are not forced into `Fin n`.
+
+The reusable low-degree cohomology layer builds on this core.  A declared
+`LieModule` supplies the action, linearity, and representation compatibility;
+`differential0` and `differential1` then expose the first two
+Chevalley--Eilenberg maps.  The checked statements are cochain-level
+statements (`d₁ d₀ = 0`, coboundaries are cocycles, and cohomology witnesses
+compose).  Quotient construction, higher degrees, Lie-group integration,
+anomaly cancellation, and the physical meaning of a class stay outside the
+verified layer until their own hypotheses and certificates are supplied.
 
 Hamiltonian interface (finite algebraic layer)
 

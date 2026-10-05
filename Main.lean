@@ -918,6 +918,35 @@ example (x y z : Operator 2) :
   exact Representation.preserves_jacobi
     (associativeLieRepresentation ℂ (Operator 2)) x y z
 
+/-! ## Low-degree Lie cohomology
+
+The Chevalley--Eilenberg boundary is checked for any declared Lie module.  The
+spin-one representation supplies a concrete matrix-valued module, while the
+adjoint module exercises the same API on coefficient-space generators. -/
+
+example (m : SU2Coefficients) :
+    LieCohomology.IsOneCocycle (adjointLieModule su2LieAlgebra)
+      (LieCohomology.differential0 (adjointLieModule su2LieAlgebra) m) := by
+  exact LieCohomology.coboundary_is_cocycle
+    (adjointLieModule su2LieAlgebra)
+    ⟨m, rfl⟩
+
+example (m : SU2Matrices) :
+    LieCohomology.IsOneCocycle
+      (representationLieModule spinOneRepresentation)
+      (LieCohomology.differential0
+        (representationLieModule spinOneRepresentation) m) := by
+  exact LieCohomology.coboundary_is_cocycle
+    (representationLieModule spinOneRepresentation)
+    ⟨m, rfl⟩
+
+example (L : LieAlgebra ℝ ℝ)
+    (𝒨 : LeanPhy.Mathematics.LieModule L ℝ)
+    (m : LieCochain0 L 𝒨) (x y : ℝ) :
+    LieCohomology.differential1 𝒨
+        (LieCohomology.differential0 𝒨 m) x y = 0 :=
+  LieCohomology.differential1_differential0 𝒨 m x y
+
 /-! ## Finite spectral and ladder interface -/
 
 example {n : Nat} (H A : Operator n) (e c : ℂ) (v : Ket n)
@@ -4792,6 +4821,8 @@ def capabilities : List (String × String) :=
    ("conserved-observable algebra", "commuting with a Hamiltonian is closed under sums, products, powers, commutators, natural multiples, and linear combinations with explicit central coefficients"),
    ("associative-algebra Lie core", "the commutator Jacobi identity, adjoint Leibniz rule and center criterion are proved once for all operator models"),
    ("generic Lie representations", "a reusable linear Lie-algebra interface; any kernel-checked matrix/operator representation inherits the commutator Jacobi identity"),
+   ("low-degree Lie cohomology", "an explicit Lie-module action and Chevalley--Eilenberg d0/d1 boundary prove coboundaries are cocycles while retaining all representation hypotheses"),
+   ("representation commutator module", "associative matrix/operator representations induce a kernel-checked adjoint action suitable for gauge and anomaly-candidate calculations"),
    ("concrete Lie adapters", "the explicit spin-one matrices are packaged as an su(2) representation, so abstract Jacobi and commutator theorems apply to a physics generator family"),
    ("matrix generator tables", "one finite-family Jacobi theorem is reused by the Lorentz six-generator table and the SU(3) colour table"),
    ("Lorentz Lie representation", "the six explicit rotation/boost matrices are packaged as a checked so(3,1) representation with [R,R]=R, [R,B]=B and [B,B]=-R structure constants"),

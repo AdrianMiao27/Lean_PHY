@@ -93,6 +93,8 @@ reports must never contain `sorryAx` or an application-specific axiom.
 #print axioms LeanPhy.Mathematics.ConstraintBRSTDifferential.map_weaklyEqual
 #print axioms LeanPhy.Mathematics.GradedBRSTDifferential.exact_closed
 #print axioms LeanPhy.Mathematics.GradedBRSTDifferential.closed_mul
+#print axioms LeanPhy.Mathematics.LieCohomology.differential1_differential0
+#print axioms LeanPhy.Mathematics.LieCohomology.coboundary_is_cocycle
 #print axioms LeanPhy.GaugeTheory.ghost_antighost
 #print axioms LeanPhy.GaugeTheory.finiteGhostDifferential_sq
 #print axioms LeanPhy.GaugeTheory.finiteGhostBRST

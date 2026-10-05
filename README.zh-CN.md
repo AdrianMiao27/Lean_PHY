@@ -16,15 +16,14 @@ LeanPhy 是一个基于 **Lean 4 与 mathlib** 的理论物理形式化库：它
 
 English version: [README.md](README.md)
 
-## 先明确验证边界：验证的是条件性正确性
+## 先明确验证边界：验证的是推导的条件性正确性
 
-LeanPhy 验证的是**条件性正确性**。也就是说，在 Lean 文件中明确写出的数学假设、物理
-约定和证书成立时，结论是否确实由这些前提推出。`checked claim` 的含义是：
+LeanPhy 验证的是**给定前提下的推导有效性**。也就是说，在 Lean 文件中明确写出的数学
+假设、物理约定和证书成立时，结论是否确实由这些前提推出。`checked claim` 的含义是：
 
 > 在所列前提成立时，该结论由 Lean 的证明规则推出。
 
-LeanPhy 不会自动判断模型是否描述真实世界或某个具体实验，也不会把下列问题自动变成
-定理：
+LeanPhy 不会判断模型是否描述真实世界或某个具体实验，也不会把下列问题悄然变成定理：
 
 - 连续极限、热力学极限或重整化极限是否存在或收敛；
 - 路径积分是否存在、是否收敛，或是否具有预期的物理解释；
@@ -37,6 +36,9 @@ LeanPhy 不会自动判断模型是否描述真实世界或某个具体实验，
 只有在 Lean 侧存在 `CertificateChecker.sound` 一类的正确性定理时，才能进入已验证层；
 未经检查的布尔值、JSON、数值输出、极限或近似，不会因为“来自工具”就成为定理。
 
+因此，项目明确区分三类信息：经过 kernel 检查的结论、该结论使用的显式前提，以及仍需
+分析、数值或物理桥接的开放义务。
+
 ```text
 显式前提/证书 ──> Lean 证明项 ──> Lean kernel ──> 条件性已验证结论
                               └── 未完成的前提与分析 ──> 开放义务账本
@@ -45,10 +47,10 @@ LeanPhy 不会自动判断模型是否描述真实世界或某个具体实验，
 ## v1.0 的范围
 
 LeanPhy v1.0.0 主要覆盖有限维、有限截断和有界构造。项目也为无界算子、连续分析、
-数值计算和外部证书提供接口；这些接口用于显式表达所缺的前提，并不代表相关数学或
-物理问题已经解决。
+数值计算和外部证书提供契约接口；这些接口用于显式表达所缺的前提，并不代表相关数学
+或物理问题已经解决。
 
-当前回归基线为 **210 个 Lean 源文件、476 项 smoke 检查和 142 条预期失败的
+当前回归基线为 **211 个 Lean 源文件、478 项 smoke 检查和 143 条预期失败的
 elaboration 测试**。默认运行 `leanphy_check --project-json` 会报告 **8 个领域包、
 15 条已检查结论和 8 条开放义务**；加入 `--broad` 后，报告覆盖 **13 个领域包、
 28 条已检查结论和 14 条开放义务**。这些数字表示库和回归测试的覆盖面，不表示已经
@@ -57,8 +59,8 @@ elaboration 测试**。默认运行 `leanphy_check --project-json` 会报告 **8
 | 领域 | 已提供的可复用基础 | 仍需显式证明或登记的边界 |
 | --- | --- | --- |
 | 量子力学与量子信息 | Pauli 与 Dirac 记号、有限态与密度矩阵、POVM、CPTP/Kraus 通道、Bell/CHSH、有限 Lindblad 模型、振子和 CCR 代数 | 无界算子的定义域、自伴性、连续测量语义，以及有限模型与具体物理系统的对应关系 |
-| 场论与高能代数 | 有限截断 Fock 空间、CAR/CCR 与 Wick 恒等式、Clifford/gamma 矩阵、自旋量、迹、Ward 型代数步骤、有限 EFT 展开和截断证书、非分次与分次 BRST 接口，以及有限 CAR ghost–antighost 适配器 | 场本身的存在性、无穷维极限、UV 完备性、重整化极限、完整的 ghost 多项式代数、BV 结构、异常消除和非微扰结论 |
-| 经典、规范、相对论、光学与流体 | Poisson 代数、第一类约束理想、约束保持映射、弱等式、Dirac 可观测量、离散 Maxwell/Yang–Mills、外微分与 plaquette 恒等式、辛与 Lorentz 代数、ABCD/Jones 光学、有限体积守恒和离散涡量 | 规范固定、约化空间的正则性、连续正则性、全局存在性、边界物理和湍流闭合 |
+| 场论与高能代数 | 有限截断 Fock 空间、CAR/CCR 与 Wick 恒等式、Clifford/gamma 矩阵、自旋量、迹、Ward 型代数步骤、有限 EFT 展开和截断证书、非分次与分次 BRST 接口、低阶 Lie 模块上同调，以及有限 CAR ghost–antighost 适配器 | 场本身的存在性、无穷维极限、UV 完备性、重整化极限、完整的 ghost 多项式代数、BV 结构、异常消除、Lie 群积分和非微扰结论 |
+| 经典、规范、相对论、光学与流体 | Poisson 代数、第一类约束理想、约束保持映射、弱等式、Dirac 可观测量、离散 Maxwell/Yang–Mills、外微分与 plaquette 恒等式、辛与 Lorentz 代数、Lie 表示、ABCD/Jones 光学、有限体积守恒和离散涡量 | 规范固定、约化空间的正则性、连续正则性、全局存在性、边界物理、异常消除和湍流闭合 |
 | 凝聚态与统计物理 | 格点、Hubbard、BdG、Berry、Jordan–Wigner、有限 Gibbs/Markov 核和转移矩阵 | 热力学极限、相变、实验参数标定，以及与连续理论的等价性 |
 | 数学分析与数值接口 | Bochner 积分、支配收敛、Lax–Milgram、Banach 不动点、有界 Hilbert 算子、谱演算、谱隙、算子收敛、残差/能量预算、有限路径积分接口和逐 regulator 证书 | 外部程序只能提供可追溯数据；结果进入已验证层仍需 Lean 侧 `CertificateChecker.sound` 证明 |
 
@@ -74,6 +76,12 @@ elaboration 测试**。默认运行 `leanphy_check --project-json` 会报告 **8
 Leibniz 规则和分次同调术语。有限 CAR ghost–antighost 适配器是这些接口的一个具体、
 由 kernel 检查的代数模型；它不等同于完整 ghost 多项式代数、BV 反括号、规范固定、
 路径积分测度、异常消除，也不证明 BRST 同调与物理可观测量之间的等价性。
+
+`Mathematics.LieCohomology` 为规范理论、表示论和异常候选计算提供有限代数层的公共接口。
+`LieModule` 显式保存作用及其表示关系；`differential0` 与 `differential1` 给出前两阶
+Chevalley--Eilenberg 映射，kernel 检查 `d₁ d₀ = 0` 以及 coboundary 是 cocycle。该模块
+保留见证项，不自动构造商空间、计算上同调群、把 Lie 代数积分到 Lie 群、证明异常消除，
+也不把上同调类解释为物理可观测量。
 
 逐模块清单和限制见 [VERIFIED.md](VERIFIED.md) 与
 [docs/verified-scope.md](docs/verified-scope.md)。

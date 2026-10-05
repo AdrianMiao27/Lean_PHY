@@ -76,6 +76,14 @@ checked by the kernel.
   checking signs and algebraic BRST steps, while full ghost-polynomial,
   continuum, BV, gauge-fixing, anomaly, and physical-equivalence claims remain
   explicit obligations.
+- `Mathematics.LieCohomology` supplies the next reusable finite algebraic
+  boundary: `LieModule` records the action and its representation law,
+  `differential0`/`differential1` form the first Chevalley--Eilenberg maps, and
+  the kernel checks `d₁ d₀ = 0` and that coboundaries are cocycles.  The
+  interface deliberately keeps the representation proof visible.  It does not
+  construct quotient cohomology groups, integrate a Lie algebra to a Lie group,
+  classify anomalies, or identify a cohomology class with a physical
+  observable.
 
 A certificate is an ordinary `Prop` structure.  Its fields are inputs, and its
 theorems derive consequences from those fields.  The structure is not a way to
@@ -120,6 +128,9 @@ The library intentionally does not infer:
   or that its cohomology equals the physical observable space;
 - that a declared graded differential has a physical ghost interpretation, or
   that its parity laws imply anomaly cancellation;
+- that a low-degree Lie cochain calculation is a completed anomaly or BRST
+  classification, or that a cocycle quotient has been constructed when only a
+  cochain-level witness is present;
 - a sign, convention, or boundary condition that is absent from the type.
 
 For unbounded operators, a name such as `Hamiltonian` carries no analytic

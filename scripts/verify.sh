@@ -29,6 +29,7 @@ lake build LeanPhy.Minimal \
   LeanPhy.Mathematics.SymmetryReduction LeanPhy.Mathematics.ConstraintAlgebra \
   LeanPhy.Mathematics.ConstraintMap LeanPhy.Mathematics.BRST \
   LeanPhy.Mathematics.GradedBRST \
+  LeanPhy.Mathematics.LieCohomology \
   LeanPhy.CLI LeanPhy.Examples.ClosedLoop \
   LeanPhy.Examples.PhysicsTactic \
   LeanPhy.Library \
