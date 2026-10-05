@@ -70,6 +70,12 @@ checked by the kernel.
   nilpotency and the same closed/exact/cohomology vocabulary.  The declaration
   of a grading is a model input: it does not construct a ghost polynomial
   algebra or a BV theory.
+- `GaugeTheory.FiniteGhost` supplies the first concrete finite adapter for that
+  interface: a `2 × 2` matrix CAR ghost pair, an explicit diagonal/off-diagonal
+  grading, and a square-zero odd differential.  The adapter is useful for
+  checking signs and algebraic BRST steps, while full ghost-polynomial,
+  continuum, BV, gauge-fixing, anomaly, and physical-equivalence claims remain
+  explicit obligations.
 
 A certificate is an ordinary `Prop` structure.  Its fields are inputs, and its
 theorems derive consequences from those fields.  The structure is not a way to

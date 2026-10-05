@@ -4473,6 +4473,59 @@ example {f : PhasePolynomial} : qGradedBRST.IsExact (qGradedBRST f) :=
 example (f : PhasePolynomial) :
     Parity.sign Parity.odd f = -f := rfl
 
+/-! ## Concrete finite ghost adapter
+
+The generic graded interface above deliberately uses a trivial grading.  This
+section exercises the first concrete finite CAR model: matrix ghost and
+antighost generators, an odd square-zero differential, and the signed
+Leibniz rule.  It is an algebraic adapter, not a continuum ghost-field claim.
+-/
+
+noncomputable def finiteGhostQBRST :
+    GradedBRSTDifferential (LeanPhy.GaugeTheory.finiteGhostGrading (R := ℚ)) :=
+  LeanPhy.GaugeTheory.finiteGhostBRST
+
+example :
+    LeanPhy.GaugeTheory.ghost (R := ℚ) * LeanPhy.GaugeTheory.ghost = 0 := by
+  exact LeanPhy.GaugeTheory.ghost_sq
+
+example :
+    LeanPhy.GaugeTheory.antighost (R := ℚ) * LeanPhy.GaugeTheory.antighost = 0 := by
+  exact LeanPhy.GaugeTheory.antighost_sq
+
+example :
+    LeanPhy.GaugeTheory.ghost (R := ℚ) * LeanPhy.GaugeTheory.antighost +
+        LeanPhy.GaugeTheory.antighost * LeanPhy.GaugeTheory.ghost =
+      (1 : LeanPhy.GaugeTheory.FiniteGhost ℚ) := by
+  exact LeanPhy.GaugeTheory.ghost_antighost
+
+example : finiteGhostQBRST.IsClosed (LeanPhy.GaugeTheory.ghost (R := ℚ)) := by
+  exact LeanPhy.GaugeTheory.ghost_closed
+
+example : finiteGhostQBRST.IsExact (1 : LeanPhy.GaugeTheory.FiniteGhost ℚ) := by
+  exact LeanPhy.GaugeTheory.one_exact
+
+example :
+    finiteGhostQBRST (finiteGhostQBRST
+      (LeanPhy.GaugeTheory.antighost (R := ℚ))) = 0 := by
+  exact finiteGhostQBRST.nilpotent_apply _
+
+example :
+    LeanPhy.GaugeTheory.finiteGhostDifferential
+        (LeanPhy.GaugeTheory.antighost (R := ℚ) *
+          LeanPhy.GaugeTheory.antighost) =
+      LeanPhy.GaugeTheory.finiteGhostDifferential
+          (LeanPhy.GaugeTheory.antighost (R := ℚ)) *
+          LeanPhy.GaugeTheory.antighost -
+        LeanPhy.GaugeTheory.antighost *
+          LeanPhy.GaugeTheory.finiteGhostDifferential
+            (LeanPhy.GaugeTheory.antighost (R := ℚ)) := by
+  simpa [Parity.sign] using
+    (LeanPhy.GaugeTheory.finiteGhost_leibniz
+      (g := Parity.odd) (h := Parity.odd)
+      (LeanPhy.GaugeTheory.antighost_isOdd (R := ℚ))
+      (LeanPhy.GaugeTheory.antighost_isOdd (R := ℚ)))
+
 end FirstClassConstraintSmoke
 
 /-! ## Executable acceptance report -/
@@ -4495,6 +4548,9 @@ def capabilities : List (String × String) :=
    ("Koszul parity sign", "the even/odd sign action is kernel-checked and reusable by ghost-algebra models"),
    ("graded BRST closed products", "closed homogeneous factors have a kernel-checked closed product under the signed law"),
    ("graded BRST exactness", "a square-zero graded differential makes every differential image explicitly exact"),
+   ("finite CAR ghost pair", "a finite 2 x 2 matrix adapter checks ghost/antighost square-zero products and their CAR anticommutator"),
+   ("finite ghost grading", "diagonal and off-diagonal matrix subspaces are closed under the declared parity product"),
+   ("finite ghost BRST differential", "a concrete odd square-zero differential checks the signed Leibniz rule, ghost closedness and exactness of the identity"),
    ("constraint-preserving symmetry", "admissible and constrained physical states are preserved by a declared group action"),
    ("covariant constraint equation", "a value-valued equivariant constraint yields a checked zero-fibre physical-state predicate when the group fixes zero"),
    ("gauge-orbit equivalence", "the orbit relation is kernel-checked as an equivalence and transports physical-state predicates"),

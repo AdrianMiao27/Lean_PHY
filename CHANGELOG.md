@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+- add a finite `2 × 2` CAR ghost–antighost adapter with an explicit parity
+  grading, signed Leibniz law, square-zero differential, and kernel-checked
+  closed/exact witnesses;
+- export the adapter through the gauge entry point and add positive, axiom,
+  and negative elaboration regressions;
+- document the finite adapter and keep full ghost-polynomial, BV, continuum,
+  anomaly, and physical-equivalence claims as explicit future obligations.
+
 ## 1.0.0 — LeanPhy v1
 
 This release migrates the complete `Inspirations/Lean_phy` research prototype
@@ -18,4 +28,3 @@ into a standalone repository layout.  It includes:
 The release is conditionally verified.  Open analytic and physical obligations
 remain visible in the generated ledgers and are not represented as proved
 claims.
-

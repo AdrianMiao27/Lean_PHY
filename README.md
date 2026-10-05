@@ -1,15 +1,15 @@
 # LeanPhy
 
-LeanPhy is a theoretical-physics formalisation library built on **Lean 4 and
-mathlib**. It keeps Lean's syntax, type checker, editor support, theorem
-library, tactics, Lake build, and CI workflow, and adds physics objects,
-notation, reusable theorems, and a ledger for research boundaries. It is not a
-Lean fork and it does not introduce a second proof logic.
+LeanPhy is a library for formalising the mathematical parts of theoretical
+physics in **Lean 4 and mathlib**. It uses Lean's existing language, kernel,
+editor support, theorem library, tactics, Lake build, and CI workflow. The
+project adds physics-oriented definitions, notation, reusable theorems, and a
+research ledger for assumptions and unfinished obligations. It is a Lean
+library, not a fork of Lean and not a second proof logic.
 
-> **Positioning:** have Lean check the mathematical steps of a theoretical-
-> physics derivation that can be formalised, while recording unfinished
-> analysis, modelling assumptions, and physical interpretation as explicit open
-> obligations.
+> **Purpose:** make the formal mathematical steps of a physics derivation
+> checkable, while keeping analytical assumptions, modelling choices, and
+> physical interpretation explicit.
 
 [![Lean](https://img.shields.io/badge/Lean-4.34.0-5f5f5f.svg)](https://lean-lang.org/)
 [![mathlib](https://img.shields.io/badge/mathlib-v4.34.0-7b68ee.svg)](https://github.com/leanprover-community/mathlib4)
@@ -18,82 +18,83 @@ Lean fork and it does not introduce a second proof logic.
 
 中文说明：[README.zh-CN.md](README.zh-CN.md)
 
-## Read the verification boundary first
+## Verification contract
 
-LeanPhy checks **conditional correctness**: whether a conclusion follows from
-the mathematical assumptions, physical conventions, and certificates that are
-explicitly stated. A `checked claim` should therefore be read as:
+LeanPhy verifies **conditional correctness**. A checked claim means that its
+conclusion follows from the mathematical assumptions, physical conventions,
+and certificates written in the Lean development:
 
-> Under the listed premises, the conclusion follows from Lean's proof rules.
+> Given the stated premises, Lean's proof rules derive the stated conclusion.
 
-LeanPhy does not decide whether a model describes the real world or a particular
-experiment. It also does not silently turn any of the following into a theorem:
+LeanPhy does not decide whether a model describes the real world or a specific
+experiment. It does not silently turn any of the following into theorems:
 
-- the existence of a continuum, thermodynamic, or renormalisation limit;
-- the existence or convergence of a path integral, or its intended physical
-  interpretation;
-- the domain, self-adjointness, or time-evolution conditions of an unbounded
-  operator;
-- the physical meaning assigned to a formal object.
+- existence or convergence of a continuum, thermodynamic, or renormalisation
+  limit;
+- existence, convergence, or physical interpretation of a path integral;
+- domains, self-adjointness, or time-evolution properties of unbounded
+  operators;
+- the claim that a formal object has the intended physical meaning.
 
-These matters must be stated as explicit propositions, structure fields, or
-user-supplied certificates. Unfinished analytical properties, physical premises,
-and interpretation work are recorded as **open obligations** in the research
-ledger. Every checked conclusion contains a Lean proof term, and the Lean
-kernel checks that term. A CAS, numerical program, or external script crosses
-into the verified layer only through a Lean-side soundness theorem such as
-`CertificateChecker.sound`; an unchecked Boolean, JSON file, numerical output,
-limit, or approximation does not become a theorem by itself.
+Such statements must appear as propositions, structure fields, or
+user-supplied certificates. Unfinished analysis and modelling premises are
+recorded in the **open-obligation ledger**. Every checked conclusion has a
+Lean proof term, and the Lean kernel checks that term. A CAS, numerical
+program, or external script enters the verified layer only through a Lean-side
+soundness theorem such as `CertificateChecker.sound`; an unchecked Boolean,
+JSON file, numerical result, limit, or approximation is not a theorem merely
+because it was produced by a tool.
 
 ```text
-explicit assumptions/certificates -> Lean proof term -> Lean kernel -> checked conditional conclusion
-                                             └ unfinished analysis and modelling premises -> open-obligation ledger
+stated premises/certificates -> Lean proof term -> Lean kernel -> checked conditional claim
+                                           └── unfinished premises and analysis -> open-obligation ledger
 ```
 
-## Version 1.0 scope
+## Scope of v1.0
 
-LeanPhy v1.0.0 targets finite-dimensional, truncated, and bounded objects.
-It also provides interfaces for unbounded operators, continuous analysis,
-numerical computation, and external programs. Those interfaces require proofs
-or certificates supplied by the user; they do not fill in missing mathematics
-or physics.
+LeanPhy v1.0.0 concentrates on finite-dimensional, finite-truncation, and
+bounded constructions. It also supplies interfaces for unbounded operators,
+continuous analysis, numerical computation, and external certificates. Those
+interfaces make the missing assumptions visible; they do not supply the
+missing mathematics or physics.
 
-The current regression baseline contains **209 Lean source files, 473 smoke
-checks, and 141 expected-failure elaboration tests**. The default
+The current regression baseline contains **210 Lean source files, 476 smoke
+checks, and 142 expected-failure elaboration tests**. The default
 `leanphy_check --project-json` report contains **8 domain packages, 15 checked
 claims, and 8 open obligations**. With `--broad`, it contains **13 domain
-packages, 28 checked claims, and 14 open obligations**. These numbers describe
+packages, 28 checked claims, and 14 open obligations**. These figures describe
 library and regression coverage, not the number of complete physics papers.
 
-| Area | Reusable foundations | Boundary that remains explicit |
+| Area | Reusable foundations | Explicit boundary |
 | --- | --- | --- |
-| Quantum mechanics and information | Pauli and Dirac notation, finite states and density matrices, POVMs, CPTP/Kraus channels, Bell/CHSH, finite Lindblad models, oscillator and CCR algebra | Unbounded-operator domains, self-adjointness, continuous-measurement semantics, and the correspondence between a finite model and a physical system |
-| Field and high-energy algebra | Finite truncated Fock spaces, CAR/CCR and Wick identities, Clifford/gamma matrices, spinors, traces, Ward-style algebraic steps, finite EFT expansions and truncation certificates, and ungraded/graded BRST interfaces | Field existence, infinite-dimensional limits, UV completion, renormalisation limits, a concrete ghost algebra, BV structure, anomaly cancellation, and non-perturbative conclusions |
-| Classical, gauge, relativity, optics, and fluids | Poisson algebras, first-class constraint ideals, constraint-preserving maps, weak equality, Dirac observables, discrete Maxwell/Yang–Mills, exterior and plaquette identities, symplectic and Lorentz algebra, ABCD/Jones optics, finite-volume conservation, and discrete vorticity | Gauge fixing, regularity of the reduced space, continuum regularity, global existence, boundary physics, and turbulence closure |
+| Quantum mechanics and information | Pauli and Dirac notation, finite states and density matrices, POVMs, CPTP/Kraus channels, Bell/CHSH, finite Lindblad models, oscillator and CCR algebra | Domains of unbounded operators, self-adjointness, continuous-measurement semantics, and the correspondence between a finite model and a physical system |
+| Field and high-energy algebra | Finite truncated Fock spaces, CAR/CCR and Wick identities, Clifford/gamma matrices, spinors, traces, Ward-style algebraic steps, finite EFT expansions and truncation certificates, ungraded and graded BRST interfaces, and a finite CAR ghost-pair adapter | Field existence, infinite-dimensional limits, UV completion, renormalisation limits, a full ghost-polynomial algebra, BV structure, anomaly cancellation, and non-perturbative conclusions |
+| Classical, gauge, relativity, optics, and fluids | Poisson algebras, first-class constraint ideals, constraint-preserving maps, weak equality, Dirac observables, discrete Maxwell/Yang–Mills, exterior and plaquette identities, symplectic and Lorentz algebra, ABCD/Jones optics, finite-volume conservation, and discrete vorticity | Gauge fixing, regularity of reduced spaces, continuum regularity, global existence, boundary physics, and turbulence closure |
 | Condensed matter and statistical mechanics | Lattice, Hubbard, BdG, Berry, Jordan–Wigner, finite Gibbs/Markov kernels, and transfer matrices | Thermodynamic limits, phase transitions, experimental calibration, and equivalence with a continuum theory |
-| Analysis and numerical bridges | Bochner integration, dominated convergence, Lax–Milgram, Banach fixed points, bounded Hilbert operators, spectral calculus, spectral gaps, operator convergence, residual/energy budgets, finite path integrals, and regulator-wise certificates | External programs provide traceable data only; a Lean-side `CertificateChecker.sound` theorem is still required before a result enters the verified layer |
+| Analysis and numerical bridges | Bochner integration, dominated convergence, Lax–Milgram, Banach fixed points, bounded Hilbert operators, spectral calculus, spectral gaps, operator convergence, residual/energy budgets, finite path-integral interfaces, and regulator-wise certificates | External programs provide traceable data only; a Lean-side `CertificateChecker.sound` theorem is required before a result enters the verified layer |
 
-The unbounded-operator interface uses mathlib's `LinearPMap` while retaining the
-declared domain in the type. `DenseDomainOperator` exposes interfaces for
+The unbounded-operator interface uses mathlib's `LinearPMap` and keeps the
+operator domain in the type. `DenseDomainOperator` provides interfaces for
 formal adjoints, closedness/closability, self-adjointness, graph-norm relative
-bounds, and bounded domain-preserving composition; each consumes a user-supplied
-proof. Calling an object a `Hamiltonian` does not prove self-adjointness or
-generate time evolution. Stone's theorem, self-adjoint extensions, spectral
-measures, and the bridge from resolvents to evolution groups remain open
-obligations.
+bounds, and bounded domain-preserving composition; each interface requires the
+corresponding proof. Calling an object a `Hamiltonian` does not prove
+self-adjointness or generate time evolution. Stone's theorem, self-adjoint
+extensions, spectral measures, and the bridge from resolvents to evolution
+groups remain open obligations.
 
 For constrained and gauge systems, `ConstraintAlgebra` and `ConstraintMap`
 cover generated constraint ideals, first-class closure, weak equality, Dirac
-observables, and Poisson maps preserving constraint ideals. `BRST` requires the
-user to supply a derivation and a nilpotency proof. `GradedBRST` adds homogeneous
-pieces, an odd degree shift, the signed Koszul Leibniz rule, and graded
-cohomology vocabulary. Neither module claims to construct a complete ghost
-algebra, BV antibracket, gauge fixing, path-integral measure, anomaly
-cancellation, or an equivalence between BRST cohomology and physical
-observables. Those belong in a concrete model or in the open-obligation ledger.
+observables, and Poisson maps preserving constraint ideals. `BRST` requires an
+explicit differential and a nilpotency proof. `GradedBRST` adds homogeneous
+components, an odd degree shift, the signed Koszul Leibniz rule, and graded
+cohomology vocabulary. The finite CAR ghost-pair adapter is a concrete,
+kernel-checked algebraic model for these interfaces; it is not a construction
+of the full ghost-polynomial algebra, BV antibracket, gauge fixing,
+path-integral measure, anomaly cancellation, or an equivalence between BRST
+cohomology and physical observables.
 
 See [VERIFIED.md](VERIFIED.md) and [docs/verified-scope.md](docs/verified-scope.md)
-for the module-by-module inventory and limitations.
+for the module-by-module inventory and its limitations.
 
 ## Quick start
 
@@ -120,8 +121,8 @@ access can be substantially slower on FUSE or network-mounted filesystems.
 
 ## Minimal example: derive a commutator identity from a CCR premise
 
-This is ordinary Lean code. `hCCR` is an explicit CCR premise, and the
-conclusion comes from a theorem that has compiled and passed kernel checking:
+This is ordinary Lean code. `hCCR` is an explicit canonical-commutation-relation
+premise, and the conclusion is a theorem whose proof has passed kernel checking:
 
 ```lean
 import LeanPhy.Entry.Quantum
@@ -134,13 +135,13 @@ example {R : Type} [Ring R] (a adag : R)
   exact LeanPhy.FieldTheory.number_commutator a adag hCCR
 ```
 
-This verifies the algebraic implication from the CCR premise. It does not prove
-the existence of an unbounded Hilbert-space representation satisfying the CCR,
-or that such a representation describes an experiment. The finite-EFT
-interface likewise puts truncation order, coefficient bounds, and error budgets
-in theorem arguments; the finite path-integral interface requires an explicit
-normalisation certificate. If a required premise is missing, elaboration fails
-instead of producing an unconditional conclusion.
+This proves the algebraic implication from the stated CCR premise. It does not
+prove the existence of an unbounded Hilbert-space representation satisfying
+the CCR, or that such a representation describes an experiment. The finite
+EFT interface likewise takes truncation order, coefficient bounds, and error
+budgets as theorem arguments. The finite path-integral interface requires an
+explicit normalisation certificate. If a required premise is missing,
+elaboration fails instead of producing an unconditional result.
 
 ## Recommended research workflow
 
@@ -153,14 +154,14 @@ instead of producing an unconditional conclusion.
    program is used, import its result through an interface with a
    `CertificateChecker.sound` theorem.
 4. Register the result as a `checked claim` in a `TheoryPackage` or
-   `ResearchProject`; record unfinished analysis, interpretation, continuum
+   `ResearchProject`. Record unfinished analysis, interpretation, continuum
    work, and other modelling premises as `open obligations`.
-5. Run `leanphy_check` and `scripts/verify.sh`, then inspect both the human-
-   readable and JSON reports.
+5. Run `leanphy_check` and `scripts/verify.sh`, then inspect both the
+   human-readable and JSON reports.
 
-`VERIFIED-CONDITIONAL` means that the proof terms compiled and passed kernel
+`VERIFIED-CONDITIONAL` means that the proof term compiled and passed kernel
 checking. It does not mean that the model has been experimentally validated or
-that the listed open obligations have been discharged.
+that its open obligations have been discharged.
 
 Run the soundness audit separately when reviewing a release:
 
@@ -182,7 +183,7 @@ LeanPhy/                 library source grouped by physics domain
   Quantum/ QuantumInfo/   quantum mechanics and quantum information
   FieldTheory/            CCR/CAR/Fock/Wick algebra
   HighEnergy/             Clifford, gamma, spinor, and finite EFT interfaces
-  GaugeTheory/            gauge fields and discrete geometric algebra
+  GaugeTheory/            gauge fields, discrete geometry, and finite ghost adapters
   Condensed/ StatMech/    condensed-matter and statistical models
   Classical/ Relativity/  classical mechanics and relativity structures
   Surface/                Dirac, Einstein, index, and dimensional notation

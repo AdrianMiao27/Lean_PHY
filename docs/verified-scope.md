@@ -25,8 +25,8 @@ The semantics are **conditional correctness**: a theorem always has the shape
 physical truth, convergence of a limit, or the validity of an unbounded-operator
 or path-integral manipulation.
 
-The current acceptance report contains **473 kernel-checked smoke
-capabilities** and 141 negative elaboration fixtures.  Recent cross-domain additions are:
+The current acceptance report contains **476 kernel-checked smoke
+capabilities** and 142 negative elaboration fixtures.  Recent cross-domain additions are:
 
 - `LeanPhy.Mathematics.SymmetryReduction`: constrained state predicates,
   group-orbit equivalence, physical-state quotients, orbit-invariant
@@ -64,6 +64,14 @@ capabilities** and 141 negative elaboration fixtures.  Recent cross-domain addit
   predicates and closed products.  No concrete ghost algebra, BV bracket,
   gauge fixing, path-integral measure, anomaly cancellation, or physical
   equivalence is inferred.
+
+- `LeanPhy.GaugeTheory.FiniteGhost`: a finite `2 × 2` matrix adapter provides
+  square-zero ghost and antighost generators, their CAR anticommutator, an
+  explicit even/odd grading, and a concrete odd square-zero differential with
+  the signed Leibniz law.  It proves ghost closedness and exactness of the
+  identity in this finite algebra.  It is not a full ghost-polynomial algebra,
+  BV construction, gauge fixing, path-integral measure, anomaly theorem,
+  continuum field, or physical cohomology equivalence.
 
 - `LeanPhy.Mathematics.OperatorConvergence`: uniform operator-norm and strong
   operator convergence certificates.  A radius tending to zero yields
@@ -179,7 +187,7 @@ capabilities** and 141 negative elaboration fixtures.  Recent cross-domain addit
   This layer does not infer parameter continuity, limits or physical calibration.
 
 - The negative elaboration suite is executed by
-  `scripts/run_negative_tests.py`: it runs the 141 independent fixtures in
+  `scripts/run_negative_tests.py`: it runs the 142 independent fixtures in
   parallel, accepts only a source-located Lean elaboration error, rejects
   import/API/compiler failures, and cleans up child compiler groups on
   interruption. This keeps a broken regression fixture from being reported as

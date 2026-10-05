@@ -124,6 +124,23 @@ noncomputable def missingGradedNilpotent :
     GradedBRSTDifferential (GradedRing.parityTrivial ℤ) where
   toGradedDerivation := GradedDerivation.zero _'
 
+expect_failure "finite_ghost_grading_certificate_required" "import LeanPhy.Entry.Gauge
+open LeanPhy.Mathematics
+open LeanPhy.GaugeTheory
+noncomputable def missingFiniteGhostGrade :
+    GradedBRSTDifferential (finiteGhostGrading (R := ℚ)) where
+  toGradedDerivation := {
+    differential := finiteGhostDifferential
+    map_zero' := finiteGhostDifferential_zero
+    map_add' := finiteGhostDifferential_add
+    map_neg' := finiteGhostDifferential_neg
+    leibniz' := by
+      intro g h x y hx hy
+      exact finiteGhost_leibniz hx hy
+  }
+  nilpotent := finiteGhostDifferential_sq
+"
+
 expect_failure "equivariant_constraint_zero_fixed_required" 'import LeanPhy.Minimal
 open LeanPhy.Mathematics
 instance : SMul Unit Nat := ⟨fun _ n => n⟩

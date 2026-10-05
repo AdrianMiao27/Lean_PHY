@@ -146,6 +146,7 @@ import LeanPhy.GaugeTheory.Wilson
 import LeanPhy.GaugeTheory.FieldStrength
 import LeanPhy.GaugeTheory.Maxwell
 import LeanPhy.GaugeTheory.YangMills
+import LeanPhy.GaugeTheory.FiniteGhost
 import LeanPhy.StatMech.TransferMatrix
 import LeanPhy.StatMech.Probability
 import LeanPhy.StatMech.FiniteProbability

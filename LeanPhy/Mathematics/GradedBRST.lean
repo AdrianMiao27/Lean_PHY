@@ -43,6 +43,16 @@ def add : Parity → Parity → Parity
   | .odd, .even => .odd
   | .odd, .odd => .even
 
+instance : Zero Parity := ⟨.even⟩
+
+instance : Add Parity := ⟨Parity.add⟩
+
+instance : AddMonoid Parity where
+  nsmul := nsmulRec
+  zero_add := by intro p; cases p <;> rfl
+  add_zero := by intro p; cases p <;> rfl
+  add_assoc := by intro p q r; cases p <;> cases q <;> cases r <;> rfl
+
 @[simp] theorem add_even_left (p : Parity) : add .even p = p := by
   cases p <;> rfl
 
