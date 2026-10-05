@@ -1,11 +1,13 @@
 # LeanPhy
 
-LeanPhy is a library for formalising the mathematical parts of theoretical
-physics in **Lean 4 and mathlib**. It uses Lean's existing language, kernel,
-editor support, theorem library, tactics, Lake build, and CI workflow. The
-project adds physics-oriented definitions, notation, reusable theorems, and a
-research ledger for assumptions and unfinished obligations. It is a Lean
-library, not a fork of Lean and not a second proof logic.
+LeanPhy is a library for formalising the mathematical steps of theoretical
+physics in **Lean 4 and mathlib**. It writes the steps that can be stated
+precisely as Lean programs and lets the Lean kernel check them. The project
+uses Lean's existing language, editor support, theorem library, tactics, Lake
+build, and CI workflow, while adding physics-oriented definitions, notation,
+reusable theorems, and a research ledger for assumptions and unfinished
+obligations. It is a Lean library, not a fork of Lean and not a second proof
+logic.
 
 > **Purpose:** make the formal mathematical steps of a physics derivation
 > checkable, while keeping analytical assumptions, modelling choices, and
@@ -22,12 +24,13 @@ library, not a fork of Lean and not a second proof logic.
 
 LeanPhy verifies **conditional correctness**. A checked claim means that its
 conclusion follows from the mathematical assumptions, physical conventions,
-and certificates written in the Lean development:
+and certificates stated in the Lean development:
 
 > Given the stated premises, Lean's proof rules derive the stated conclusion.
 
-LeanPhy does not decide whether a model describes the real world or a specific
-experiment. It does not silently turn any of the following into theorems:
+LeanPhy does not automatically decide whether a model describes the real world
+or a specific experiment. It does not turn any of the following into theorems
+automatically:
 
 - existence or convergence of a continuum, thermodynamic, or renormalisation
   limit;
@@ -39,11 +42,11 @@ experiment. It does not silently turn any of the following into theorems:
 Such statements must appear as propositions, structure fields, or
 user-supplied certificates. Unfinished analysis and modelling premises are
 recorded in the **open-obligation ledger**. Every checked conclusion has a
-Lean proof term, and the Lean kernel checks that term. A CAS, numerical
-program, or external script enters the verified layer only through a Lean-side
-soundness theorem such as `CertificateChecker.sound`; an unchecked Boolean,
-JSON file, numerical result, limit, or approximation is not a theorem merely
-because it was produced by a tool.
+Lean proof term, and the Lean kernel checks that term. Results from a CAS,
+numerical program, or external script enter the verified layer only through a
+Lean-side soundness theorem such as `CertificateChecker.sound`; an unchecked
+Boolean, JSON file, numerical result, limit, or approximation is not a theorem
+merely because it came from a tool.
 
 ```text
 stated premises/certificates -> Lean proof term -> Lean kernel -> checked conditional claim
@@ -55,8 +58,8 @@ stated premises/certificates -> Lean proof term -> Lean kernel -> checked condit
 LeanPhy v1.0.0 concentrates on finite-dimensional, finite-truncation, and
 bounded constructions. It also supplies interfaces for unbounded operators,
 continuous analysis, numerical computation, and external certificates. Those
-interfaces make the missing assumptions visible; they do not supply the
-missing mathematics or physics.
+interfaces make missing premises explicit; they do not supply mathematics or
+physics that has not been proved.
 
 The current regression baseline contains **210 Lean source files, 476 smoke
 checks, and 142 expected-failure elaboration tests**. The default
