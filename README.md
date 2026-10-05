@@ -1,17 +1,18 @@
 # LeanPhy
 
-LeanPhy is a library for formalising the mathematical steps of theoretical
-physics in **Lean 4 and mathlib**. It writes the steps that can be stated
-precisely as Lean programs and lets the Lean kernel check them. The project
-uses Lean's existing language, editor support, theorem library, tactics, Lake
-build, and CI workflow, while adding physics-oriented definitions, notation,
-reusable theorems, and a research ledger for assumptions and unfinished
-obligations. It is a Lean library, not a fork of Lean and not a second proof
-logic.
+LeanPhy is a library for formalising theoretical-physics derivations in
+**Lean 4 and mathlib**. It expresses the mathematical steps that can be stated
+precisely in Lean and lets Lean's kernel check them. The project reuses Lean's
+language, editor support, theorem library, tactics, Lake build, and CI workflow;
+LeanPhy adds physics-oriented objects, notation, reusable theorems, and a
+research ledger for assumptions and unresolved work.
 
-> **Purpose:** make the formal mathematical steps of a physics derivation
-> checkable, while keeping analytical assumptions, modelling choices, and
-> physical interpretation explicit.
+LeanPhy is an extension library for Lean. It is neither a fork of Lean nor a
+second logical system.
+
+> **Purpose:** check the mathematical steps of a physics derivation under
+> explicit premises, while keeping analytical assumptions, modelling choices,
+> and physical interpretation visible.
 
 [![Lean](https://img.shields.io/badge/Lean-4.34.0-5f5f5f.svg)](https://lean-lang.org/)
 [![mathlib](https://img.shields.io/badge/mathlib-v4.34.0-7b68ee.svg)](https://github.com/leanprover-community/mathlib4)
@@ -20,18 +21,18 @@ logic.
 
 中文说明：[README.zh-CN.md](README.zh-CN.md)
 
-## What LeanPhy verifies
+## Verification boundary: conditional correctness
 
 LeanPhy verifies the **validity of a derivation under stated premises**. A
-`checked claim` means that its conclusion follows from the mathematical
-assumptions, physical conventions, and certificates written in the Lean
-development:
+`checked claim` is a conditional conclusion whose proof term has been checked by
+Lean's kernel: the conclusion follows from the mathematical assumptions,
+physical conventions, and certificates declared in the Lean development.
 
 > Given the stated premises, Lean's proof rules derive the stated conclusion.
 
-LeanPhy does not decide whether a model describes the real world or a specific
-experiment. It does not silently turn any of the following into theorems:
+LeanPhy does not treat any of the following as a theorem by default:
 
+- whether a model describes the real world or a particular experiment;
 - existence or convergence of a continuum, thermodynamic, or renormalisation
   limit;
 - existence, convergence, or physical interpretation of a path integral;
@@ -39,18 +40,23 @@ experiment. It does not silently turn any of the following into theorems:
   operators;
 - the claim that a formal object has the intended physical meaning.
 
-These statements must appear as propositions, structure fields, or
-user-supplied certificates. Unfinished analysis, modelling premises, and
-interpretation work are recorded in the **open-obligation ledger**. Every
-checked claim contains a Lean proof term, and the Lean kernel checks that term.
-Results from a CAS, numerical program, or external script enter the verified
-layer only through a Lean-side soundness theorem such as
-`CertificateChecker.sound`; an unchecked Boolean, JSON file, numerical result,
-limit, or approximation is not a theorem merely because it came from a tool.
+These matters must appear as propositions, structure fields, theorem
+arguments, or user-supplied certificates. Unfinished analysis, numerical
+certification, modelling premises, and interpretation work are recorded in the
+**open-obligation ledger**. Every checked claim contains a Lean proof term, and
+Lean's kernel checks that term. A result from a CAS, numerical program, or
+external script enters the verified layer only through a Lean-side soundness
+theorem such as `CertificateChecker.sound`; an unchecked Boolean, JSON file,
+numerical result, limit, or approximation is not a theorem merely because a
+tool produced it.
 
-The repository therefore distinguishes three things explicitly: a
-kernel-checked claim, a declared premise used by that claim, and an open
-obligation that still needs an analytic, numerical, or physical bridge.
+The repository therefore distinguishes three states:
+
+| State | Meaning |
+| --- | --- |
+| kernel-checked claim | A proof term has passed Lean's kernel; the conclusion is conditional on its explicit premises |
+| declared premise | An assumption, convention, or external certificate used by a claim; its physical adequacy requires a separate argument |
+| open obligation | Analysis, numerical, or physical work that has not yet been completed |
 
 ```text
 stated premises/certificates -> Lean proof term -> Lean kernel -> checked conditional claim
@@ -59,11 +65,11 @@ stated premises/certificates -> Lean proof term -> Lean kernel -> checked condit
 
 ## Scope of v1.0
 
-LeanPhy v1.0.0 concentrates on finite-dimensional, finite-truncation, and
-bounded constructions. It also supplies contracts for unbounded operators,
-continuous analysis, numerical computation, and external certificates. These
-contracts make missing premises explicit; they do not supply mathematics or
-physics that has not been proved.
+LeanPhy v1.0.0 focuses on finite-dimensional, finite-truncation, and bounded
+constructions. It also supplies contracts for unbounded operators, continuous
+analysis, numerical computation, and external certificates. These contracts
+make missing premises explicit; they do not provide mathematics or physics that
+has not been proved.
 
 The current regression baseline contains **211 Lean source files, 478 smoke
 checks, and 143 expected-failure elaboration tests**. The default
@@ -100,8 +106,8 @@ of the full ghost-polynomial algebra, BV antibracket, gauge fixing,
 path-integral measure, anomaly cancellation, or an equivalence between BRST
 cohomology and physical observables.
 
-`Mathematics.LieCohomology` provides a reusable finite algebraic boundary for
-gauge, representation, and anomaly-candidate calculations. `LieModule` stores
+`Mathematics.LieCohomology` provides a reusable low-degree algebraic interface
+for gauge, representation, and anomaly-candidate calculations. `LieModule` stores
 the action and its representation law; `differential0` and `differential1`
 define the first Chevalley--Eilenberg maps, and the kernel checks `d₁ d₀ = 0`
 and that coboundaries are cocycles. The module keeps the witnesses visible: it
@@ -185,7 +191,7 @@ Run the soundness audit separately when reviewing a release:
 lake env lean scripts/axioms.lean
 ```
 
-The project source and acceptance entry points do not use `sorry`, `admit`, or
+The library and release checks do not use `sorry`, `admit`, or
 application-specific unchecked axioms. `#print axioms` may list standard
 foundational axioms used by Lean/mathlib, such as `propext`,
 `Classical.choice`, and `Quot.sound`; that is different from declaring a

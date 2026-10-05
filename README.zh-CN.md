@@ -1,13 +1,14 @@
 # LeanPhy
 
-LeanPhy 是一个基于 **Lean 4 与 mathlib** 的理论物理形式化库：它把推导中可以明确
-表达的数学步骤写成 Lean 程序，并交给 Lean kernel 检查。项目沿用 Lean 的语言、编辑器
-支持、定理库、tactic、Lake 构建和 CI 工作流，再补充物理领域的定义、记号、可复用定理，
-以及记录研究假设和未完成工作的研究账本。LeanPhy 是 Lean 的库，不是 Lean 的 fork，
-也没有另起一套证明逻辑。
+LeanPhy 是一个建立在 **Lean 4 与 mathlib** 之上的理论物理形式化库。它把推导中能够
+明确表达的数学步骤写成 Lean 代码，并交由 Lean kernel 检查。项目直接复用 Lean 的语言、
+编辑器支持、定理库、tactic、Lake 构建和 CI；LeanPhy 在此基础上提供物理对象、记号、
+可复用定理，以及用于记录假设和未决工作的研究账本。
 
-> **定位**：让可形式化的推导步骤接受严格的数学检查，同时把分析假设、建模选择和
-> 物理解释明确写出来。
+LeanPhy 是 Lean 的扩展库，不是 Lean 的分支，也不引入新的逻辑系统。
+
+> **一句话定位**：验证“在明确前提下，推导步骤是否成立”，并把尚未证明的分析性质和
+> 物理前提清楚地留在账本中。
 
 [![Lean](https://img.shields.io/badge/Lean-4.34.0-5f5f5f.svg)](https://lean-lang.org/)
 [![mathlib](https://img.shields.io/badge/mathlib-v4.34.0-7b68ee.svg)](https://github.com/leanprover-community/mathlib4)
@@ -16,39 +17,47 @@ LeanPhy 是一个基于 **Lean 4 与 mathlib** 的理论物理形式化库：它
 
 English version: [README.md](README.md)
 
-## 先明确验证边界：验证的是推导的条件性正确性
+## 验证边界：条件性正确性
 
-LeanPhy 验证的是**给定前提下的推导有效性**。也就是说，在 Lean 文件中明确写出的数学
-假设、物理约定和证书成立时，结论是否确实由这些前提推出。`checked claim` 的含义是：
+LeanPhy 验证的是**给定前提下的推导有效性**，而不是模型的物理真值。在 Lean 文件中明确
+写出的数学假设、物理约定和证书成立时，系统检查结论是否确实由这些前提推出。`checked claim`（已检查结论）
+表示一个带有 Lean 证明项、并已通过 kernel 检查的条件性结论：
 
 > 在所列前提成立时，该结论由 Lean 的证明规则推出。
 
-LeanPhy 不会判断模型是否描述真实世界或某个具体实验，也不会把下列问题悄然变成定理：
+LeanPhy 不会把下列问题默认当作已经证明的定理：
 
-- 连续极限、热力学极限或重整化极限是否存在或收敛；
+- 模型是否描述真实世界或某个具体实验；
+- 连续极限、热力学极限和重整化极限是否存在、收敛或具有所需性质；
 - 路径积分是否存在、是否收敛，或是否具有预期的物理解释；
 - 无界算子的定义域、自伴性和时间演化条件是否成立；
 - 一个形式对象是否确实具有研究者赋予它的物理含义。
 
-这些内容必须写成显式命题、结构字段或用户提供的证书。尚未完成的分析性质、物理前提
-和解释工作会记录在**开放义务账本（open-obligation ledger）**中。每条已验证结论都
-包含 Lean 证明项，并由 Lean kernel 检查该证明项。CAS、数值程序或外部脚本的结果，
-只有在 Lean 侧存在 `CertificateChecker.sound` 一类的正确性定理时，才能进入已验证层；
-未经检查的布尔值、JSON、数值输出、极限或近似，不会因为“来自工具”就成为定理。
+上述内容必须以命题、结构字段、定理参数或用户提供的证书（certificate）明确出现。尚未完成
+的分析证明、数值认证、建模前提和物理解释会登记在**开放义务账本（open-obligation
+ledger）**中。每条已验证结论都包含一个 Lean proof term，并由 Lean kernel 检查；外部
+CAS、数值程序或脚本的结果，只有经过 Lean 侧 `CertificateChecker.sound` 一类的正确性
+定理，才能进入已验证层。未经检查的布尔值、JSON、数值输出、极限或近似，不会因为来自
+某个工具就自动成为定理。
 
-因此，项目明确区分三类信息：经过 kernel 检查的结论、该结论使用的显式前提，以及仍需
-分析、数值或物理桥接的开放义务。
+项目因此严格区分三类状态：
+
+| 状态 | 含义 |
+| --- | --- |
+| kernel-checked claim | 证明项已由 Lean kernel 检查，结论对其显式前提成立 |
+| declared premise | 参与推导的假设、约定或外部证书，是否符合物理情形仍需单独论证 |
+| open obligation | 尚未完成的分析、数值或物理桥接工作 |
 
 ```text
 显式前提/证书 ──> Lean 证明项 ──> Lean kernel ──> 条件性已验证结论
                               └── 未完成的前提与分析 ──> 开放义务账本
 ```
 
-## v1.0 的范围
+## 当前版本的范围
 
-LeanPhy v1.0.0 主要覆盖有限维、有限截断和有界构造。项目也为无界算子、连续分析、
-数值计算和外部证书提供契约接口；这些接口用于显式表达所缺的前提，并不代表相关数学
-或物理问题已经解决。
+LeanPhy v1.0.0 以有限维、有限截断和有界构造为主要验证对象，同时提供无界算子、连续
+分析、数值计算和外部证书的契约接口。这些接口的作用是让缺少的前提可被准确记录；它们
+本身不替用户完成尚未证明的数学或物理工作。
 
 当前回归基线为 **211 个 Lean 源文件、478 项 smoke 检查和 143 条预期失败的
 elaboration 测试**。默认运行 `leanphy_check --project-json` 会报告 **8 个领域包、
@@ -56,7 +65,7 @@ elaboration 测试**。默认运行 `leanphy_check --project-json` 会报告 **8
 28 条已检查结论和 14 条开放义务**。这些数字表示库和回归测试的覆盖面，不表示已经
 形式化了相同数量的完整物理论文。
 
-| 领域 | 已提供的可复用基础 | 仍需显式证明或登记的边界 |
+| 领域 | 已提供的可复用基础 | 需要另行证明或登记的边界 |
 | --- | --- | --- |
 | 量子力学与量子信息 | Pauli 与 Dirac 记号、有限态与密度矩阵、POVM、CPTP/Kraus 通道、Bell/CHSH、有限 Lindblad 模型、振子和 CCR 代数 | 无界算子的定义域、自伴性、连续测量语义，以及有限模型与具体物理系统的对应关系 |
 | 场论与高能代数 | 有限截断 Fock 空间、CAR/CCR 与 Wick 恒等式、Clifford/gamma 矩阵、自旋量、迹、Ward 型代数步骤、有限 EFT 展开和截断证书、非分次与分次 BRST 接口、低阶 Lie 模块上同调，以及有限 CAR ghost–antighost 适配器 | 场本身的存在性、无穷维极限、UV 完备性、重整化极限、完整的 ghost 多项式代数、BV 结构、异常消除、Lie 群积分和非微扰结论 |
@@ -77,9 +86,9 @@ Leibniz 规则和分次同调术语。有限 CAR ghost–antighost 适配器是�
 由 kernel 检查的代数模型；它不等同于完整 ghost 多项式代数、BV 反括号、规范固定、
 路径积分测度、异常消除，也不证明 BRST 同调与物理可观测量之间的等价性。
 
-`Mathematics.LieCohomology` 为规范理论、表示论和异常候选计算提供有限代数层的公共接口。
+`Mathematics.LieCohomology` 为规范理论、表示论和异常候选计算提供低阶有限代数接口。
 `LieModule` 显式保存作用及其表示关系；`differential0` 与 `differential1` 给出前两阶
-Chevalley--Eilenberg 映射，kernel 检查 `d₁ d₀ = 0` 以及 coboundary 是 cocycle。该模块
+Chevalley–Eilenberg 映射，kernel 检查 `d₁ d₀ = 0` 以及 余边界（coboundary）是余循环（cocycle）。该模块
 保留见证项，不自动构造商空间、计算上同调群、把 Lie 代数积分到 Lie 群、证明异常消除，
 也不把上同调类解释为物理可观测量。
 
@@ -109,7 +118,7 @@ lake exe leanphy_check --broad --project-json
 
 ## 最小示例：从 CCR 前提推出对易子恒等式
 
-下面是普通的 Lean 代码。`hCCR` 是显式给出的正则对易关系（CCR）前提；结论来自已经
+下面示例使用 Lean 原生语法。`hCCR` 是显式给出的正则对易关系（CCR）前提；结论是一个已经
 编译并通过 kernel 检查的定理：
 
 ```lean
@@ -123,8 +132,8 @@ example {R : Type} [Ring R] (a adag : R)
   exact LeanPhy.FieldTheory.number_commutator a adag hCCR
 ```
 
-这个例子验证的是“由 CCR 前提推出对易子恒等式”。它不证明存在满足 CCR 的无界
-Hilbert 空间表示，也不证明该表示就是某个实验系统。有限 EFT 接口同样把截断阶数、
+这个例子验证的是“由 CCR 前提推出对易子恒等式”。它不证明存在满足 CCR 的无界 Hilbert
+空间表示，也不证明该表示描述某个实验系统。有限 EFT 接口同样把截断阶数、
 系数界和误差预算写入定理参数；有限路径积分接口要求显式的归一化证书。缺少必要
 前提时，代码会在 elaboration 阶段失败，不会生成无条件结论。
 
@@ -138,9 +147,9 @@ Hilbert 空间表示，也不证明该表示就是某个实验系统。有限 EF
    完成的分析、物理解释、连续极限和其他建模前提写入 `open obligations`。
 5. 运行 `leanphy_check` 和 `scripts/verify.sh`，同时检查人类可读报告与 JSON 报告。
 
-账本中的 `VERIFIED-CONDITIONAL` 表示证明项已经编译并通过 kernel 检查；这不等于模型
-已经过实验验证，也不表示相关开放义务已经完成。阅读结果时，应同时查看对应条目的
-前提和开放义务。
+账本中的 `VERIFIED-CONDITIONAL` 表示证明项已经编译并通过 kernel 检查；这不等于模型已经
+过实验验证，也不表示相关开放义务已经完成。阅读结果时，应同时查看对应条目的前提和
+开放义务。
 
 可信性审计可以单独运行：
 
