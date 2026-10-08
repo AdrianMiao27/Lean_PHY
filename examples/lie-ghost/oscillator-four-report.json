@@ -1,0 +1,56 @@
+{
+  "status": "candidate_requires_lean_check",
+  "name": "OscillatorGhost",
+  "input_sha256": "0b184f30e09fb6f612013b62a12118f59c2bee3a4188f9634fa28b3fd369e98e",
+  "lie_dimension": 4,
+  "coefficient_ring": "Q",
+  "sector": "pure_ghost",
+  "matter_extension": "requires_certified_Lean_LieModule",
+  "sign_convention": "d c^k = -sum_(i<j) C^k_ij c^i c^j",
+  "generator_images": [
+    [],
+    [
+      [
+        0,
+        2,
+        "1"
+      ]
+    ],
+    [
+      [
+        0,
+        1,
+        "-1"
+      ]
+    ],
+    [
+      [
+        1,
+        2,
+        "-1"
+      ]
+    ]
+  ],
+  "proof_obligations": [
+    "lie_algebra_laws",
+    "generator_images",
+    "jacobi_implies_images_closed",
+    "all_polynomial_nilpotency",
+    "degree_one_ce_bridge",
+    "degree_two_ce_bridge",
+    "integer_degree_shift",
+    "scalar_exactness",
+    "closedness_reflection",
+    "exactness_reflection",
+    "degree_two_h2_equivalence",
+    "certified_matter_nilpotency",
+    "matter_invariant_vectors",
+    "matter_one_ce_bridge"
+  ],
+  "boundaries": [
+    "trivial_scalar_coefficients",
+    "pure_ghost_nonnegative_degrees",
+    "no_full_chain_equivalence",
+    "no_physical_observable_identification"
+  ]
+}

@@ -1,239 +1,129 @@
 # LeanPhy
 
-LeanPhy is a physics-oriented library for [Lean 4](https://lean-lang.org/)
-and [mathlib](https://github.com/leanprover-community/mathlib4). It helps a
-researcher express the mathematical steps of a theoretical-physics derivation
-and ask Lean's kernel to check them. The project reuses Lean's language,
-elaborator, editor support, theorem library, tactics, Lake build, and CI. It
-adds physics objects, notation, reusable certificates, and a research ledger
-for assumptions and unfinished work.
+LeanPhy is a Lean 4 library for conditional verification of theoretical-physics
+derivations. It lets a researcher state a model, its conventions, an
+intermediate calculation, and the hypotheses needed for a physical conclusion;
+Lean's kernel then checks the resulting proof. Unproved analysis, modelling
+choices, external numerical data, and failed exploratory branches remain
+visible as assumptions or open obligations.
 
-LeanPhy is a library on top of Lean. It is not a fork of Lean and it does not
-introduce a second proof logic.
+LeanPhy is built on Lean and mathlib. It does not replace Lean's logic and it
+does not decide whether a model describes a real material or experiment.
 
-> **One-line description:** check that a stated conclusion follows from the
-> stated mathematical and physical premises, while keeping unproved analysis
-> and modelling decisions visible.
+中文说明：[README.zh-CN.md](README.zh-CN.md) · Documentation map: [docs/README.md](docs/README.md)
 
-[![Lean](https://img.shields.io/badge/Lean-4.34.0-5f5f5f.svg)](https://lean-lang.org/)
-[![mathlib](https://img.shields.io/badge/mathlib-v4.34.0-7b68ee.svg)](https://github.com/leanprover-community/mathlib4)
-[![CI](https://img.shields.io/github/actions/workflow/status/AdrianMiao27/Lean_PHY/leanphy.yml?label=CI)](https://github.com/AdrianMiao27/Lean_PHY/actions/workflows/leanphy.yml)
-[![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+## Current snapshot
 
-中文说明：[README.zh-CN.md](README.zh-CN.md)
+Version `1.1.0`, reviewed on **2026-10-08**. The project is aimed at
+exploratory work in condensed matter, quantum/statistical physics, and high
+energy or field theory. The main design goal is a reusable chain:
 
-## What LeanPhy verifies
+```text
+model and conventions -> formal operation -> physical readout -> applicability/error evidence
+```
 
-LeanPhy verifies **conditional mathematical correctness**. A checked claim has
-a Lean proof term, and that proof term has passed the Lean kernel. In plain
-language:
+The chain is conditional: finite-dimensional or finite-truncation theorems do
+not silently become continuum, thermodynamic-limit, or experimentally valid
+claims.
 
-> Given the premises written in the development, the conclusion follows by
-> the accepted proof rules.
+## What this revision changed
 
-This is deliberately different from deciding whether a model is physically
-true. LeanPhy does not silently turn any of the following into a theorem:
+- Added `LeanPhy.FieldTheory.FermionUnitaryWick`. A finite many-body unitary
+  can transport a vacuum density, CAR generators, and all ordered linear-probe
+  moments together. The result covers finite orbital or quench-style changes
+  of basis and keeps CAR contact terms explicit.
+- Connected the new transport API to the field-theory and condensed-matter
+  entries and to `Examples/FermionResearch.lean`. The client now reports 19
+  kernel-checked claims and 3 open obligations.
+- Extended the response regression with Pauli-matrix pulses, the zero-background
+  case, and a time envelope whose exact pulse area and integrated response are
+  checked in Lean.
+- Consolidated documentation responsibilities. The detailed capability table
+  and roadmap live in `docs/capabilities.md` and `docs/roadmap.md`; redundant
+  phase and compatibility copies were removed; `VERIFIED.md` is the only
+  verification record.
 
-- that a model describes the real world or a particular experiment;
-- that a continuum, thermodynamic, or renormalisation limit exists or
-  converges;
-- that a path integral exists, converges, or has the intended interpretation;
-- that an unbounded operator has the required domain, self-adjointness, or
-  time-evolution properties;
-- that a formal object has the physical meaning assigned to it by a paper.
+## Current capabilities
 
-Such statements must enter as propositions, structure fields, theorem
-arguments, or soundness certificates. Analysis that has not been completed,
-external numerical evidence, and physical modelling assumptions are recorded
-in the **open-obligation ledger**. The ledger is an audit record; it is not a
-substitute for a proof.
+The reusable library currently provides the following research-facing chains.
 
-An external CAS, numerical program, or script can supply data, but the data
-enters the verified layer only through a Lean-side soundness theorem such as
-`CertificateChecker.sound`. A Boolean, JSON file, sampled limit, or numerical
-approximation is not a theorem merely because another program produced it.
-
-The repository uses three labels:
-
-| Label | Meaning |
-| --- | --- |
-| kernel-checked claim | A proof term passed Lean's kernel; the result is conditional on its explicit premises. |
-| declared premise | An assumption, convention, or external certificate used by a claim. Its adequacy for a physical system needs a separate argument. |
-| open obligation | Analysis, numerical certification, continuum passage, or physical interpretation that is still outstanding. |
-
-~~~text
-premises and certificates -> Lean proof term -> Lean kernel -> checked conditional claim
-                                      \
-                                       -> unfinished work -> open-obligation ledger
-~~~
-
-## Scope of v1.0
-
-LeanPhy v1.0.0 concentrates on finite-dimensional, finite-truncation, and
-bounded constructions. It also provides interfaces for unbounded operators,
-continuous analysis, approximation, numerical certificates, and external data.
-Those interfaces make missing hypotheses explicit; they do not prove results
-that have not been supplied.
-
-The current acceptance baseline contains **211 Lean source files, 478
-kernel-checked smoke capabilities, and 143 expected-failure elaboration
-fixtures**. The default `leanphy_check --project-json` report contains **8
-proof-bearing domain packages, 15 checked claims, and 8 `open obligations`**;
-`--broad` reports **13 packages, 28 claims, and 14 `open obligations`**. These
-are library and regression metrics, not a count of complete physics papers.
-
-| Area | Reusable foundations | Boundary that remains explicit |
+| Area | Available now | Main boundary |
 | --- | --- | --- |
-| Quantum mechanics and information | Pauli and Dirac notation, finite states and density matrices, POVMs, CPTP/Kraus channels, Bell/CHSH, finite Lindblad models, oscillator and CCR algebra | Domains and self-adjointness of unbounded operators, continuous-measurement semantics, and the relation between a finite model and a physical system |
-| Field and high-energy algebra | Finite truncated Fock spaces, CAR/CCR and Wick identities, Clifford and gamma matrices, spinors, traces, Ward-style algebraic steps, finite EFT expansions, `BRST` interfaces, low-degree Lie-module cochains, and a finite CAR ghost-pair adapter | Field existence, infinite-dimensional limits, UV completion, renormalisation limits, a full ghost-polynomial algebra, BV structure, anomaly cancellation, Lie-group integration, and non-perturbative conclusions |
-| Classical, gauge, relativity, optics, and fluids | Poisson algebras, first-class constraint ideals, weak equality, Dirac observables, discrete Maxwell/Yang--Mills, exterior and plaquette identities, symplectic and Lorentz algebra, Lie representations, ABCD/Jones optics, finite-volume conservation, and discrete vorticity | Gauge fixing, quotient regularity, continuum regularity, global existence, boundary physics, anomaly cancellation, and turbulence closure |
-| Condensed matter and statistical mechanics | Lattice, Hubbard, BdG, Berry, Jordan--Wigner, finite Gibbs/Markov kernels, and transfer matrices | Thermodynamic limits, phase transitions, experimental calibration, and equivalence with a continuum theory |
-| Analysis and numerical bridges | Bochner integration, dominated convergence, Lax--Milgram, Banach fixed points, bounded Hilbert operators, spectral calculus, spectral gaps, operator convergence, residual/energy budgets, finite path-integral interfaces, and regulator-wise certificates | External programs provide traceable data only; a Lean-side soundness theorem is still required before that data becomes a checked claim |
+| Finite fermions | Occupation-space CAR, Nambu and complex pairing, orbital transport, arbitrary fermion words, vacuum moments, CAR contact terms, and finite unitary transport | General Gaussian or thermal Wick theorems, interacting ground-state selection, and large-system sparse performance |
+| Quantum dynamics and response | Finite non-autonomous evolution, Heisenberg/state derivatives, two-time response, contact terms, causal pulses, non-commuting Gibbs response, and exact finite-grid Fourier reconstruction | General laboratory-frame drives, continuous-frequency/transport limits, and finite-amplitude remainder bounds |
+| Actions and field theory | Polynomial actions, actual field evaluation, Euler and variational currents, interval actions, boundary terms, field redefinitions, and quadratic heavy-field matching | Global inverse charts, derivative-dependent or higher-order EFT transformations, multidimensional boundaries, Green functions, and loop matching |
+| Effective theories and certificates | Noncommutative retained-order operations, block elimination, source/readout transport, rational matrix inverse and spectral certificates, and residual/error budgets | Automatic interval arithmetic, robust uncertain real inputs, exact-solution error bounds, and energy-independent unitary reduction |
+| Statistical and lattice tools | Finite Gibbs/source response, feedback self-consistency on certified contraction domains, finite Ward insertions, and blocking-defect budgets | Critical and multi-branch self-consistency, quantum closure, physical coupling flows, and thermodynamic limits |
+| Gauge/deformation and research workflow | Finite Lie/ghost/cohomology calculations, deformation obstructions, target-bound obligations, hypothesis branches, counterexamples, audits, and reproducible clients | Connecting every algebraic certificate to a physical action/observable and automatic semantic impact analysis |
 
-The unbounded-operator interface uses mathlib's `LinearPMap` and keeps the
-operator domain in the type. `DenseDomainOperator` exposes interfaces for
-formal adjoints, closedness, closability, self-adjointness, graph-norm bounds,
-and domain-preserving bounded composition; each interface requires the
-corresponding proof. Naming an object `Hamiltonian` does not prove
-self-adjointness or generate time evolution. Stone's theorem, self-adjoint
-extensions, spectral measures, and the passage from resolvents to evolution
-groups remain `open obligations`.
+The complete C01–C28 inventory, source links, maturity labels, and research
+gaps are maintained in [the capability inventory](docs/capabilities.md). Use
+the individual guides in [the documentation index](docs/README.md) for API
+details and examples.
 
-For gauge systems, `ConstraintAlgebra` and `ConstraintMap` cover generated
-constraint ideals, first-class closure, weak equality, Dirac observables, and
-Poisson maps that preserve the relevant ideals. `BRST` requires an explicit
-differential and a nilpotency proof. `GradedBRST` adds homogeneous pieces, an
-odd degree shift, and the signed Koszul Leibniz rule. The finite CAR
-ghost--antighost adapter is a concrete kernel-checked algebraic model for
-these interfaces; it is not a full ghost-polynomial algebra, BV antibracket,
-gauge-fixing construction, path-integral measure, anomaly theorem, or
-physical `BRST`-cohomology equivalence.
+## Scope and trust boundary
 
-`Mathematics.LieCohomology` provides a low-degree algebraic interface for gauge,
-representation, and anomaly-candidate calculations. The action and
-representation law are explicit, and the kernel checks the first
-Chevalley--Eilenberg identities. The module keeps witnesses visible: it does
-not silently construct quotient cohomology, integrate a Lie algebra, prove
-anomaly cancellation, or identify a cocycle with a physical observable.
+A checked claim means that a Lean proof term passed the kernel under its stated
+premises. LeanPhy does not by itself prove:
 
-See VERIFIED.md and docs/verified-scope.md for the module-by-module inventory
-and its limitations.
+- that a chosen Hamiltonian, action, or state models a real system;
+- existence or convergence of a continuum, thermodynamic, renormalisation, or
+  path-integral limit;
+- domains, self-adjointness, or evolution of arbitrary unbounded operators;
+- correctness of an external numerical approximation without a Lean-side
+  soundness certificate; or
+- that a supplied finite vacuum is the ground state of an interacting model.
 
-## Quick start
+These boundaries are part of the project interface. Open analysis and physical
+interpretation are recorded in research packages and `VERIFIED.md` rather than
+being hidden behind a successful compilation.
 
-Lean 4.34.0 and mathlib v4.34.0 are pinned in lean-toolchain and lakefile.toml.
-From the repository root:
+## Verification
 
-~~~bash
-lake build
-lake exe leanphy_smoke
-lake exe leanphy_prototype
-lake exe leanphy_check --broad --project-json
-~~~
+The focused checks for this snapshot pass:
 
-The release verification script checks public entry points, downstream
-clients, research ledgers, declaration audits, project scaffolding, and
-negative tests:
+```bash
+lake env lean LeanPhy/FieldTheory/FermionUnitaryWick.lean
+lake build leanphy_fermion_client
+python3 scripts/test_driven_response.py --build-root .
+python3 scripts/test_fermion_vacuum.py --build-root .
+git diff --check
+```
 
-~~~bash
-./scripts/verify.sh
-~~~
+The complete `scripts/verify.sh` release run does not yet have a successful
+terminal record for the current worktree. Focused checks and library builds
+must therefore be read together with the limits in [VERIFIED.md](VERIFIED.md).
 
-A local ext4 or overlay filesystem is recommended. Mathlib imports and cache
-access can be substantially slower on FUSE or network-mounted filesystems.
+## Layout and contribution path
 
-## Minimal example
+Reusable proofs belong under `LeanPhy/`; domain import surfaces under
+`LeanPhy/Entry/`; compilable research packages under `LeanPhy/Examples/`;
+executable wrappers under `Clients/`; and the six compatibility/smoke roots
+(`Main.lean`, `Prototype.lean`, `Check.lean`, `ClientMain.lean`,
+`StrictClientMain.lean`, `Scaffold.lean`) remain at the root for Lake and
+downstream-project conventions. JSON inputs and external reports live under
+`examples/`. See [the project layout](docs/project-layout.md) before adding a
+module or document.
 
-The following is ordinary Lean code. `hCCR` is an explicit canonical
-commutation relation; the conclusion is a theorem whose proof has passed the
-kernel:
+## Future directions
 
-~~~lean
-import LeanPhy.Entry.Quantum
-import LeanPhy.Entry.FieldTheory
-open scoped LeanPhy.Quantum
+Development is paused after this cleanup while the next scope is reviewed. The
+roadmap prioritises functions that close real theoretical-physics research
+steps rather than more fixed examples:
 
-example {R : Type} [Ring R] (a adag : R)
-    (hCCR : ⟦a, adag⟧ = 1) :
-    ⟦LeanPhy.FieldTheory.number adag a, adag⟧ = adag := by
-  exact LeanPhy.FieldTheory.number_commutator a adag hCCR
-~~~
+1. Construct general Gaussian and thermal states, including pairing, source
+   insertions, and time-ordered multi-point correlations.
+2. Extend finite response to general laboratory-frame drives, stationarity and
+   continuous-frequency or transport readouts with controlled remainders.
+3. Connect spectral certificates to stable low-energy subspaces, Bogoliubov
+   reductions, band geometry, topology, and finite RG coupling flows.
+4. Add Green-function and boundary-value error statements for effective
+   theories, together with higher-order field redefinitions, IBP/EOM bases,
+   and selected loop or non-quadratic matching tasks.
+5. Improve reliable numerical enclosures, uncertain-input propagation, sparse
+   many-body representations, and performance evidence.
+6. Build carefully chosen continuum, thermodynamic, and non-equilibrium bridges
+   only when a concrete model supplies the required analytic hypotheses.
 
-This proves the algebraic implication from the stated CCR premise. It does
-not prove the existence of an unbounded Hilbert-space representation or that
-the representation describes an experiment. Likewise, the finite EFT and
-finite path-integral interfaces require explicit truncation, error, and
-normalisation certificates. If a required premise is missing, elaboration
-fails instead of producing an unconditional conclusion.
-
-## A research workflow
-
-1. Import the smallest suitable `LeanPhy.Entry.*` profile.
-2. State mathematical premises, physical conventions, boundary conditions,
-   truncation ranges, and approximation parameters as types, structure fields,
-   or theorem arguments.
-3. Use reusable theorems and tactics for algebraic steps. If a CAS or numerical
-   program is used, pass its result through an interface with a
-   `CertificateChecker.sound` theorem.
-4. Register the result as a checked claim in a `TheoryPackage` or
-   `ResearchProject`; put unfinished analysis, interpretation, continuum work,
-   and modelling premises in `open obligations`.
-5. Run `leanphy_check` and `scripts/verify.sh`, then inspect both the human-readable
-   and JSON reports.
-
-`VERIFIED-CONDITIONAL` means that the proof term compiled and passed the kernel.
-It does not mean that a model has been experimentally validated or that its
-`open obligations` have been discharged.
-
-For a separate soundness audit, run:
-
-~~~bash
-lake env lean scripts/axioms.lean
-~~~
-
-The library and release checks do not use `sorry`, `admit`, or
-application-specific unchecked axioms. `#print axioms` may list standard
-foundational axioms used by Lean/mathlib, such as `propext`, `Classical.choice`,
-and `Quot.sound`; that is different from declaring a physics result as an axiom.
-
-## Repository layout
-
-~~~text
-LeanPhy/                 library source grouped by physics domain
-  Mathematics/            analysis, operators, spectra, limits, certificates
-  Quantum/ QuantumInfo/   quantum mechanics and quantum information
-  FieldTheory/            CCR/CAR/Fock/Wick algebra
-  HighEnergy/             Clifford, gamma, spinor, and finite EFT interfaces
-  GaugeTheory/            gauge fields, discrete geometry, finite ghost adapter
-  Condensed/ StatMech/    condensed-matter and statistical models
-  Classical/ Relativity/  classical mechanics and relativity structures
-  Surface/                Dirac, Einstein, index, and dimensional notation
-  Entry/                  selective public import profiles
-  Examples/               workflow and research-project examples
-Main.lean                kernel regression entry point
-Prototype.lean           compact end-to-end workflow
-Check.lean               research-ledger CLI
-scripts/                 release verification and negative tests
-docs/                    architecture, roadmap, and detailed scope
-~~~
-
-Common entry points are `LeanPhy.Minimal`, the domain-specific `LeanPhy.Entry.*`
-profiles, and `LeanPhy.Entry.Physics` for projects spanning several domains.
-
-## Development and citation
-
-~~~bash
-lake exe leanphy_check --project-json
-lake exe leanphy_check --broad --claims-json
-lake exe leanphy_check --extended --manifest-json
-~~~
-
-New modules should provide reusable theorems, explicit hypotheses, a positive
-smoke regression, a negative regression where a safety boundary can fail, an
-entry-point export, and documentation showing how the module composes with
-existing certificates. See CONTRIBUTING.md, docs/architecture.md, and
-docs/roadmap.md.
-
-When citing LeanPhy, record the commit, Lean toolchain, mathlib revision,
-import profile, and generated ledger JSON. Citation metadata is in
-CITATION.cff. LeanPhy is released under the Apache License 2.0.
+The current priorities, dependencies, and acceptance criteria are kept in
+[docs/roadmap.md](docs/roadmap.md).

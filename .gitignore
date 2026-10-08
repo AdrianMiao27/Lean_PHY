@@ -15,9 +15,24 @@
 __pycache__/
 *.py[cod]
 .pytest_cache/
+.mypy_cache/
+.ruff_cache/
 coverage.xml
+
+# Local Python environments and packaging output
+.venv/
+venv/
+dist/
+build/
+*.egg-info/
 
 # Generated verification logs
 *.log
 verification-output/
+*.tmp
 
+# Scratch material under the release-managed docs/scripts trees
+docs/_drafts/
+docs/_build/
+scripts/_generated/
+scripts/_reports/

@@ -1,3 +1,9 @@
+import LeanPhy.FieldTheory.RedefinitionVariation
+import LeanPhy.FieldTheory.EulerTransport
+import LeanPhy.FieldTheory.IntervalAction
+import LeanPhy.FieldTheory.PolynomialAction
+import LeanPhy.FieldTheory.VariationalResidual
+import LeanPhy.Classical.VariationalBridge
 import LeanPhy.Minimal
 import LeanPhy.Classical.Symplectic
 import LeanPhy.Classical.Hamiltonian

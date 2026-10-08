@@ -1,0 +1,42 @@
+{
+  "name": "AffineFourThirdCharacter",
+  "parameters": [
+    "a",
+    "t"
+  ],
+  "dimension": 4,
+  "brackets": [
+    {
+      "i": 0,
+      "j": 1,
+      "value": [
+        0,
+        "a",
+        0,
+        0
+      ]
+    }
+  ],
+  "action": [
+    [
+      [
+        "t"
+      ]
+    ],
+    [
+      [
+        0
+      ]
+    ],
+    [
+      [
+        0
+      ]
+    ],
+    [
+      [
+        0
+      ]
+    ]
+  ]
+}

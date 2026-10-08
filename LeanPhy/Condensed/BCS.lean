@@ -11,26 +11,17 @@ set_option linter.unusedTactic false
 set_option linter.unreachableTactic false
 
 /-!
-# BCS mean field and Bogoliubov quasiparticles
+# Legacy BCS coefficient algebra and real-pairing gap adapter
 
-Mean-field superconductivity turns a pairing term into a two-band problem whose
-eigen-excitations are Bogoliubov quasiparticles.  Stripped of the analysis, its
-algebraic content is small and exactly checkable:
+This module proves complex-orthogonal Clifford identities and identities for
+the complex-symmetric matrix `[[eps, Delta], [Delta, -eps]]`. Its finite
+Hermitian gap adapter explicitly restricts both parameters to real values.
+General complex pairing is implemented by `Condensed.ComplexPairing`, and
+the full Nambu/CAR operator bridge by `FieldTheory.FermionBdG` and
+`FieldTheory.FermionHamiltonian`.
 
-1. the Bogoliubov transformation is a rotation of the two Majorana modes of a
-   Dirac mode, and any such rotation of a Clifford pair is again a Clifford pair
-   (both the self-square and the anticommutator survive);
-2. the BdG matrix `[[eps, Delta], [Delta, -eps]]` squares to the excitation
-   energy squared times the identity, `H^2 = (eps^2 + Delta^2) 1`, and its
-   trace and determinant show the spectrum is the symmetric pair of energies
-   `± sqrt (eps^2 + Delta^2)`;
-3. the Pauli decomposition `H = eps sigma_z + Delta sigma_x`, whose pieces
-   reflect under `sigma_x` and `sigma_z` conjugation;
-4. the mean-field gap equation `gap = -g * pairingAmp`.
-
-Everything is proved from the canonical anticommutation relations and the
-explicit matrices.  The self-consistency of the gap (the fixed-point part) is an
-explicit hypothesis, never a hidden axiom. -/
+`MeanField` records a supplied algebraic gap relation. It does not construct
+the state-dependent self-consistency map or establish a nonzero solution. -/
 
 namespace LeanPhy.Condensed
 
@@ -42,14 +33,13 @@ local notation "M2" => Matrix (Fin 2) (Fin 2) ℂ
 
 /-! ## The Bogoliubov transformation as a rotation of Majorana modes
 
-A Dirac mode carries the two Majorana operators `g1 = c + c†` and `g2 = c - c†`
-(see `LeanPhy.Condensed.Majorana`).  A Bogoliubov transformation mixes them by a
-rotation, and the physical input is that the new modes are again Majorana, i.e.
-the Clifford relations survive.  The coefficients are central (an `Algebra ℂ`
-structure), the honest algebraic setting for a complex rotation of operators
-that need not commute. -/
+A physical Majorana pair uses `g1 = c + c†`, `g2 = -i (c - c†)` and an
+adjoint relation. The structure below carries only the square and
+anticommutation laws. A complex orthogonal rotation preserves these algebraic
+laws, but need not preserve self-adjointness. The adjoint-compatible CAR
+construction is in `FieldTheory.PhysicalMajorana`. -/
 
-/-- The Clifford data of the two real Majorana modes of one Dirac mode. -/
+/-- Clifford algebra data without an assumed star operation or adjoint law. -/
 structure CliffordPair where
   /-- Carrier ring of operators. -/
   A : Type
@@ -121,15 +111,16 @@ end CliffordPair
 
 /-! ## The BdG matrix and its spectrum -/
 
-/-- The BdG matrix `[[eps, Delta], [Delta, -eps]]`. -/
+/-- Legacy complex-symmetric coefficient block; real inputs give a Hermitian block.
+For general complex pairing use `ComplexPairing.block`. -/
 def bdg (eps Delta : ℂ) : M2 := !![eps, Delta; Delta, -eps]
 
 /-- The Bogoliubov rotation `R(u, v) = [[u, -v], [v, u]]`, the matrix form of
 `u g1 + v g2` on the Majorana basis. -/
 def bogoMatrix (u v : ℂ) : M2 := !![u, -v; v, u]
 
-/-- **The BdG square.**  `H^2 = (eps^2 + Delta^2) 1`: the excitation energy is
-`sqrt (eps^2 + Delta^2)`, and the gap `Delta` moves the spectrum off zero. -/
+/-- Algebraic square of the legacy block. General complex inputs do not
+imply Hermiticity or a positive excitation gap. -/
 theorem bdg_sq (eps Delta : ℂ) : bdg eps Delta * bdg eps Delta
     = (eps ^ 2 + Delta ^ 2) • (1 : M2) := by
   ext i j
@@ -141,9 +132,8 @@ theorem bdg_sq (eps Delta : ℂ) : bdg eps Delta * bdg eps Delta
 theorem bdg_trace (eps Delta : ℂ) : Matrix.trace (bdg eps Delta) = 0 := by
   simp [bdg, Matrix.trace, Fin.sum_univ_two]
 
-/-- The BdG determinant is `-(eps^2 + Delta^2)`, so the two eigenvalues are
-`± sqrt (eps^2 + Delta^2)`: the excitation spectrum is symmetric about zero and
-gapped by `Delta`. -/
+/-- Determinant identity; a physical gap additionally needs the real-input
+and nonvanishing conditions consumed by the adapter below. -/
 theorem bdg_det (eps Delta : ℂ) : Matrix.det (bdg eps Delta) = -(eps ^ 2 + Delta ^ 2) := by
   simp [bdg, Matrix.det_fin_two]
   ring
@@ -184,8 +174,8 @@ theorem bdg_uniform_finite_spectral_gap
   · exact hr
   · exact hgap
 
-/-- Conjugating by `sigma_x` flips the sign of `eps`, so `sigma_x` is the
-(antiunitary) particle-hole reflection of the normal part. -/
+/-- Unitary matrix conjugation flips `eps`. This identity does not apply
+complex conjugation and is not an antiunitary particle-hole operation. -/
 theorem bdg_sigmaX_conj (eps Delta : ℂ) :
     pauliX * bdg eps Delta * pauliX = bdg (-eps) Delta := by
   ext i j
@@ -232,9 +222,8 @@ structure MeanField where
 theorem MeanField.gap_relation (M : MeanField) : M.gap + M.g * M.pairingAmp = 0 := by
   rw [M.gap_eq, neg_mul, neg_add_cancel]
 
-/-- With a real negative coupling `g = -V`, the gap has the sign of the pairing
-amplitude: `gap = V * pairingAmp`.  This is the algebraic reason a real
-attractive interaction supports a nonzero order parameter. -/
+/-- Substituting `g = -V` yields this algebraic relation. No positivity of V,
+nonzero gap or state-dependent self-consistent solution is asserted. -/
 theorem MeanField.gap_real_attractive (M : MeanField) (V : ℝ)
     (hg : M.g = -(V : ℂ)) : M.gap = (V : ℂ) * M.pairingAmp := by
   rw [M.gap_eq, hg, neg_neg]

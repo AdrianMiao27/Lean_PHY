@@ -24,7 +24,8 @@ Proved here (no sorry, no axiom):
 - g2 satisfies g2^2 = -1, the algebraic image of the factor -i;
 - the two anticommute, {g1, g2} = 0, so they define Clifford algebra Cl(1,1);
 - the Dirac number operator is recovered:  g1 g2 = 2 c†c - 1, i.e.
-  c†c = (1 - i gamma1 gamma2)/2 once the physical gamma2 = -i g2 is restored.
+  c†c = (1 + i gamma1 gamma2)/2 once the physical gamma2 = -i g2 is restored.
+  The complex, adjoint-compatible version is in `FieldTheory.PhysicalMajorana`.
 -/
 
 namespace LeanPhy.Condensed
@@ -85,7 +86,7 @@ theorem majorana_anticommute : M.majorana1 * M.majorana2 + M.majorana2 * M.major
   rw [key, M.c_sq, M.cdag_sq]
   simp
 
-/-- The parity operator P = g1 g2 anticommutes with g1:  g1 P + P g1 = 0.  This
+/-- The parity operator up to an overall sign, P = g1 g2, anticommutes with g1:  g1 P + P g1 = 0.  This
 is the algebraic form of the Z2 fermion parity grading. -/
 theorem majorana1_anticommute_parity :
     M.majorana1 * (M.majorana1 * M.majorana2) + (M.majorana1 * M.majorana2) * M.majorana1 = 0 := by
@@ -99,7 +100,7 @@ theorem majorana1_anticommute_parity :
 
 /-- **Dirac-Majorana correspondence.**  The product of the two Majoranas is the
 Dirac number operator:  g1 g2 = 2 c†c - 1.  Restoring the physical gamma2 = -i g2
-this reads c†c = (1 - i gamma1 gamma2)/2, the standard Majorana form of the
+this reads c†c = (1 + i gamma1 gamma2)/2, the Majorana form of the
 occupation number. -/
 theorem number_from_majorana : M.majorana1 * M.majorana2 = 2 * (M.cdag * M.c) - 1 := by
   have hcar' : M.c * M.cdag = 1 - M.cdag * M.c := by

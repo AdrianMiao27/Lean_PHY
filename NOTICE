@@ -1,4 +1,4 @@
-LeanPhy v1
+LeanPhy v1.1
 
 Copyright 2026 LeanPhy contributors.
 
@@ -6,4 +6,3 @@ This distribution includes original LeanPhy source code and documentation.
 LeanPhy depends on Lean 4 and mathlib; those upstream projects retain their
 own copyright notices and license terms.  See lake-manifest.json for the pinned
 dependency revisions.
-

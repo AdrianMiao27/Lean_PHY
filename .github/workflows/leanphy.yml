@@ -10,7 +10,7 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
       - uses: leanprover/lean-action@v1
@@ -18,4 +18,3 @@ jobs:
           lean-version: leanprover/lean4:v4.34.0
       - name: Build and run release verification
         run: ./scripts/verify.sh
-

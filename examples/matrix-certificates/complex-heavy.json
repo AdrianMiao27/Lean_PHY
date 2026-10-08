@@ -1,0 +1,8 @@
+{
+  "name": "ComplexHeavy",
+  "nominal": {"real": [[4, 0], [0, 4]], "imag": [[0, 1], [-1, 0]]},
+  "inverse": {"real": [["1/4", 0], [0, "1/4"]], "imag": [[0, 0], [0, 0]]},
+  "inverse_bound": "1/4",
+  "residual_bound": "1/4",
+  "model_radius": 1
+}

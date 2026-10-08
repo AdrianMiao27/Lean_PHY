@@ -1,0 +1,6 @@
+{
+  "name": "AbelianSecondOrder",
+  "dimension": 3,
+  "coefficient_mode": "adjoint",
+  "brackets": []
+}

@@ -1,0 +1,16 @@
+{
+  "name": "HeisenbergThird",
+  "dimension": 3,
+  "coefficient_mode": "adjoint",
+  "brackets": [
+    {
+      "i": 0,
+      "j": 1,
+      "value": [
+        0,
+        0,
+        1
+      ]
+    }
+  ]
+}

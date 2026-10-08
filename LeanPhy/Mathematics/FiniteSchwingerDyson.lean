@@ -96,6 +96,23 @@ structure InvolutiveVariation (P : FinitePathIntegral ι) where
   jacobian : ι → ℂ
   balance : ∀ i, P.weight (map i) = jacobian i * P.weight i
 
+/-- Build the unit-Jacobian variation used by a finite Ward identity from an
+actual weight symmetry.  The symmetry is kept as an explicit hypothesis so a
+downstream lattice or truncated-field model can expose the physical
+transformation and its invariance separately from the insertion theorem. -/
+def InvolutiveVariation.ofWeightSymmetry
+    (P : FinitePathIntegral ι) (e : Equiv.Perm ι)
+    (hinvolutive : ∀ i, e (e i) = i)
+    (hsym : FinitePathIntegral.WeightSymmetry P e) :
+    InvolutiveVariation P where
+  map := e
+  involutive := hinvolutive
+  jacobian := fun _ => 1
+  balance := by
+    intro i
+    rw [hsym i]
+    simp
+
 theorem weighted_change_of_variables
     (P : FinitePathIntegral ι) (V : InvolutiveVariation P)
     (O : ι → ℂ) :
@@ -165,6 +182,19 @@ theorem schwinger_dyson_of_invariant_weight
     P.expectation (fun i => O (V.map i) - O i) = 0 := by
   rw [P.schwinger_dyson_expectation V O]
   simp [hjac]
+
+/-- A finite weight symmetry is therefore a zero-insertion Ward identity.  This
+is the convenient research-facing form: callers provide the involution and
+the model's symmetry proof, while the Jacobian bookkeeping is derived once. -/
+theorem weight_symmetry_ward
+    (P : FinitePathIntegral ι) (e : Equiv.Perm ι)
+    (hinvolutive : ∀ i, e (e i) = i)
+    (hsym : FinitePathIntegral.WeightSymmetry P e) (O : ι → ℂ) :
+    P.expectation (fun i => O (e i) - O i) = 0 := by
+  let V := InvolutiveVariation.ofWeightSymmetry P e hinvolutive hsym
+  have h := P.schwinger_dyson_of_invariant_weight V (fun _ => rfl) O
+  change P.expectation (fun i => O (e i) - O i) = 0 at h
+  exact h
 
 end FinitePathIntegral
 

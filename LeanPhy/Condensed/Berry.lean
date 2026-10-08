@@ -9,34 +9,16 @@ set_option linter.unnecessarySeqFocus false
 set_option linter.unreachableTactic false
 
 /-!
-# Berry curvature of a two-level system
+# Spherical Bloch-vector geometry and discrete phase adapters
 
-A qubit Hamiltonian `H(d) = d . sigma` is a Bloch vector.  When the Bloch
-vector is swept by two angles `(theta, phi)` on the unit sphere, the Berry
-curvature density (the integrand of the first Chern number, the solid-angle
-two-form) is the scalar triple product of the Bloch vector with the two angle
-tangents,
+For `dhat(theta, phi) = (sin t cos p, sin t sin p, cos t)`, this module proves
+unit norm, tangent identities and the scalar triple product `sin theta`.
+The legacy theorem name `berry_density` is retained, but its statement is a
+geometric area Jacobian. No selected eigenband, projector, Berry connection,
+curvature normalization or Chern integral is constructed here.
 
-    F = dhat . (d_theta dhat x d_phi dhat).
-
-For the standard spherical parametrisation
-
-    dhat(theta, phi) = (sin t cos p, sin t sin p, cos t)
-
-the kernel checks the two defining facts: the Bloch vector is a unit vector
-(`dhat_unit`), and the curvature density is exactly `sin theta` (`berry_density`),
-the monopole field of a charge-one Dirac point.  The two tangents are also
-proved orthogonal to `dhat` and to one another, and `dTheta` is a unit
-vector while `dPhi` has squared norm `sin theta ^ 2`.  In the spherical
-frame the curvature density is the Jacobian `sin theta` of the area element, so the
-flux through the whole sphere is `4 pi`, the charge of the monopole.
-
-Everything here is real trigonometric ring algebra over `ℝ`, closed with
-the Pythagorean identity `sin^2 + cos^2 = 1` as the only input, so it is kernel-verified
-with no analysis.  The topological invariant itself - the integral of `F` over the
-Brillouin zone, the `N = 1` Chern number of a Dirac monopole - needs the surface
-integral on top and is out of scope, in keeping with the conditional semantics
-of the library.
+The discrete adapters prove gauge invariance for supplied edge-phase data.
+Relating those data to an actual band or to a continuum limit remains separate.
 -/
 
 namespace LeanPhy.Condensed
@@ -83,9 +65,8 @@ theorem dhat_dPhi (theta phi : ℝ) : dot3 (dhat theta phi) (dPhi theta phi) = 0
   simp [dot3, dhat, dPhi]
   ring
 
-/-- **Berry curvature density**: the triple product of the Bloch vector with the
-two angle tangents equals `sin theta`, the monopole field of a charge-one
-Dirac point.  This is the integrand of the first Chern number. -/
+/-- The spherical scalar triple product equals the area Jacobian `sin theta`.
+Interpreting it as a selected band's curvature requires a separate bridge. -/
 theorem berry_density (theta phi : ℝ) :
     dot3 (dhat theta phi) (cross3 (dTheta theta phi) (dPhi theta phi)) = Real.sin theta := by
   have hphi := Real.sin_sq_add_cos_sq phi

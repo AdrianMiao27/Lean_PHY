@@ -85,9 +85,10 @@ noncomputable def fieldJetVar {ι : Type} [DecidableEq ι]
     (x : ι) (slot : Fin 3) : FieldJetPolynomial ι :=
   MvPolynomial.X (x, slot)
 
-/-- Total derivative acting on the jet of one selected field component.  Other
-components are held fixed, which is the algebraic core of a componentwise
-Euler--Lagrange calculation. -/
+/-- Legacy component jet derivation: other components are held fixed.
+This is NOT the total time derivative of a coupled system. Use
+`fieldTimeDerivative` in Euler--Lagrange calculations. The original name is
+retained for source compatibility with explicitly componentwise operations. -/
 noncomputable def fieldTotalDerivative {ι : Type} [DecidableEq ι]
     (x : ι) : PhysicsDerivation ℝ (FieldJetPolynomial ι) :=
   MvPolynomial.mkDerivation ℝ (fun p =>
@@ -108,14 +109,37 @@ noncomputable def fieldTotalDerivative {ι : Type} [DecidableEq ι]
     fieldTotalDerivative x (fieldJetVar y slot) = 0 := by
   simp [fieldTotalDerivative, fieldJetVar, h]
 
-/-! The componentwise residual uses the field label as a typed derivative
-index.  A Lagrangian may contain all components; differentiating in `x` only
-selects the corresponding Euler equation. -/
+/-- Total time derivative on all component jets simultaneously. The finite
+three-slot algebra sets `D_t a = 0`, so this operator is appropriate for taking
+one derivative of a first-order momentum, not for arbitrary higher-derivative
+actions. `FieldTheory.JetPolynomial` provides jets of unrestricted order. -/
+noncomputable def fieldTimeDerivative {ι : Type} :
+    PhysicsDerivation ℝ (FieldJetPolynomial ι) :=
+  MvPolynomial.mkDerivation ℝ (fun p =>
+    if p.2 = 0 then MvPolynomial.X (p.1, 1)
+    else if p.2 = 1 then MvPolynomial.X (p.1, 2) else 0)
+
+@[simp] theorem fieldTimeDerivative_q {ι : Type} [DecidableEq ι] (x : ι) :
+    fieldTimeDerivative (fieldJetVar x 0) = fieldJetVar x 1 := by
+  simp [fieldTimeDerivative, fieldJetVar]
+
+@[simp] theorem fieldTimeDerivative_v {ι : Type} [DecidableEq ι] (x : ι) :
+    fieldTimeDerivative (fieldJetVar x 1) = fieldJetVar x 2 := by
+  simp [fieldTimeDerivative, fieldJetVar]
+
+@[simp] theorem fieldTimeDerivative_a {ι : Type} [DecidableEq ι] (x : ι) :
+    fieldTimeDerivative (fieldJetVar x 2) = 0 := by
+  simp [fieldTimeDerivative, fieldJetVar]
+
+/-! The partial derivative selects the equation for `x`; the total derivative
+must still advance every component present in its conjugate momentum.
+This residual is intended for Lagrangians depending on slots `0` and `1` only.
+The typed `FieldTheory.FirstOrderLagrangian` interface enforces that boundary. -/
 
 noncomputable def fieldEulerLagrangeResidual {ι : Type} [DecidableEq ι]
     (x : ι) (L : FieldJetPolynomial ι) : FieldJetPolynomial ι :=
   MvPolynomial.pderiv (x, 0) L -
-    fieldTotalDerivative x (MvPolynomial.pderiv (x, 1) L)
+    fieldTimeDerivative (MvPolynomial.pderiv (x, 1) L)
 
 noncomputable def fieldOscillatorLagrangian {ι : Type} [DecidableEq ι]
     (x : ι) : FieldJetPolynomial ι :=
@@ -126,7 +150,7 @@ theorem fieldOscillator_euler_lagrange {ι : Type} [DecidableEq ι] (x : ι) :
     fieldEulerLagrangeResidual x (fieldOscillatorLagrangian x) =
       -(fieldJetVar x 0 + fieldJetVar x 2) := by
   simp [fieldEulerLagrangeResidual, fieldOscillatorLagrangian,
-    fieldTotalDerivative, fieldJetVar]
+    fieldTimeDerivative, fieldJetVar]
   module
 
 end LeanPhy.Classical

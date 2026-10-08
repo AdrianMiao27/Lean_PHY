@@ -1,5 +1,5 @@
 name = "LeanPhy"
-version = "1.0.0"
+version = "1.1.0"
 defaultTargets = ["LeanPhy"]
 
 [[lean_lib]]
@@ -29,6 +29,98 @@ root = "StrictClientMain"
 name = "leanphy_init"
 root = "Scaffold"
 
+[[lean_exe]]
+name = "leanphy_ghost_research"
+root = "Clients.GhostResearchMain"
+
+[[lean_exe]]
+name = "leanphy_lie_research"
+root = "Clients.LieResearchMain"
+
+[[lean_exe]]
+name = "leanphy_structure_research"
+root = "Clients.StructureResearchMain"
+
+[[lean_exe]]
+name = "leanphy_parameter_research"
+root = "Clients.ParameterResearchMain"
+
+[[lean_exe]]
+name = "leanphy_automatic_parameters"
+root = "Clients.AutomaticParameterMain"
+
+[[lean_exe]]
+name = "leanphy_symbolic_lie"
+root = "Clients.SymbolicLieMain"
+
+[[lean_exe]]
+name = "leanphy_model_domains"
+root = "Clients.ModelDomainMain"
+
+[[lean_exe]]
+name = "leanphy_deformations"
+root = "Clients.DeformationResearchMain"
+
+[[lean_exe]]
+name = "leanphy_adjoint_deformations"
+root = "Clients.AdjointDeformationMain"
+
+[[lean_exe]]
+name = "leanphy_second_order"
+root = "Clients.SecondOrderDeformationMain"
+
+[[lean_exe]]
+name = "leanphy_deformation_gauge"
+root = "Clients.DeformationGaugeMain"
+
+[[lean_exe]]
+name = "leanphy_third_cohomology"
+root = "Clients.ThirdCohomologyMain"
+
+[[lean_exe]]
+name = "leanphy_parameter_obstructions"
+root = "Clients.ParameterizedObstructionMain"
+
+[[lean_exe]]
+name = "leanphy_third_order"
+root = "Clients.ThirdOrderDeformationMain"
+
+[[lean_exe]]
+name = "leanphy_third_search"
+root = "Clients.ThirdOrderSearchMain"
+
+[[lean_exe]]
+name = "leanphy_lie_ghost"
+root = "Clients.LieGhostMain"
+
+[[lean_exe]]
+name = "leanphy_obligation_client"
+root = "Clients.ObligationClientMain"
+
+[[lean_exe]]
+name = "leanphy_variational_client"
+root = "Clients.VariationalClientMain"
+
+[[lean_exe]]
+name = "leanphy_index"
+root = "Clients.IndexMain"
+
+[[lean_exe]]
+name = "leanphy_source_client"
+root = "Clients.SourceClientMain"
+
+[[lean_exe]]
+name = "leanphy_effective_client"
+root = "Clients.EffectiveClientMain"
+
+[[lean_exe]]
+name = "leanphy_fermion_client"
+root = "Clients.FermionClientMain"
+
+[[lean_exe]]
+name = "leanphy_dynamics_client"
+root = "Clients.DynamicsClientMain"
+
 [[require]]
 name = "mathlib"
 git = "https://github.com/leanprover-community/mathlib4.git"
@@ -36,3 +128,31 @@ rev = "v4.34.0"
 
 [package]
 precompileModules = true
+
+[[lean_exe]]
+name = "leanphy_exploration_client"
+root = "Clients.ExplorationClientMain"
+
+[[lean_exe]]
+name = "leanphy_matrix_certificate_client"
+root = "Clients.MatrixCertificateClientMain"
+
+[[lean_exe]]
+name = "leanphy_action_evaluation_client"
+root = "Clients.ActionEvaluationClientMain"
+
+[[lean_exe]]
+name = "leanphy_fermion_word_client"
+root = "Clients.FermionWordClientMain"
+
+[[lean_exe]]
+name = "leanphy_self_consistency_client"
+root = "Clients.SelfConsistencyClientMain"
+
+[[lean_exe]]
+name = "leanphy_field_redefinition_client"
+root = "Clients.FieldRedefinitionClientMain"
+
+[[lean_exe]]
+name = "leanphy_finite_lattice_client"
+root = "Clients.FiniteLatticeClientMain"

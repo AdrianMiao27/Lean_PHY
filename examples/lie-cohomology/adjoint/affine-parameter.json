@@ -1,0 +1,18 @@
+{
+  "name": "AffineAdjointParameter",
+  "parameters": [
+    "g"
+  ],
+  "dimension": 2,
+  "coefficient_mode": "adjoint",
+  "brackets": [
+    {
+      "i": 0,
+      "j": 1,
+      "value": [
+        0,
+        "g"
+      ]
+    }
+  ]
+}

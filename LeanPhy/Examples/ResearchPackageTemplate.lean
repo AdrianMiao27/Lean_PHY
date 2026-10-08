@@ -80,36 +80,28 @@ def witnessedResearch : TheoryPackage :=
       "witnessed theorem" "the theorem consumes the typed model premise"
       "research_project.lean" (fun h => h)
 
-/- An external obligation can later be closed by a proof-bearing claim.  The
-   membership argument makes a misspelled obligation name a Lean error. -/
+/- Relevant finite evidence cannot discharge the text-only continuum task. -/
 def closedResearch : TheoryPackage :=
-  researchBase.resolveObligation "continuum bridge" (by
-    simp [researchBase, TheoryPackage.addObligationText,
-      TheoryPackage.addObligation, TheoryPackage.ofModel])
-    "finite bridge theorem"
-    "the declared finite result is transported through the supplied bridge"
-    "research_project.lean"
-    ["model domain", "coefficient field"] [] True.intro
+  researchBase.addObligationEvidence ⟨⟨0, by decide⟩⟩
+    "finite evidence" "finite evidence leaves the continuum bridge open"
+    "research_project.lean" [] [] LeanPhy.Quantum.pauliX_sq
 
-/- The typed form binds the open obligation to a Lean proposition.  In a real
-   project replace `True` with the convergence, domain, or numerical theorem
-   that the external bridge is required to establish. -/
-def continuumBridgeWitness : ExternalObligationWitness where
+/-- Register the exact finite target before supplying its proof. -/
+def finiteBridgeWitness : ExternalObligationWitness where
   metadata :=
-    { name := "continuum bridge"
-      statement := "supply the analysis or numerical certificate needed to interpret the finite result in the target theory"
-      source := "research project" }
-  proposition := True
+    { name := "finite involution"
+      statement := "Pauli X squares to identity"
+      source := "LeanPhy.Quantum.Pauli" }
+  proposition := LeanPhy.Quantum.pauliX * LeanPhy.Quantum.pauliX = LeanPhy.Quantum.identity
+
+def finiteResearchBase : TheoryPackage :=
+  (TheoryPackage.empty "finite bridge" "quantum").addObligationWitness finiteBridgeWitness
 
 def typedClosedResearch : TheoryPackage :=
-  researchBase.resolveObligationWitness continuumBridgeWitness (by
-    simp [researchBase, TheoryPackage.addObligationText,
-      TheoryPackage.addObligation, TheoryPackage.ofModel,
-      continuumBridgeWitness])
-    "typed finite bridge theorem"
-    "the declared finite result is transported through the typed bridge"
-    "research_project.lean" ["model domain", "coefficient field"] []
-    (fun h => h) True.intro
+  finiteResearchBase.resolveObligation
+    ((TheoryPackage.empty "finite bridge" "quantum").addedObligationRef finiteBridgeWitness)
+    "finite involution proved" "Pauli X squares to identity"
+    "LeanPhy.Quantum.Pauli" [] [] LeanPhy.Quantum.pauliX_sq
 
 example : researchBase.status = "UNVERIFIED" := rfl
 example : (researchWithClaim True.intro).status = "VERIFIED-CONDITIONAL" := rfl
@@ -123,7 +115,7 @@ example : (researchWithDerivedClaim True.intro).missingClaimReferenceCount = 0 :
 example : witnessedResearch.claimCount = 1 := rfl
 example : witnessedResearch.missingAssumptionReferenceCount = 0 := rfl
 example : closedResearch.claimCount = 1 := rfl
-example : closedResearch.obligationCount = 0 := rfl
+example : closedResearch.obligationCount = 1 := rfl
 example : closedResearch.status = "VERIFIED-CONDITIONAL" := rfl
 example : typedClosedResearch.claimCount = 1 := rfl
 example : typedClosedResearch.obligationCount = 0 := rfl

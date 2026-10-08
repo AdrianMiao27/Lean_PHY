@@ -1,0 +1,63 @@
+{
+  "name": "AffineFourThirdVector",
+  "parameters": [
+    "a",
+    "u"
+  ],
+  "dimension": 4,
+  "brackets": [
+    {
+      "i": 0,
+      "j": 1,
+      "value": [
+        0,
+        "a",
+        0,
+        0
+      ]
+    }
+  ],
+  "coefficient_dimension": 2,
+  "action": [
+    [
+      [
+        "u",
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ],
+    [
+      [
+        0,
+        1
+      ],
+      [
+        0,
+        0
+      ]
+    ],
+    [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ],
+    [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  ]
+}

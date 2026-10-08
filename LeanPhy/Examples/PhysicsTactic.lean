@@ -64,6 +64,8 @@ example : (7 : ℤ) + 5 = 12 := by
   physics_norm_num
 
 example : (LeanPhy.Library.names (LeanPhy.Library.search "CCR")).length = 1 := by
-  decide
+  -- The growing catalogue exceeds the elaborator reducer's recursion limit.
+  -- Kernel evaluation retains the same checked proposition without native axioms.
+  decide +kernel
 
 end LeanPhy.Examples.PhysicsTactic

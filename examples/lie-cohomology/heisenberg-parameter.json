@@ -1,0 +1,6 @@
+{
+  "name": "HeisenbergParameter",
+  "parameters": ["g"],
+  "dimension": 3,
+  "brackets": [{"i": 0, "j": 1, "value": [0, 0, "g"]}]
+}

@@ -1,0 +1,35 @@
+{
+  "name": "BiasedFeedback",
+  "kind": "feedback",
+  "action": [
+    0,
+    0
+  ],
+  "observables": [
+    [
+      1,
+      -1
+    ]
+  ],
+  "bias": [
+    "1/3"
+  ],
+  "coupling": [
+    [
+      "1/8"
+    ]
+  ],
+  "point": [
+    "0.361413"
+  ],
+  "error": "1/100000",
+  "candidates": [
+    {
+      "shift": 0,
+      "depth": 0,
+      "order": 10,
+      "value": "0.361413",
+      "error": "1/100000"
+    }
+  ]
+}

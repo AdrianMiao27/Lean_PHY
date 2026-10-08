@@ -1,0 +1,5 @@
+{
+  "name": "AffineTrivial",
+  "dimension": 2,
+  "brackets": [{"i": 0, "j": 1, "value": [0, 1]}]
+}

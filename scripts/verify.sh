@@ -35,7 +35,16 @@ lake build LeanPhy.Minimal \
   LeanPhy.Library \
   LeanPhy.Examples.ApproximateModel \
   LeanPhy.Examples.ResearchPackageTemplate LeanPhy.Examples.ClientProject \
-  LeanPhy.Scaffold leanphy_client_regression leanphy_strict_client leanphy_init
+  LeanPhy.Scaffold leanphy_client_regression leanphy_strict_client leanphy_init \
+  leanphy_ghost_research leanphy_lie_research leanphy_structure_research leanphy_parameter_research \
+  leanphy_automatic_parameters leanphy_symbolic_lie leanphy_model_domains leanphy_deformations leanphy_adjoint_deformations leanphy_second_order leanphy_deformation_gauge leanphy_third_cohomology leanphy_parameter_obstructions leanphy_third_order leanphy_third_search leanphy_lie_ghost
+
+# New shared operations and independent research clients are release targets.
+lake build LeanPhy.Workflow.Core LeanPhy.CLI.Core LeanPhy.Library.Core \
+  LeanPhy.FieldTheory.Variational LeanPhy.FieldTheory.VariationalResidual \
+  LeanPhy.Classical.VariationalBridge leanphy_obligation_client \
+  leanphy_variational_client leanphy_source_client leanphy_effective_client \
+  leanphy_fermion_client leanphy_dynamics_client leanphy_exploration_client leanphy_matrix_certificate_client leanphy_action_evaluation_client leanphy_fermion_word_client leanphy_self_consistency_client leanphy_field_redefinition_client leanphy_finite_lattice_client leanphy_index
 
 # The project generator is part of the public workflow.  Exercise it without
 # building the generated project (which would intentionally resolve the
@@ -73,6 +82,15 @@ if ! rg -q 'lake build' "${SCAFFOLD_DIR}/scripts/verify-leanphy.sh"; then
   echo "verification failed: scaffold omitted the CI verification script" >&2
   exit 1
 fi
+if ! rg -q '#leanphy_audit_module' "${SCAFFOLD_DIR}/Research.lean" || \
+   ! rg -q 'audit_project.py' "${SCAFFOLD_DIR}/scripts/verify-leanphy.sh"; then
+  echo "verification failed: scaffold omitted declaration dependency auditing" >&2
+  exit 1
+fi
+if ! cmp -s "${PROJECT_ROOT}/scripts/audit_project.py" "${SCAFFOLD_DIR}/scripts/audit_project.py"; then
+  echo "verification failed: scaffold copied a stale or different project verifier" >&2
+  exit 1
+fi
 if ! rg -q 'verify-leanphy\.sh' "${SCAFFOLD_DIR}/.github/workflows/leanphy.yml"; then
   echo "verification failed: scaffold omitted the GitHub Actions verification step" >&2
   exit 1
@@ -80,9 +98,10 @@ fi
 # An existing empty destination directory is accepted (the common `mktemp -d`
 # workflow).  A full generated-project build is available for release jobs;
 # it is opt-in here because Lake may need to fetch mathlib again in a clean
-# temporary directory.
+# temporary directory. The project-audit regression below always checks a real
+# generated project using the already installed, pinned dependency artifacts.
 if [[ "${LEANPHY_VERIFY_SCAFFOLD_BUILD:-0}" == "1" ]]; then
-  (cd "${SCAFFOLD_DIR}" && lake build >/dev/null)
+  (cd "${SCAFFOLD_DIR}" && bash scripts/verify-leanphy.sh >/dev/null)
   if ! (cd "${SCAFFOLD_DIR}" && lake exe verify_physics_check --project-json >/dev/null); then
     echo "verification failed: generated downstream project could not run its CLI" >&2
     exit 1
@@ -104,8 +123,8 @@ fi
 SMOKE_LOG="$(mktemp /tmp/leanphy-smoke.XXXXXX.log)"
 lake exe leanphy_smoke | tee "${SMOKE_LOG}"
 OK_COUNT="$(rg -c '^  \[ok\]' "${SMOKE_LOG}")"
-if (( OK_COUNT < 450 )); then
-  echo "verification failed: expected at least 450 smoke capabilities, got ${OK_COUNT}" >&2
+if (( OK_COUNT < 777 )); then
+  echo "verification failed: expected at least 777 smoke capabilities, got ${OK_COUNT}" >&2
   exit 1
 fi
 
@@ -183,6 +202,29 @@ if not any("commutator" in entry.get("tags", []) for entry in catalog):
     raise SystemExit("verification failed: lemma catalogue omitted a commutator entry")
 if any(not entry.get("id", "").startswith("leanphy.lemma:") for entry in catalog):
     raise SystemExit("verification failed: lemma catalogue omitted stable ids")
+ghost_entries = {"ghost_koszul_nilpotency", "ghost_left_derivative_car",
+                 "ghost_quadratic_nilpotency", "ghost_quadratic_nontriviality",
+                 "ghost_finite_nilpotency_criterion", "lie_ghost_degree_one_bridge",
+                 "lie_ghost_jacobi_nilpotency", "lie_ghost_degree_two_bridge",
+                 "lie_ghost_integer_degree", "ghost_koszul_integer_degree",
+                 "lie_ghost_homogeneous_primitive", "lie_ghost_scalar_boundary",
+                 "lie_ghost_closed_reflection", "lie_ghost_exact_reflection",
+                 "lie_ghost_h2_equivalence", "lie_ghost_complete_coordinates",
+                 "lie_matter_nilpotent", "lie_matter_degree", "lie_matter_invariants", "lie_matter_cocycle"}
+if not ghost_entries.issubset({entry.get("name") for entry in catalog}):
+    raise SystemExit("verification failed: lemma catalogue omitted ghost derivative theorems")
+lie_entries = {"lie_d2_d1", "lie_h2_zero_iff_boundary", "central_extension_classification",
+               "cohomology_reduction_exactness", "heisenberg_h2_dimension",
+               "finite_lie_cocycle_check", "generated_vector_h2_dimension",
+               "diagonal_cohomology_exactness", "solvable_family_dimension",
+               "generated_solvable_strata_dimension", "generated_determinant_strata_dimension",
+               "symbolic_heisenberg_dimension", "symbolic_vector_exactness", "discovered_lie_model_domain",
+               "adjoint_h2_deformation_classification", "second_order_deformation_obstruction", "intrinsic_h3_extension_criterion", "parameter_actual_h3", "parameter_intrinsic_extension", "intrinsic_obstruction_closed",
+               "joint_third_search_criterion", "joint_third_search_all_models", "joint_third_search_nonexistence",
+               "third_order_model_criterion", "third_order_intrinsic_obstruction", "third_order_computed_correction",
+               "computed_adjoint_deformation_equivalence", "computed_deformation_representatives_unique"}
+if not lie_entries.issubset({entry.get("name") for entry in catalog}):
+    raise SystemExit("verification failed: lemma catalogue omitted degree-two Lie theorems")
 PY
 
 CLAIMS_LOG="$(mktemp /tmp/leanphy-claims.XXXXXX.log)"
@@ -329,6 +371,8 @@ if manifest.get("status") != "VERIFIED-CONDITIONAL":
     raise SystemExit("verification failed: manifest status is not conditional-verified")
 if manifest.get("toolchain", {}).get("lean") != "v4.34.0":
     raise SystemExit("verification failed: manifest omitted the Lean toolchain")
+if manifest.get("toolchain", {}).get("leanphy") != pathlib.Path("VERSION").read_text().strip():
+    raise SystemExit("verification failed: manifest LeanPhy version does not match VERSION")
 if "LeanPhy.Entry.FieldTheory" not in manifest.get("profiles", []):
     raise SystemExit("verification failed: manifest omitted the field-theory profile")
 if manifest.get("claim_count", 0) < 20:
@@ -399,6 +443,356 @@ if ! rg -q 'client derived algebra::Pauli commutator derived from XY product' "$
   exit 1
 fi
 
+# A finite research calculation exports real proofs and retains its open obligations.
+GHOST_JSON_LOG="$(mktemp /tmp/leanphy-ghost-project.XXXXXX.log)"
+lake exe leanphy_ghost_research --project-json >"${GHOST_JSON_LOG}"
+python3 - "${GHOST_JSON_LOG}" <<'PY'
+import json
+import pathlib
+import sys
+
+project = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
+if project.get("status") != "VERIFIED-CONDITIONAL" or project.get("diagnostics"):
+    raise SystemExit("verification failed: finite ghost research report is malformed")
+if (project.get("package_count"), project.get("claim_count"),
+        project.get("open_obligation_count")) != (1, 11, 2):
+    raise SystemExit("verification failed: finite ghost report lost claims or open obligations")
+claims = project["packages"][0]["claims"]
+if any(not claim.get("source", "").startswith("LeanPhy.Examples.GhostResearch.")
+       or not claim.get("requires") for claim in claims):
+    raise SystemExit("verification failed: finite ghost claim lost provenance or assumptions")
+PY
+if lake exe leanphy_ghost_research --strict --project-json >/dev/null 2>/dev/null; then
+  echo "verification failed: strict mode accepted open ghost interpretation obligations" >&2
+  exit 1
+fi
+
+# Degree-two research distinguishes nonzero cochains from nonzero quotient classes.
+LIE_JSON_LOG="$(mktemp /tmp/leanphy-lie-project.XXXXXX.log)"
+lake exe leanphy_lie_research --project-json >"${LIE_JSON_LOG}"
+python3 - "${LIE_JSON_LOG}" <<'PY'
+import json
+import pathlib
+import sys
+
+project = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
+if project.get("status") != "VERIFIED-CONDITIONAL" or project.get("diagnostics"):
+    raise SystemExit("verification failed: Lie cohomology research report is malformed")
+if (project.get("package_count"), project.get("claim_count"),
+        project.get("open_obligation_count")) != (1, 16, 2):
+    raise SystemExit("verification failed: Lie cohomology report lost claims or obligations")
+claims = project["packages"][0]["claims"]
+if any(not claim.get("source", "").startswith("LeanPhy.Examples.LieCohomologyResearch.")
+       or not claim.get("requires") for claim in claims):
+    raise SystemExit("verification failed: Lie cohomology claim lost provenance or assumptions")
+PY
+if lake exe leanphy_lie_research --strict --project-json >/dev/null 2>/dev/null; then
+  echo "verification failed: strict mode accepted open Lie cohomology interpretation obligations" >&2
+  exit 1
+fi
+
+# Structure constants and coefficient actions produce an independent research ledger.
+STRUCTURE_JSON_LOG="$(mktemp /tmp/leanphy-structure-project.XXXXXX.log)"
+lake exe leanphy_structure_research --project-json >"${STRUCTURE_JSON_LOG}"
+python3 - "${STRUCTURE_JSON_LOG}" <<'PYREPORT'
+import json
+import pathlib
+import sys
+
+project = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
+if project.get("status") != "VERIFIED-CONDITIONAL" or project.get("diagnostics"):
+    raise SystemExit("verification failed: structure constant report is malformed")
+if (project.get("package_count"), project.get("claim_count"),
+        project.get("open_obligation_count")) != (1, 10, 1):
+    raise SystemExit("verification failed: structure constant report lost claims or obligations")
+if any(not c.get("source", "").startswith("LeanPhy.Examples.StructureConstantResearch.")
+       or not c.get("requires") for c in project["packages"][0]["claims"]):
+    raise SystemExit("verification failed: structure constant claim lost provenance or assumptions")
+PYREPORT
+if lake exe leanphy_structure_research --strict --project-json >/dev/null 2>/dev/null; then
+  echo "verification failed: strict mode accepted open structure constant interpretation obligations" >&2
+  exit 1
+fi
+
+# A symbolic family retains parameter conditions and physical interpretation obligations.
+PARAMETER_JSON_LOG="$(mktemp /tmp/leanphy-parameter-project.XXXXXX.log)"
+lake exe leanphy_parameter_research --project-json >"${PARAMETER_JSON_LOG}"
+python3 - "${PARAMETER_JSON_LOG}" <<'PYREPORT'
+import json
+import pathlib
+import sys
+
+project = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
+if project.get("status") != "VERIFIED-CONDITIONAL" or project.get("diagnostics"):
+    raise SystemExit("verification failed: parameter cohomology report is malformed")
+if (project.get("package_count"), project.get("claim_count"),
+        project.get("open_obligation_count")) != (1, 12, 1):
+    raise SystemExit("verification failed: parameter cohomology report lost claims or obligations")
+if any(not c.get("source", "").startswith("LeanPhy.Examples.ParameterCohomologyResearch.")
+       or not c.get("requires") for c in project["packages"][0]["claims"]):
+    raise SystemExit("verification failed: parameter cohomology claim lost provenance or assumptions")
+PYREPORT
+if lake exe leanphy_parameter_research --strict --project-json >/dev/null 2>/dev/null; then
+  echo "verification failed: strict mode accepted open parameter interpretation obligations" >&2
+  exit 1
+fi
+
+# Automatic branches must report their proof provenance and remaining interpretation task.
+AUTOMATIC_JSON_LOG="$(mktemp /tmp/leanphy-automatic-project.XXXXXX.log)"
+lake exe leanphy_automatic_parameters --project-json >"${AUTOMATIC_JSON_LOG}"
+python3 - "${AUTOMATIC_JSON_LOG}" <<'PYREPORT'
+import json
+import pathlib
+import sys
+
+project = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
+if project.get("status") != "VERIFIED-CONDITIONAL" or project.get("diagnostics"):
+    raise SystemExit("verification failed: automatic parameter report is malformed")
+if (project.get("package_count"), project.get("claim_count"),
+        project.get("open_obligation_count")) != (1, 13, 1):
+    raise SystemExit("verification failed: automatic parameter report lost claims or obligations")
+if any(not c.get("source", "").startswith("LeanPhy.Examples.AutomatedParameterResearch.")
+       or not c.get("requires") for c in project["packages"][0]["claims"]):
+    raise SystemExit("verification failed: automatic parameter report lost proof provenance")
+PYREPORT
+if lake exe leanphy_automatic_parameters --strict --project-json >/dev/null 2>/dev/null; then
+  echo "verification failed: strict mode accepted open automatic parameter interpretation obligations" >&2
+  exit 1
+fi
+
+# Symbolic Lie inputs retain model conditions and the physical interpretation task.
+SYMBOLIC_JSON_LOG="$(mktemp /tmp/leanphy-symbolic-lie-project.XXXXXX.log)"
+lake exe leanphy_symbolic_lie --project-json >"${SYMBOLIC_JSON_LOG}"
+python3 - "${SYMBOLIC_JSON_LOG}" <<'PYREPORT'
+import json
+import pathlib
+import sys
+
+project = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
+if project.get("status") != "VERIFIED-CONDITIONAL" or project.get("diagnostics"):
+    raise SystemExit("verification failed: symbolic Lie report is malformed")
+if (project.get("package_count"), project.get("claim_count"),
+        project.get("open_obligation_count")) != (1, 14, 1):
+    raise SystemExit("verification failed: symbolic Lie report lost claims or obligations")
+if any(not c.get("source", "").startswith("LeanPhy.Examples.SymbolicLieResearch.")
+       or not c.get("requires") for c in project["packages"][0]["claims"]):
+    raise SystemExit("verification failed: symbolic Lie report lost proof provenance")
+PYREPORT
+if lake exe leanphy_symbolic_lie --strict --project-json >/dev/null 2>/dev/null; then
+  echo "verification failed: strict mode accepted open symbolic Lie interpretation obligations" >&2
+  exit 1
+fi
+
+# Discovered model domains retain proof provenance and interpretation obligations.
+DOMAIN_JSON_LOG="$(mktemp /tmp/leanphy-model-domain-project.XXXXXX.log)"
+lake exe leanphy_model_domains --project-json >"${DOMAIN_JSON_LOG}"
+python3 - "${DOMAIN_JSON_LOG}" <<'PYREPORT'
+import json
+import pathlib
+import sys
+project = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
+if project.get("status") != "VERIFIED-CONDITIONAL" or project.get("diagnostics"):
+    raise SystemExit("verification failed: model domain report is malformed")
+if (project.get("package_count"), project.get("claim_count"), project.get("open_obligation_count")) != (1, 12, 1):
+    raise SystemExit("verification failed: model domain report lost claims or obligations")
+if any(not c.get("source", "").startswith("LeanPhy.Examples.ModelDomainResearch.")
+       or not c.get("requires") for c in project["packages"][0]["claims"]):
+    raise SystemExit("verification failed: model domain report lost proof provenance")
+PYREPORT
+if lake exe leanphy_model_domains --strict --project-json >/dev/null 2>/dev/null; then
+  echo "verification failed: strict mode accepted open model domain interpretation obligations" >&2
+  exit 1
+fi
+
+# Deformation results retain algebraic premises and the physical interpretation boundary.
+DEFORMATION_JSON_LOG="$(mktemp /tmp/leanphy-deformation-project.XXXXXX.log)"
+lake exe leanphy_deformations --project-json >"${DEFORMATION_JSON_LOG}"
+python3 - "${DEFORMATION_JSON_LOG}" <<'PYREPORT'
+import json
+import pathlib
+import sys
+project = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
+if project.get("status") != "VERIFIED-CONDITIONAL" or project.get("diagnostics"):
+    raise SystemExit("verification failed: deformation report is malformed")
+if (project.get("package_count"), project.get("claim_count"), project.get("open_obligation_count")) != (1, 14, 1):
+    raise SystemExit("verification failed: deformation report lost claims or obligations")
+for claim in project["packages"][0]["claims"]:
+    if not claim.get("source", "").startswith(("LeanPhy.Examples.LieDeformationResearch.", "LeanPhy.Mathematics.LieDeformation.")) or not claim.get("requires"):
+        raise SystemExit("verification failed: deformation report lost proof provenance")
+PYREPORT
+if lake exe leanphy_deformations --strict --project-json >/dev/null 2>/dev/null; then
+  echo "verification failed: strict mode accepted open deformation interpretation obligations" >&2
+  exit 1
+fi
+
+# Computed adjoint coordinates produce proof-bearing deformation reports.
+ADJOINT_JSON_LOG="$(mktemp /tmp/leanphy-adjoint-project.XXXXXX.log)"
+lake exe leanphy_adjoint_deformations --project-json >"${ADJOINT_JSON_LOG}"
+python3 - "${ADJOINT_JSON_LOG}" <<'PYREPORT'
+import json
+import pathlib
+import sys
+project = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
+if project.get("status") != "VERIFIED-CONDITIONAL" or project.get("diagnostics"):
+    raise SystemExit("verification failed: adjoint deformation report is malformed")
+if (project.get("package_count"), project.get("claim_count"), project.get("open_obligation_count")) != (1, 12, 1):
+    raise SystemExit("verification failed: adjoint deformation report lost claims or obligations")
+if any(not c.get("source", "").startswith("LeanPhy.Examples.AdjointDeformationResearch.")
+       or not c.get("requires") for c in project["packages"][0]["claims"]):
+    raise SystemExit("verification failed: adjoint deformation report lost proof provenance")
+PYREPORT
+if lake exe leanphy_adjoint_deformations --strict --project-json >/dev/null 2>/dev/null; then
+  echo "verification failed: strict mode accepted open adjoint interpretation obligations" >&2
+  exit 1
+fi
+
+# Complete second-order solvers expose checked claims and retain interpretation obligations.
+SECOND_ORDER_JSON_LOG="$(mktemp /tmp/leanphy-second-order-project.XXXXXX.log)"
+lake exe leanphy_second_order --project-json >"${SECOND_ORDER_JSON_LOG}"
+python3 - "${SECOND_ORDER_JSON_LOG}" <<'PYREPORT'
+import json
+import pathlib
+import sys
+project = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
+if project.get("status") != "VERIFIED-CONDITIONAL" or project.get("diagnostics"):
+    raise SystemExit("verification failed: second-order report is malformed")
+if (project.get("package_count"), project.get("claim_count"), project.get("open_obligation_count")) != (1, 13, 1):
+    raise SystemExit("verification failed: second-order report lost claims or obligations")
+if any(not c.get("source", "").startswith("LeanPhy.Examples.SecondOrderDeformationResearch.")
+       or not c.get("requires") for c in project["packages"][0]["claims"]):
+    raise SystemExit("verification failed: second-order report lost proof provenance")
+PYREPORT
+if lake exe leanphy_second_order --strict --project-json >/dev/null 2>/dev/null; then
+  echo "verification failed: strict mode accepted open second-order interpretation obligations" >&2
+  exit 1
+fi
+
+# Second-order generator changes retain typed provenance and physical obligations.
+GAUGE_JSON_LOG="$(mktemp /tmp/leanphy-deformation-gauge-project.XXXXXX.log)"
+lake exe leanphy_deformation_gauge --project-json >"${GAUGE_JSON_LOG}"
+python3 - "${GAUGE_JSON_LOG}" <<'PYREPORT'
+import json
+import pathlib
+import sys
+project = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
+if project.get("status") != "VERIFIED-CONDITIONAL" or project.get("diagnostics"):
+    raise SystemExit("verification failed: deformation gauge report is malformed")
+if (project.get("package_count"), project.get("claim_count"), project.get("open_obligation_count")) != (1, 15, 1):
+    raise SystemExit("verification failed: deformation gauge report lost claims or obligations")
+if any(not c.get("source", "").startswith("LeanPhy.Examples.DeformationGaugeResearch.")
+       or not c.get("requires") for c in project["packages"][0]["claims"]):
+    raise SystemExit("verification failed: deformation gauge report lost proof provenance")
+PYREPORT
+if lake exe leanphy_deformation_gauge --strict --project-json >/dev/null 2>/dev/null; then
+  echo "verification failed: strict mode accepted open generator interpretation obligations" >&2
+  exit 1
+fi
+
+# Actual H3 calculations retain checked claims and physical interpretation obligations.
+THIRD_JSON_LOG="$(mktemp /tmp/leanphy-third-cohomology-project.XXXXXX.log)"
+lake exe leanphy_third_cohomology --project-json >"${THIRD_JSON_LOG}"
+python3 - "${THIRD_JSON_LOG}" <<'PYREPORT'
+import json
+import pathlib
+import sys
+project = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
+if project.get("status") != "VERIFIED-CONDITIONAL" or project.get("diagnostics"):
+    raise SystemExit("verification failed: third cohomology report is malformed")
+if (project.get("package_count"), project.get("claim_count"), project.get("open_obligation_count")) != (1, 14, 1):
+    raise SystemExit("verification failed: third cohomology report lost claims or obligations")
+if any(not c.get("source", "").startswith("LeanPhy.Examples.ThirdCohomologyResearch.")
+       or not c.get("requires") for c in project["packages"][0]["claims"]):
+    raise SystemExit("verification failed: third cohomology report lost proof provenance")
+PYREPORT
+if lake exe leanphy_third_cohomology --strict --project-json >/dev/null 2>/dev/null; then
+  echo "verification failed: strict mode accepted open H3 interpretation obligations" >&2
+  exit 1
+fi
+
+# Parameter-dependent H3 calculations preserve complete strata and model conditions.
+PARAM_OBSTRUCTION_LOG="$(mktemp /tmp/leanphy-parameter-obstructions-project.XXXXXX.log)"
+lake exe leanphy_parameter_obstructions --project-json >"${PARAM_OBSTRUCTION_LOG}"
+python3 - "${PARAM_OBSTRUCTION_LOG}" <<'PYREPORT'
+import json
+import pathlib
+import sys
+project = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
+if project.get("status") != "VERIFIED-CONDITIONAL" or project.get("diagnostics"):
+    raise SystemExit("verification failed: parameter obstruction report is malformed")
+if (project.get("package_count"), project.get("claim_count"), project.get("open_obligation_count")) != (1, 16, 1):
+    raise SystemExit("verification failed: parameter obstruction report lost claims or obligations")
+if any(not c.get("source", "").startswith("LeanPhy.Examples.ParameterizedObstructionResearch.")
+       or not c.get("requires") for c in project["packages"][0]["claims"]):
+    raise SystemExit("verification failed: parameter obstruction report lost proof provenance")
+PYREPORT
+if lake exe leanphy_parameter_obstructions --strict --project-json >/dev/null 2>/dev/null; then
+  echo "verification failed: strict mode accepted open H3 interpretation obligations" >&2
+  exit 1
+fi
+
+# Third-order models retain their specified lower corrections and interpretation obligation.
+THIRD_ORDER_LOG="$(mktemp /tmp/leanphy-third-order-project.XXXXXX.log)"
+lake exe leanphy_third_order --project-json >"${THIRD_ORDER_LOG}"
+python3 - "${THIRD_ORDER_LOG}" <<'PYREPORT'
+import json
+import pathlib
+import sys
+project = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
+if project.get("status") != "VERIFIED-CONDITIONAL" or project.get("diagnostics"):
+    raise SystemExit("verification failed: third-order report is malformed")
+if (project.get("package_count"), project.get("claim_count"), project.get("open_obligation_count")) != (1, 13, 1):
+    raise SystemExit("verification failed: third-order report lost claims or obligations")
+if any(not c.get("source", "").startswith("LeanPhy.Examples.ThirdOrderDeformationResearch.")
+       or not c.get("requires") for c in project["packages"][0]["claims"]):
+    raise SystemExit("verification failed: third-order report lost proof provenance")
+PYREPORT
+if lake exe leanphy_third_order --strict --project-json >/dev/null 2>/dev/null; then
+  echo "verification failed: strict mode accepted open third-order interpretation obligations" >&2
+  exit 1
+fi
+
+# Joint correction search reports both successful repairs and true third-order obstructions.
+THIRD_SEARCH_LOG="$(mktemp /tmp/leanphy-third-search-project.XXXXXX.log)"
+lake exe leanphy_third_search --project-json >"${THIRD_SEARCH_LOG}"
+python3 - "${THIRD_SEARCH_LOG}" <<'PYREPORT'
+import json
+import pathlib
+import sys
+project = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
+if project.get("status") != "VERIFIED-CONDITIONAL" or project.get("diagnostics"):
+    raise SystemExit("verification failed: joint correction search report is malformed")
+if (project.get("package_count"), project.get("claim_count"), project.get("open_obligation_count")) != (1, 14, 1):
+    raise SystemExit("verification failed: joint correction report lost claims or obligations")
+if any(not c.get("source", "").startswith("LeanPhy.Examples.ThirdOrderSearchResearch.")
+       or not c.get("requires") for c in project["packages"][0]["claims"]):
+    raise SystemExit("verification failed: joint correction report lost proof provenance")
+PYREPORT
+if lake exe leanphy_third_search --strict --project-json >/dev/null 2>/dev/null; then
+  echo "verification failed: strict mode accepted open joint correction interpretation obligations" >&2
+  exit 1
+fi
+
+# Generated pure-ghost calculations retain a separate physical interpretation obligation.
+LIE_GHOST_LOG="$(mktemp /tmp/leanphy-lie-ghost-project.XXXXXX.log)"
+lake exe leanphy_lie_ghost --project-json >"${LIE_GHOST_LOG}"
+python3 - "${LIE_GHOST_LOG}" <<'PYREPORT'
+import json
+import pathlib
+import sys
+project = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
+if project.get("status") != "VERIFIED-CONDITIONAL" or project.get("diagnostics"):
+    raise SystemExit("verification failed: Lie ghost report is malformed")
+if (project.get("package_count"), project.get("claim_count"), project.get("open_obligation_count")) != (1, 54, 1):
+    raise SystemExit("verification failed: Lie ghost report lost claims or obligations")
+if any(not c.get("source", "").startswith(("LeanPhy.Examples.LieGhostResearch.", "LeanPhy.Examples.GhostCohomology.", "LeanPhy.Examples.GhostMatter."))
+       for c in project["packages"][0]["claims"]):
+    raise SystemExit("verification failed: Lie ghost report lost proof provenance")
+PYREPORT
+if lake exe leanphy_lie_ghost --strict --project-json >/dev/null 2>/dev/null; then
+  echo "verification failed: strict mode accepted open Lie ghost interpretation obligations" >&2
+  exit 1
+fi
+
 # Strip nested Lean comments before checking; documentation may discuss these words.
 python3 "${PROJECT_ROOT}/scripts/check_declarations.py"
 
@@ -409,10 +803,23 @@ if rg -n 'sorryAx|Lean\.ofReduceBool' "${AXIOM_LOG}"; then
   exit 1
 fi
 
-# Scan every locally defined LeanPhy declaration, not only a representative list.
-lake env lean "${PROJECT_ROOT}/scripts/audit_all.lean"
+# Enumerate, build and import every source module; audit imported and private
+# declarations too. The driver verifies source/mirror hashes before and after.
+python3 "${PROJECT_ROOT}/scripts/audit_library.py" \
+  --source-root "${PROJECT_ROOT}" --build-root "${BUILD_ROOT}"
+python3 "${PROJECT_ROOT}/scripts/test_axiom_audit.py" --build-root "${BUILD_ROOT}"
+python3 "${PROJECT_ROOT}/scripts/test_project_audit.py" --build-root "${BUILD_ROOT}"
 
 python3 "${PROJECT_ROOT}/scripts/test_negative_runner.py"
+LEANPHY_BUILD_ROOT="${BUILD_ROOT}" python3 "${PROJECT_ROOT}/scripts/test_research_infrastructure.py"
+python3 "${PROJECT_ROOT}/scripts/test_matrix_certificate.py" --build-root "${BUILD_ROOT}"
+python3 "${PROJECT_ROOT}/scripts/test_fermion_words.py" --build-root "${BUILD_ROOT}"
+python3 "${PROJECT_ROOT}/scripts/test_driven_response.py" --build-root "${BUILD_ROOT}"
+python3 "${PROJECT_ROOT}/scripts/test_heavy_field_matching.py" --build-root "${BUILD_ROOT}"
+python3 "${PROJECT_ROOT}/scripts/test_fermion_vacuum.py" --build-root "${BUILD_ROOT}"
+python3 "${PROJECT_ROOT}/scripts/test_self_consistency.py" --build-root "${BUILD_ROOT}"
+python3 "${PROJECT_ROOT}/scripts/test_gibbs_certificate.py" --build-root "${BUILD_ROOT}"
+python3 "${PROJECT_ROOT}/scripts/test_field_redefinitions.py" --build-root "${BUILD_ROOT}"
 "${PROJECT_ROOT}/scripts/negative_tests.sh"
 
 echo "LeanPhy verification passed: ${OK_COUNT} smoke capabilities; representative theorems have no sorryAx."

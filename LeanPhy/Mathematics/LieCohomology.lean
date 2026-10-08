@@ -9,12 +9,12 @@ representation law; degree-zero cochains produce degree-one coboundaries, and
 the degree-one differential produces an explicit alternating bilinear
 cochain.  The kernel checks `d₁ d₀ = 0` from the declared representation law.
 
-The interface is deliberately low-degree and certificate-oriented.  It does
-not construct a quotient by boundaries, compute a cohomology group, classify
-anomalies, integrate a Lie algebra to a Lie group, or identify algebraic
-cohomology with physical observables.  Those are separate mathematical and
-physical obligations.  The same API can nevertheless be reused by gauge,
-representation, BRST and cohomological-field-theory developments.
+This file keeps the low-degree witnesses explicit. `LieCohomology2` builds
+on it with the next differential, native mathlib adapters and the quotient
+module `H2`; `CentralExtension` connects that quotient to supplied extensions.
+General higher-degree cohomology, anomalies, Lie-group integration and the
+identification with physical observables remain separate obligations. The
+same API can be reused by gauge, representation and BRST developments.
 -/
 
 namespace LeanPhy.Mathematics

@@ -1,0 +1,7 @@
+{
+  "name": "DeterminantStrata",
+  "parameters": ["s", "t"],
+  "dimensions": [2, 2, 0],
+  "d1": [["s", "t"], ["t", "s"]],
+  "d2": []
+}

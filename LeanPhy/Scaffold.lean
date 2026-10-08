@@ -1,4 +1,4 @@
-import LeanPhy.CLI
+import LeanPhy.CLI.Core
 
 /-!
 # Downstream project scaffolding
@@ -15,7 +15,7 @@ namespace LeanPhy.Scaffold
 structure Options where
   target : String
   projectName : String := "physics_research"
-  leanphyPath : String := "../Lean_phy"
+  leanphyPath : String := "../Lean_PHY"
   profile : String := "quantum"
   force : Bool := false
 
@@ -31,6 +31,7 @@ private def usage : String :=
   "  leanphy_init TARGET [--name NAME] [--profile PROFILE]\n" ++
   "               [--leanphy-path PATH] [--force]\n\n" ++
   "PROFILE is one of minimal, quantum, optics, fluid, physics, research (default: quantum).\n" ++
+  "PATH names an existing LeanPhy checkout, relative to TARGET.\n" ++
   "The generated project uses the ordinary lake build/check workflow."
 
 private def parseLoop : List String → Options → Except String Options
@@ -81,8 +82,9 @@ private def leanToolchain : String :=
 
 private def researchFile (opts : Options) : String :=
   "import " ++ profileImport opts.profile ++ "\n" ++
-  "import LeanPhy.Workflow\n" ++
-  "import LeanPhy.CLI\n\n" ++
+  "import LeanPhy.Workflow.Core\n" ++
+  "import LeanPhy.CLI.Core\n" ++
+  "import LeanPhy.Verification\n\n" ++
   "namespace Research\n\n" ++
   "open LeanPhy.Workflow\n\n" ++
   "/-- Replace the placeholder model assumptions with the assumptions of the paper. -/\n" ++
@@ -107,21 +109,24 @@ private def researchFile (opts : Options) : String :=
   "      |>.addPackage package)\n" ++
   "  let profiled := ResearchManifest.withProfiles base [\"" ++ profileImport opts.profile ++ "\"]\n" ++
   "  ResearchManifest.withSources profiled [\"Research.lean\", \"Main.lean\", \"lakefile.toml\"]\n\n" ++
-  "end Research\n"
+  "end Research\n\n" ++
+  "/- This checks declarations above; the project verifier checks every source module. -/\n" ++
+  "#leanphy_audit_module\n"
 
 private def mainFile : String :=
-  "import LeanPhy.CLI\n" ++
+  "import LeanPhy.CLI.Core\n" ++
   "import Research\n\n" ++
   "/- `lake exe PROJECT_check --project-json` emits the machine-readable ledger. -/\n" ++
   "def main (args : List String) : IO Unit :=\n" ++
-  "  LeanPhy.CLI.run Research.manifest args\n"
+  "  LeanPhy.CLI.runWithCatalog Research.manifest args\n"
 
 private def readme (opts : Options) : String :=
   "# " ++ opts.projectName ++ "\n\n" ++
   "This project was created by `leanphy_init`.  Edit `Research.lean`, replace\n" ++
-  "the placeholder proof with ordinary Lean declarations, and run:\n\n" ++
+  "the model assumptions with those of the paper, add ordinary Lean proofs, and run:\n\n" ++
   "```text\n" ++
   "lake build\n" ++
+  "bash scripts/verify-leanphy.sh\n" ++
   "lake exe " ++ opts.projectName ++ "_check --project-json\n" ++
   "```\n\n" ++
   "A successful report is conditional on the assumptions and open obligations\n" ++
@@ -134,12 +139,27 @@ private def readme (opts : Options) : String :=
   "be exported with `--catalog-json`; the project's flat claim index is\n" ++
   "available with `--claims-json`.  Both contain only compiled proof entries.\n\n" ++
   "The scaffold also includes scripts/verify-leanphy.sh and a GitHub Actions\n" ++
-  "workflow.  Both run the same lake build and machine-readable report checks.\n"
+  "workflow.  Both run the same build, complete local-module dependency audit and\n" ++
+  "machine-readable reports. The audit requires Python 3.11 or later and permits\n" ++
+  "only propext, Classical.choice and Quot.sound as foundational axioms.\n" ++
+  "It also builds and audits Research/*.lean files not imported by Research.lean.\n" ++
+  "New modules must belong to a Lean library or executable in the Lake configuration.\n" ++
+  "A successful audit does not discharge the package's open physical obligations.\n\n" ++
+  "For a receipt tied to source hashes, use new output paths:\n\n" ++
+  "```text\n" ++
+  "bash scripts/verify-leanphy.sh --report /tmp/research-audit.json --log /tmp/research-audit.log\n" ++
+  "```\n\n" ++
+  "The standalone scripts/audit_project.py reads source directories from lakefile.toml;\n" ++
+  "for lakefile.lean, pass each --source-dir explicitly. Dependency artifacts and\n" ++
+  "the installed toolchain remain trusted. The copied verifier can be versioned\n" ++
+  "with the research project; its hash is recorded in each receipt.\n"
 
 private def verifyScript (opts : Options) : String :=
   "#!/usr/bin/env bash\n" ++
   "set -euo pipefail\n\n" ++
+  "cd \"$(dirname \"${BASH_SOURCE[0]}\")/..\"\n" ++
   "lake build\n" ++
+  "python3 scripts/audit_project.py --project-root . \"$@\"\n" ++
   "lake exe " ++ opts.projectName ++ "_check --project-json\n" ++
   "lake exe " ++ opts.projectName ++ "_check --manifest-json\n"
 
@@ -148,6 +168,8 @@ private def workflow : String :=
   "on:\n  push:\n  pull_request:\n\n" ++
   "jobs:\n  verify:\n    runs-on: ubuntu-latest\n    steps:\n" ++
   "      - uses: actions/checkout@v4\n" ++
+  "      - uses: actions/setup-python@v5\n" ++
+  "        with:\n          python-version: '3.12'\n" ++
   "      - uses: leanprover/lean-action@v1\n" ++
   "      - run: bash scripts/verify-leanphy.sh\n"
 
@@ -166,7 +188,15 @@ def create (opts : Options) : IO Unit := do
     if !entries.isEmpty then
       throw <| IO.userError ("target already exists and is not empty: " ++ opts.target ++
         " (use --force only to overwrite the generated files)")
+  /- Read the verifier from the declared dependency before writing project files.
+     Copying at creation time avoids stale code embedded in a cached executable. -/
   IO.FS.createDirAll root
+  let auditPath := (root / opts.leanphyPath / "scripts" / "audit_project.py").normalize
+  let auditSource ← try IO.FS.readFile auditPath catch _ => do
+    if !alreadyThere then
+      try IO.FS.removeDir root catch _ => pure ()
+    throw <| IO.userError ("cannot read the project verifier at " ++ auditPath.toString ++
+      "; --leanphy-path must point to an existing LeanPhy checkout relative to TARGET")
   IO.FS.createDirAll (root.join ".github" |>.join "workflows")
   IO.FS.createDirAll (root.join "scripts")
   writeOne root "lakefile.toml" (lakefile opts)
@@ -176,9 +206,10 @@ def create (opts : Options) : IO Unit := do
   writeOne root "README.md" (readme opts)
   writeOne root ".gitignore" ".lake/\n"
   writeOne (root.join "scripts") "verify-leanphy.sh" (verifyScript opts)
+  writeOne (root.join "scripts") "audit_project.py" auditSource
   writeOne (root.join ".github" |>.join "workflows") "leanphy.yml" workflow
   IO.println ("Created LeanPhy project at " ++ opts.target)
-  IO.println ("Next: cd " ++ opts.target ++ " && lake build")
+  IO.println ("Next: cd \"" ++ opts.target ++ "\" && bash scripts/verify-leanphy.sh")
 
 def run (args : List String) : IO Unit := do
   if args == ["--help"] then

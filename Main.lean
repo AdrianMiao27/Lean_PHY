@@ -947,6 +947,582 @@ example (L : LieAlgebra ℝ ℝ)
         (LieCohomology.differential0 𝒨 m) x y = 0 :=
   LieCohomology.differential1_differential0 𝒨 m x y
 
+/-! ## Degree-two cohomology and central extensions -/
+
+section DegreeTwoCohomology
+
+open LieCohomology
+
+variable (L : LieAlgebra ℚ (Fin 2 → ℚ)) (𝒨 : LeanPhy.Mathematics.LieModule L ℚ)
+
+example (ω : LieCochain2 L 𝒨) :
+    LieCochain2.ofNative ω.toNative = ω := rfl
+
+example (φ : (Fin 2 → ℚ) →ₗ[ℚ] ℚ) : differential2 𝒨 (differential1 𝒨 φ) = 0 :=
+  differential2_differential1 𝒨 φ
+
+example (ω : LieCochain2 L 𝒨) (hω : IsTwoCocycle 𝒨 ω) :
+    classOf 𝒨 ω hω = 0 ↔ IsTwoCoboundary 𝒨 ω := classOf_eq_zero_iff 𝒨 ω hω
+
+example (ω : LieCochain2 L (trivialLieModule L : LeanPhy.Mathematics.LieModule L ℚ))
+    (hω : IsTwoCocycle (trivialLieModule L) ω) (x y z : (Fin 2 → ℚ) × ℚ) :
+    (CentralExtension.algebra ω hω).bracket x ((CentralExtension.algebra ω hω).bracket y z) +
+      (CentralExtension.algebra ω hω).bracket y ((CentralExtension.algebra ω hω).bracket z x) +
+      (CentralExtension.algebra ω hω).bracket z ((CentralExtension.algebra ω hω).bracket x y) = 0 :=
+  (CentralExtension.algebra ω hω).jacobi x y z
+
+example (x : (Fin 2 → ℚ) × ℚ) :
+    CentralExtension.projection (R := ℚ) x = 0 ↔
+      ∃ m, CentralExtension.inclusion (R := ℚ) m = x :=
+  CentralExtension.projection_eq_zero_iff x
+
+example (ω η : LieCochain2 L (trivialLieModule L : LeanPhy.Mathematics.LieModule L ℚ))
+    (hω : IsTwoCocycle (trivialLieModule L) ω) (hη : IsTwoCocycle (trivialLieModule L) η) :
+    classOf (trivialLieModule L) ω hω = classOf (trivialLieModule L) η hη ↔
+      Nonempty (CentralExtension.Equivalence ω η) :=
+  CentralExtension.class_eq_iff_nonempty_equivalence ω η hω hη
+
+open LeanPhy.Examples.LieCohomologyResearch
+
+example : classOf (trivialLieModule abelianPlane) areaCocycle area_closed ≠ 0 :=
+  heisenberg_class_nonzero
+
+example : affineBoundary ≠ 0 ∧ classOf affineCoefficients affineBoundary affineBoundary_closed = 0 :=
+  ⟨affineBoundary_nonzero, affineBoundary_class_zero⟩
+
+example (x y : Plane × ℚ) :
+    removeAffineCentralTerm.linearEquiv (CentralExtension.bracket affineBoundary x y) =
+      CentralExtension.bracket (0 : LieCochain2 affine affineCoefficients)
+        (removeAffineCentralTerm.linearEquiv x) (removeAffineCentralTerm.linearEquiv y) :=
+  affine_central_term_removable x y
+
+example (φ : Plane →ₗ[ℚ] ℚ) :
+    LeanPhy.GaugeTheory.GhostPolynomial.quadratic (0 : Fin 2) 1 (oneGhost φ) =
+      twoGhost (differential1 affineCoefficients φ) := affine_ghost_bridge φ
+
+namespace HeisenbergReductionSmoke
+
+open LeanPhy.Examples.HeisenbergCohomology
+
+example (ω : C2) : coordinates.symm (coordinates ω) = ω := coordinates.symm_apply_apply ω
+
+example (ω : C2) : IsTwoCocycle coefficients ω := all_closed ω
+
+example (φ : Space →ₗ[ℚ] ℚ) :
+    coordinates (differential1 coefficients φ) =
+      LeanPhy.Generated.Heisenberg.d1.toLin' (LieCochainCoordinates.oneEquiv 3 φ) :=
+  differential1_coordinates φ
+
+example : Module.finrank ℚ (H2 coefficients) = 2 := h2_finrank
+
+example (ω : C2) : IsTwoCoboundary coefficients ω ↔
+    ω (LieCochainCoordinates.e 0) (LieCochainCoordinates.e 2) = 0 ∧
+    ω (LieCochainCoordinates.e 1) (LieCochainCoordinates.e 2) = 0 := boundary_iff ω
+
+example (ω : C2) : differential1 coefficients (reduction.primitive ω) +
+    reduction.represent (parameters ω) = ω := normal_form ω
+
+example (ω η : C2) : Nonempty (CentralExtension.Equivalence ω η) ↔
+    parameters ω = parameters η := extension_equivalence_iff ω η
+
+example {A B C H : Type} [AddCommGroup A] [Module ℚ A] [AddCommGroup B] [Module ℚ B]
+    [AddCommGroup C] [Module ℚ C] [AddCommGroup H] [Module ℚ H]
+    {d₁ : A →ₗ[ℚ] B} {d₂ : B →ₗ[ℚ] C} (S : CohomologyReduction d₁ d₂ H)
+    (b : B) (hb : d₂ b = 0) :
+    S.quotientEquiv (CohomologyReduction.classOf b hb) = S.project b := rfl
+
+end HeisenbergReductionSmoke
+
+namespace StructureConstantSmoke
+
+set_option maxSynthPendingDepth 5
+open LeanPhy.Examples.StructureConstantResearch
+
+example : Module.finrank ℚ (H2 LeanPhy.Generated.AffineTrivial.coefficients) = 0 :=
+  affine_trivial_dimension
+
+example : Module.finrank ℚ (H2 LeanPhy.Generated.AffineCharacter.coefficients) = 1 :=
+  affine_character_dimension
+
+example : LeanPhy.Generated.AffineTrivial.algebra = LeanPhy.Generated.AffineCharacter.algebra :=
+  same_affine_algebra
+
+example : Module.finrank ℚ (H2 LeanPhy.Generated.AffineTrivial.coefficients) ≠
+    Module.finrank ℚ (H2 LeanPhy.Generated.AffineCharacter.coefficients) := coefficient_dependence
+
+example : Module.finrank ℚ (H2 LeanPhy.Generated.SolvableVector.coefficients) = 4 :=
+  solvable_vector_dimension
+
+example : ¬IsTwoCocycle LeanPhy.Generated.SolvableVector.coefficients nonclosed :=
+  nonclosed_not_cocycle
+
+example : LeanPhy.Generated.SolvableVector.reduction.project nonclosed = 0 :=
+  nonclosed_zero_coordinates
+
+example (ω : LeanPhy.Generated.SolvableVector.C2)
+    (hω : IsTwoCocycle LeanPhy.Generated.SolvableVector.coefficients ω) :
+    IsTwoCoboundary LeanPhy.Generated.SolvableVector.coefficients ω ↔
+      LeanPhy.Generated.SolvableVector.reduction.project ω = 0 := solvable_exactness ω hω
+
+example (ω : LeanPhy.Generated.SolvableVector.C2)
+    (hω : IsTwoCocycle LeanPhy.Generated.SolvableVector.coefficients ω) :
+    differential1 LeanPhy.Generated.SolvableVector.coefficients
+        (LeanPhy.Generated.SolvableVector.reduction.primitive ω) +
+      LeanPhy.Generated.SolvableVector.reduction.represent
+        (LeanPhy.Generated.SolvableVector.reduction.project ω) = ω := solvable_normal_form ω hω
+
+example {n : Nat} (L : LieAlgebra ℚ (Fin n → ℚ))
+    (𝒨 : LeanPhy.Mathematics.LieModule L ℚ) (ω : LieCochain2 L 𝒨)
+    (h : ∀ i j k : Fin n, i < j → j < k → differential2 𝒨 ω
+      (LieCochainCoordinates.e i) (LieCochainCoordinates.e j) (LieCochainCoordinates.e k) = 0) :
+    IsTwoCocycle 𝒨 ω := LieCochainCoordinates.differential2_eq_zero_of_increasing 𝒨 ω h
+
+end StructureConstantSmoke
+
+namespace ParameterCohomologySmoke
+
+open LeanPhy.Mathematics.SolvableLieFamily LeanPhy.Examples.ParameterCohomologyResearch
+open scoped _root_.Classical
+set_option maxSynthPendingDepth 5
+
+example (a b t : ℝ) : Module.finrank ℝ (H2 (coefficients a b t)) =
+    (if t = a then 1 else 0) + (if t = b then 1 else 0) + (if t = a + b then 1 else 0) :=
+  dimension_formula a b t
+
+example (a b t : ℝ) (ha : t ≠ a) (hb : t ≠ b) (hab : t ≠ a + b) :
+    Module.finrank ℝ (H2 (coefficients a b t)) = 0 := generic_dimension a b t ha hb hab
+
+example : Module.finrank ℝ (H2 (coefficients (1 : ℝ) 1 1)) = 2 := double_resonance
+example : Module.finrank ℝ (H2 (coefficients (1 : ℝ) 1 2)) = 1 := closure_resonance
+example : Module.finrank ℝ (H2 (coefficients (0 : ℝ) 0 0)) = 3 := full_degeneracy
+
+example (a b t : ℝ) :
+    classOf (coefficients a b t) (unit01 a b t) (unit01_closed a b t) ≠ 0 ↔ t = a :=
+  unit_class_jumps a b t
+
+example (a b t : ℝ) : IsTwoCocycle (coefficients a b t) (unit12 a b t) ↔ t = a + b :=
+  closure_changes a b t
+
+example (a b t : ℝ) (ha : t ≠ a) (hb : t ≠ b) (hab : t ≠ a + b)
+    (ω : C2 a b t) (hω : IsTwoCocycle (coefficients a b t) ω) :
+    differential1 (coefficients a b t) ((reduction a b t).primitive ω) = ω :=
+  generic_primitive_works a b t ha hb hab ω hω
+
+example : differential1 (coefficients (1 : ℝ) 1 1)
+    ((reduction (1 : ℝ) 1 1).primitive (unit01 1 1 1)) ≠ unit01 1 1 1 :=
+  generic_primitive_fails_at_resonance
+
+example (a b t : ℝ) (ω : C2 a b t) (hω : IsTwoCocycle (coefficients a b t) ω) :
+    differential1 (coefficients a b t) ((reduction a b t).primitive ω) +
+      (reduction a b t).represent ((reduction a b t).project ω) = ω := normal_form_at_all_parameters a b t ω hω
+
+example (a b t : ℚ) : Module.finrank ℂ (H2 (coefficients (a : ℂ) (b : ℂ) (t : ℂ))) =
+    Module.finrank ℚ (H2 (coefficients a b t)) := rational_to_complex_dimension a b t
+
+example (a b t a' b' t' : ℝ) (h₀ : t = a ↔ t' = a') (h₁ : t = b ↔ t' = b')
+    (h₂ : t = a + b ↔ t' = a' + b') :
+    Module.finrank ℝ (H2 (coefficients a b t)) = Module.finrank ℝ (H2 (coefficients a' b' t')) :=
+  same_stratum_dimension a b t a' b' t' h₀ h₁ h₂
+
+end ParameterCohomologySmoke
+
+namespace AutomaticParameterSmoke
+
+open LeanPhy.Mathematics.SolvableLieFamily LeanPhy.Examples.AutomatedParameterResearch
+open LeanPhy.Generated
+open scoped _root_.Classical
+set_option maxSynthPendingDepth 5
+
+example (a b t : ℝ) (φ : Space ℝ →ₗ[ℝ] ℝ) :
+    twoCoordinates a b t (differential1 (coefficients a b t) φ) =
+      (SolvableStrata.d1 ![a, b, t]).toLin' (oneCoordinates φ) := first_ce_bridge a b t φ
+
+example (a b t : ℝ) (ω : C2 a b t) :
+    (SolvableStrata.d2 ![a, b, t]).toLin' (twoCoordinates a b t ω) =
+      readThird (differential2 (coefficients a b t) ω) := second_ce_bridge a b t ω
+
+example (a b t : ℝ) : Module.finrank ℝ (H2 (coefficients a b t)) =
+    SolvableStrata.dimension ![a, b, t] := automatic_h2_dimension a b t
+
+example (a b t : ℝ) : SolvableStrata.dimension ![a, b, t] =
+    (if t = a then 1 else 0) + (if t = b then 1 else 0) + (if t = a + b then 1 else 0) :=
+  tree_matches_resonances a b t
+
+example (a b t : ℝ) (ω : C2 a b t) (hω : IsTwoCocycle (coefficients a b t) ω) :
+    IsTwoCoboundary (coefficients a b t) ω ↔ (automaticReduction a b t).project ω = 0 :=
+  automatic_exactness a b t ω hω
+
+example (a b t : ℝ) (ω : C2 a b t) (hω : IsTwoCocycle (coefficients a b t) ω) :
+    differential1 (coefficients a b t) ((automaticReduction a b t).primitive ω) +
+      (automaticReduction a b t).represent ((automaticReduction a b t).project ω) = ω :=
+  automatic_normal_form a b t ω hω
+
+example : Module.finrank ℝ (H2 (coefficients (1 : ℝ) 1 0)) = 0 := computed_generic_dimension
+example : Module.finrank ℝ (H2 (coefficients (1 : ℝ) 1 1)) = 2 := computed_double_resonance
+example : Module.finrank ℝ (H2 (coefficients (0 : ℝ) 0 0)) = 3 := computed_full_degeneracy
+
+example (s t : ℝ) (hm : s - t ≠ 0) (hp : s + t ≠ 0) :
+    Module.finrank ℝ (DeterminantCohomology s t) = 0 := determinant_generic s t hm hp
+example : Module.finrank ℝ (DeterminantCohomology (1 : ℝ) 1) = 1 := determinant_positive_locus
+example : Module.finrank ℝ (DeterminantCohomology (1 : ℝ) (-1)) = 1 := determinant_negative_locus
+example : Module.finrank ℝ (DeterminantCohomology (0 : ℝ) 0) = 2 := determinant_intersection
+
+end AutomaticParameterSmoke
+
+namespace SymbolicLieSmoke
+
+open LeanPhy.Generated LeanPhy.Examples.SymbolicLieResearch
+open scoped _root_.Classical
+set_option maxSynthPendingDepth 5
+
+example (g : ℝ) :
+    Module.finrank ℝ (H2 (HeisenbergParameter.coefficients ![g] (heisenbergConditions g))) =
+      if g = 0 then 3 else 2 := heisenberg_dimension g
+
+example (g : ℝ) (hg : g ≠ 0) :
+    Module.finrank ℝ (H2 (HeisenbergParameter.coefficients ![g] (heisenbergConditions g))) = 2 :=
+  heisenberg_nonzero g hg
+
+example : Module.finrank ℝ (H2 (HeisenbergParameter.coefficients ![(0 : ℝ)] (heisenbergConditions 0))) = 3 :=
+  heisenberg_zero
+
+example (g : ℝ) (ω : HeisenbergParameter.C2 ![g] (heisenbergConditions g))
+    (hω : IsTwoCocycle (HeisenbergParameter.coefficients ![g] (heisenbergConditions g)) ω) :
+    IsTwoCoboundary (HeisenbergParameter.coefficients ![g] (heisenbergConditions g)) ω ↔
+      (HeisenbergParameter.reduction ![g] (heisenbergConditions g)).project ω = 0 :=
+  heisenberg_exactness g ω hω
+
+example (g : ℝ) (ω : HeisenbergParameter.C2 ![g] (heisenbergConditions g))
+    (hω : IsTwoCocycle (HeisenbergParameter.coefficients ![g] (heisenbergConditions g)) ω) :
+    differential1 (HeisenbergParameter.coefficients ![g] (heisenbergConditions g))
+      ((HeisenbergParameter.reduction ![g] (heisenbergConditions g)).primitive ω) +
+      (HeisenbergParameter.reduction ![g] (heisenbergConditions g)).represent
+        ((HeisenbergParameter.reduction ![g] (heisenbergConditions g)).project ω) = ω :=
+  heisenberg_normal_form g ω hω
+
+example (a u : ℝ) : AffineVectorParameters.Conditions ![a,u] ↔ u = a := affine_domain_iff a u
+example (a : ℝ) :
+    Module.finrank ℝ (H2 (AffineVectorParameters.coefficients ![a,a] (affineConditions a))) =
+      if a = 0 then 1 else 0 := affine_dimension a
+example (a : ℝ) (ha : a ≠ 0) :
+    Module.finrank ℝ (H2 (AffineVectorParameters.coefficients ![a,a] (affineConditions a))) = 0 :=
+  affine_nonzero a ha
+example : Module.finrank ℝ (H2 (AffineVectorParameters.coefficients ![(0 : ℝ),0] (affineConditions 0))) = 1 :=
+  affine_zero
+example : ¬AffineVectorParameters.Conditions ![(1 : ℝ),0] := affine_wrong_character
+example (a b : ℝ) : JacobiParameters.Conditions ![a,b] ↔ a = 0 ∨ b = 0 := jacobi_domain_iff a b
+example : ¬JacobiParameters.Conditions ![(1 : ℝ),1] := jacobi_invalid_point
+example (a b : ℝ) (h : a = 0 ∨ b = 0) :
+    Module.finrank ℝ (H2 (JacobiParameters.coefficients ![a,b] (jacobiConditions a b h))) =
+      if a = 0 ∧ b = 0 then 3 else 1 := jacobi_dimension a b h
+example : Module.finrank ℝ (H2 (JacobiParameters.coefficients ![(0 : ℝ),0]
+    (jacobiConditions 0 0 (Or.inl rfl)))) = 3 := jacobi_origin
+
+end SymbolicLieSmoke
+
+namespace ModelDomainSmoke
+open LeanPhy.Generated LeanPhy.Examples.ModelDomainResearch
+open scoped _root_.Classical
+example (a b t : ℝ) : DiscoveredLieDomain.Conditions ![a,b,t] ↔ a=0 ∨ (b=0 ∧ t=0) :=
+  discovered_domain a b t
+example (a b t : ℝ) : DiscoveredLieDomain.ModelLaws ![a,b,t] ↔ a=0 ∨ (b=0 ∧ t=0) :=
+  laws_iff_domain a b t
+example (a b t : ℝ) :
+    (∃ L : LeanPhy.Mathematics.LieAlgebra ℝ (DiscoveredLieDomain.Space ℝ),
+      L.bracket = DiscoveredLieDomain.bracket ![a,b,t] ∧
+      ∃ M : LeanPhy.Mathematics.LieModule L (DiscoveredLieDomain.Coeff ℝ),
+        M.act = DiscoveredLieDomain.action ![a,b,t]) ↔ a=0 ∨ (b=0 ∧ t=0) := model_exists_iff a b t
+example (b t : ℝ) : DiscoveredLieDomain.ModelLaws ![0,b,t] := plane_is_legal b t
+example (a : ℝ) : DiscoveredLieDomain.ModelLaws ![a,0,0] := axis_is_legal a
+example : ¬DiscoveredLieDomain.ModelLaws ![(1 : ℝ),0,1] := off_locus_is_illegal
+example (a b t : ℝ) (h : a=0 ∨ (b=0 ∧ t=0)) :
+    Module.finrank ℝ (H2 (DiscoveredLieDomain.coefficients ![a,b,t] (domainConditions a b t h))) =
+      if t≠0 then 0 else if a=0 ∧ b=0 then 3 else 1 := computed_dimension a b t h
+example (b t : ℝ) (ht : t≠0) :
+    Module.finrank ℝ (H2 (DiscoveredLieDomain.coefficients ![0,b,t]
+      (domainConditions 0 b t (Or.inl rfl)))) = 0 := nonzero_character_vanishes b t ht
+example : Module.finrank ℝ (H2 (DiscoveredLieDomain.coefficients ![(0 : ℝ),0,0]
+    (domainConditions 0 0 0 (Or.inl rfl)))) = 3 := origin_dimension
+example (a u : ℝ) : DiscoveredVectorDomain.ModelLaws ![a,u] ↔ a=u := vector_laws_iff a u
+example (p : Fin 0 → ℝ) : ¬ImpossibleLieDomain.ModelLaws p := impossible_laws p
+example (p : Fin 0 → ℝ) :
+    ¬∃ L : LeanPhy.Mathematics.LieAlgebra ℝ (ImpossibleLieDomain.Space ℝ),
+      L.bracket = ImpossibleLieDomain.bracket p ∧
+      ∃ M : LeanPhy.Mathematics.LieModule L (ImpossibleLieDomain.Coeff ℝ),
+        M.act = ImpossibleLieDomain.action p := impossible_model p
+end ModelDomainSmoke
+
+namespace LieDeformationSmoke
+open LeanPhy.Examples.LieDeformationResearch LeanPhy.Mathematics
+open LeanPhy.Mathematics.LieCohomology LeanPhy.Mathematics.LieCochainCoordinates
+example (a b : ℚ) : IsTwoCocycle (adjointLieModule abelian) (direction a b) := every_direction_firstOrder a b
+example (a b : ℚ) : classOf (adjointLieModule abelian) (direction a b)
+    (every_direction_firstOrder a b) = 0 ↔ a=0 ∧ b=0 := direction_class_zero_iff a b
+example (a b : ℚ) : Nonempty (LieDeformation.Equivalence (direction a b) 0) ↔ a=0 ∧ b=0 :=
+  direction_removable_iff a b
+example (a b : ℚ) : LieDeformation.obstruction (direction a b) (e 0) (e 1) (e 2) = ![a*b,0,0] :=
+  obstruction_basis a b
+example (a b : ℚ) : (∃ ν : LieDeformation.Cochain abelian,
+    ∃ A : LeanPhy.Mathematics.LieAlgebra ℚ (Space ℚ × Space ℚ × Space ℚ),
+      A.bracket = LieDeformation.secondBracket (direction a b) ν) ↔ a*b=0 := secondOrder_exists_iff a b
+example : classOf (adjointLieModule abelian) (direction (1 : ℚ) 1) (every_direction_firstOrder 1 1) ≠ 0 :=
+  obstructed_class_nonzero
+example : ¬∃ ν : LieDeformation.Cochain abelian,
+    ∃ A : LeanPhy.Mathematics.LieAlgebra ℚ (Space ℚ × Space ℚ × Space ℚ),
+      A.bracket = LieDeformation.secondBracket (direction 1 1) ν := obstructed_no_secondOrder
+example (a b : ℚ) (hab : a*b=0) (s : ℚ) (x y : Space ℚ) :
+    (integratedFamily a b hab s).bracket x y = s • direction a b x y := integratedFamily_bracket a b hab s x y
+example (a b : ℚ) (hab : a*b=0) (x y : Space ℚ) :
+    (integratedFamily a b hab 0).bracket x y = abelian.bracket x y := integratedFamily_origin a b hab x y
+example : scalingDirection ≠ 0 := scalingDirection_nonzero
+example : classOf (adjointLieModule LeanPhy.Examples.LieDeformationResearch.affine) scalingDirection scalingDirection_closed = 0 := scaling_class_zero
+example (x y : Space ℚ × Space ℚ) :
+    removeScaling.linearEquiv (LieDeformation.bracket scalingDirection x y) =
+      LieDeformation.bracket (0 : LieDeformation.Cochain LeanPhy.Examples.LieDeformationResearch.affine)
+        (removeScaling.linearEquiv x) (removeScaling.linearEquiv y) := removeScaling_bracket x y
+example (ω : LieDeformation.Cochain LeanPhy.Examples.LieDeformationResearch.affine) :
+    (∀ x y z, LieDeformation.bracket ω x (LieDeformation.bracket ω y z) +
+      LieDeformation.bracket ω y (LieDeformation.bracket ω z x) +
+      LieDeformation.bracket ω z (LieDeformation.bracket ω x y) = 0) ↔
+      IsTwoCocycle (adjointLieModule LeanPhy.Examples.LieDeformationResearch.affine) ω := LieDeformation.jacobi_iff_cocycle ω
+example (ω : LieDeformation.Cochain LeanPhy.Examples.LieDeformationResearch.affine) :
+    (∃ A : LeanPhy.Mathematics.LieAlgebra ℚ (Space ℚ × Space ℚ), A.bracket = LieDeformation.bracket ω) ↔
+      IsTwoCocycle (adjointLieModule LeanPhy.Examples.LieDeformationResearch.affine) ω := LieDeformation.algebra_exists_iff ω
+example (ω η : LieDeformation.Cochain LeanPhy.Examples.LieDeformationResearch.affine)
+    (hω : IsTwoCocycle (adjointLieModule LeanPhy.Examples.LieDeformationResearch.affine) ω) (hη : IsTwoCocycle (adjointLieModule LeanPhy.Examples.LieDeformationResearch.affine) η) :
+    classOf (adjointLieModule LeanPhy.Examples.LieDeformationResearch.affine) ω hω = classOf (adjointLieModule LeanPhy.Examples.LieDeformationResearch.affine) η hη ↔
+      Nonempty (LieDeformation.Equivalence ω η) := LieDeformation.class_eq_iff_nonempty_equivalence ω η hω hη
+example (ω ν : LieDeformation.Cochain LeanPhy.Examples.LieDeformationResearch.affine) :
+    (∃ A : LeanPhy.Mathematics.LieAlgebra ℚ (Space ℚ × Space ℚ × Space ℚ), A.bracket = LieDeformation.secondBracket ω ν) ↔
+      IsTwoCocycle (adjointLieModule LeanPhy.Examples.LieDeformationResearch.affine) ω ∧
+        ∀ x y z, differential2 (adjointLieModule LeanPhy.Examples.LieDeformationResearch.affine) ν x y z + LieDeformation.obstruction ω x y z = 0 :=
+  LieDeformation.secondAlgebra_exists_iff ω ν
+end LieDeformationSmoke
+
+namespace AdjointDeformationSmoke
+open scoped _root_.Classical
+set_option maxSynthPendingDepth 5
+open LeanPhy.Examples.AdjointDeformationResearch LeanPhy.Mathematics
+open LeanPhy.Mathematics.LieCohomology LeanPhy.Generated
+example (g : ℚ) : Module.finrank ℚ (H2 (adjointLieModule (AffineAdjointParameter.algebra ![g] ⟨⟩))) =
+    if g=0 then 2 else 0 := by
+  by_cases hg : g=0 <;> simpa [hg] using affine_dimension g
+example (g : ℝ) : Module.finrank ℝ (H2 (adjointLieModule (HeisenbergAdjointParameter.algebra ![g] ⟨⟩))) =
+    if g=0 then 9 else 5 := heisenberg_dimension g
+example (g : ℚ) (hg : g≠0) (ω : AffineAdjointParameter.C2 ![g] ⟨⟩)
+    (hω : IsTwoCocycle (adjointLieModule (AffineAdjointParameter.algebra ![g] ⟨⟩)) ω) :
+    Nonempty (LieDeformation.Equivalence ω 0) := affine_all_removable g hg ω hω
+example : IsTwoCocycle (AffineAdjointParameter.coefficients ![(0 : ℚ)] ⟨⟩) affineOriginDirection :=
+  affine_origin_closed
+example : ¬Nonempty (LieDeformation.Equivalence (affineOriginDirection (K := ℚ)) 0) :=
+  affine_origin_not_removable
+example (g : ℚ) (hg : g≠0) (a : Fin 5 → ℚ) :
+    IsTwoCocycle (adjointLieModule (HeisenbergAdjointParameter.algebra ![g] ⟨⟩))
+      (heisenbergRepresentative g hg a) := heisenberg_representative_closed g hg a
+example (g : ℚ) (hg : g≠0) (a b : Fin 5 → ℚ) :
+    Nonempty (LieDeformation.Equivalence (heisenbergRepresentative g hg a)
+      (heisenbergRepresentative g hg b)) ↔ a=b := heisenberg_representatives_equivalent_iff g hg a b
+example (g : ℚ) (hg : g≠0) (ω : HeisenbergAdjointParameter.C2 ![g] ⟨⟩)
+    (hω : IsTwoCocycle (adjointLieModule (HeisenbergAdjointParameter.algebra ![g] ⟨⟩)) ω)
+    (x y : (Fin 3 → ℚ) × (Fin 3 → ℚ)) :
+    (normalizeHeisenberg g hg ω hω).linearEquiv (LieDeformation.bracket ω x y) =
+      LieDeformation.bracket (heisenbergRepresentative g hg ((heisenbergReduction g hg).project ω))
+        ((normalizeHeisenberg g hg ω hω).linearEquiv x) ((normalizeHeisenberg g hg ω hω).linearEquiv y) :=
+  heisenberg_normalization_preserves_bracket g hg ω hω x y
+example (g : ℚ) (hg : g≠0) (a : Fin 5 → ℚ) (ha : a≠0) :
+    classOf (adjointLieModule (HeisenbergAdjointParameter.algebra ![g] ⟨⟩))
+      (heisenbergRepresentative g hg a) (heisenberg_representative_closed g hg a) ≠ 0 :=
+  heisenberg_class_nonzero g hg a ha
+example : Module.finrank ℚ (H2 (adjointLieModule Sl2Adjoint.algebra)) = 0 := sl2_dimension
+example (ω : Sl2Adjoint.C2) (hω : IsTwoCocycle (adjointLieModule Sl2Adjoint.algebra) ω) :
+    Nonempty (LieDeformation.Equivalence ω 0) := sl2_all_removable ω hω
+example (ω : Sl2Adjoint.C2) (hω : IsTwoCocycle (adjointLieModule Sl2Adjoint.algebra) ω) :
+    differential1 (adjointLieModule Sl2Adjoint.algebra) (Sl2Adjoint.reduction.primitive ω) = ω := sl2_primitive ω hω
+end AdjointDeformationSmoke
+
+namespace SecondOrderSmoke
+set_option maxSynthPendingDepth 5
+open LeanPhy.Examples.SecondOrderDeformationResearch
+open LeanPhy.Mathematics LeanPhy.Mathematics.LieDeformation LeanPhy.Generated
+example (a : Fin 5 → ℚ) :
+    IsTwoCocycle HeisenbergSecondOrder.coefficients
+      (HeisenbergSecondOrder.twoFrom (heisenbergFamily a)) := heisenberg_closed a
+example (a : Fin 5 → ℚ) :
+    HeisenbergSecondOrder.obstructionValues (heisenbergFamily a) =
+      ![a 0 * a 4 - a 1 * a 3, -(a 0 * a 2 + a 1 * a 4)] := heisenberg_obstructions a
+example (a : Fin 5 → ℚ) :
+    (∃ ν : HeisenbergSecondOrder.C2, ∃ D : LeanPhy.Mathematics.LieAlgebra ℚ (Space × Space × Space),
+      D.bracket = secondBracket (HeisenbergSecondOrder.twoFrom (heisenbergFamily a)) ν) ↔
+      a 0 * a 4 - a 1 * a 3 = 0 ∧ a 0 * a 2 + a 1 * a 4 = 0 := heisenberg_extension_iff a
+example :
+    ¬∃ ν : HeisenbergSecondOrder.C2, ∃ D : LeanPhy.Mathematics.LieAlgebra ℚ (Space × Space × Space),
+      D.bracket = secondBracket (HeisenbergSecondOrder.twoFrom (heisenbergFamily ![1,0,1,0,0])) ν := heisenberg_no_correction
+example (t u : ℚ) :
+    HeisenbergSecondOrder.SecondOrderConditions (cancellable t u) := cancellable_conditions t u
+example (t u : ℚ) :
+    obstruction (HeisenbergSecondOrder.twoFrom (cancellable t u)) (LeanPhy.Mathematics.LieCochainCoordinates.e 0) (LeanPhy.Mathematics.LieCochainCoordinates.e 1) (LeanPhy.Mathematics.LieCochainCoordinates.e 2) =
+      ![0,0,-(t*u)] := cancellable_quadratic t u
+example (t u : ℚ) :
+    HeisenbergSecondOrder.correctionValues (cancellable t u) = ![0,0,0,t*u,0,0,0,0,0] := cancellable_correction t u
+example (t u : ℚ) :
+    (correctedModel t u).bracket = secondBracket (HeisenbergSecondOrder.twoFrom (cancellable t u))
+      (HeisenbergSecondOrder.twoFrom ![0,0,0,t*u,0,0,0,0,0]) := corrected_model_bracket t u
+example (t u : ℚ) (h : t*u ≠ 0) :
+    ¬∃ D : LeanPhy.Mathematics.LieAlgebra ℚ (Space × Space × Space),
+      D.bracket = secondBracket (HeisenbergSecondOrder.twoFrom (cancellable t u)) 0 := zero_correction_fails t u h
+example (t u : ℚ) (ν : HeisenbergSecondOrder.C2) :
+    secondResidual (HeisenbergSecondOrder.twoFrom (cancellable t u)) ν = 0 ↔
+      IsTwoCocycle HeisenbergSecondOrder.coefficients
+        (ν - HeisenbergSecondOrder.twoFrom ![0,0,0,t*u,0,0,0,0,0]) := all_cancellable_corrections t u ν
+example : HeisenbergSecondOrder.obstructionValues nonclosed = 0 := nonclosed_obstruction_zero
+example :
+    ¬∃ ν : HeisenbergSecondOrder.C2, ∃ D : LeanPhy.Mathematics.LieAlgebra ℚ (Space × Space × Space),
+      D.bracket = secondBracket (HeisenbergSecondOrder.twoFrom nonclosed) ν := nonclosed_no_model
+example (a b : ℚ) :
+    (∃ ν : AbelianSecondOrder.C2, ∃ D : LeanPhy.Mathematics.LieAlgebra ℚ (Space × Space × Space),
+      D.bracket = secondBracket (AbelianSecondOrder.twoFrom (abelianFamily a b)) ν) ↔ a*b=0 := abelian_extension_iff a b
+end SecondOrderSmoke
+
+namespace DeformationGaugeSmoke
+set_option maxSynthPendingDepth 5
+open LeanPhy.Examples.DeformationGaugeResearch LeanPhy.Examples.SecondOrderDeformationResearch
+open LeanPhy.Mathematics LeanPhy.Mathematics.LieDeformation LeanPhy.Generated
+example (x u v : ℚ) :
+    (secondGauge (LinearMap.id : ℚ →ₗ[ℚ] ℚ) 0).symm (x,u,v) = (x,u-x,v-u+x) := LeanPhy.Examples.DeformationGaugeResearch.inverse_identity_generators x u v
+example (a : Fin 5 → ℚ) :
+    HeisenbergSecondOrder.representativeObstructionValues a =
+      ![a 0*a 4-a 1*a 3,-(a 0*a 2+a 1*a 4)] := LeanPhy.Examples.DeformationGaugeResearch.heisenberg_normalized_equations a
+example (ω : HeisenbergSecondOrder.C2)
+    (hω : IsTwoCocycle HeisenbergSecondOrder.coefficients ω) :
+    SecondExtendable ω ↔ HeisenbergSecondOrder.representativeObstructionValues
+      (HeisenbergSecondOrder.reduction.project ω) = 0 := LeanPhy.Examples.DeformationGaugeResearch.heisenberg_test_on_classes ω hω
+example (ω η : HeisenbergSecondOrder.C2)
+    (E : Equivalence ω η) :
+    HeisenbergSecondOrder.secondOrderSolver.obstructionCoordinates ω =
+      HeisenbergSecondOrder.secondOrderSolver.obstructionCoordinates η := LeanPhy.Examples.DeformationGaugeResearch.heisenberg_obstruction_invariant ω η E
+example (t u : ℚ) : IsTwoCocycle HeisenbergSecondOrder.coefficients (direction t u) := LeanPhy.Examples.DeformationGaugeResearch.direction_closed t u
+example (t u : ℚ) :
+    HeisenbergSecondOrder.reduction.project (direction t u) = ![-u,t,0,0,0] := LeanPhy.Examples.DeformationGaugeResearch.computed_class_coordinates t u
+example (t u : ℚ) :
+    HeisenbergSecondOrder.representativeObstructionValues
+      (HeisenbergSecondOrder.reduction.project (direction t u)) = 0 := LeanPhy.Examples.DeformationGaugeResearch.normalized_conditions t u
+example (t u : ℚ) :
+    HeisenbergSecondOrder.normalizedCorrection (direction t u) (direction_closed t u) =
+      HeisenbergSecondOrder.twoFrom ![0,0,0,0,0,0,0,t*u,0] := LeanPhy.Examples.DeformationGaugeResearch.normalized_correction_explicit t u
+example (t u : ℚ) :
+    (LeanPhy.Examples.DeformationGaugeResearch.normalizedModel t u).bracket = secondBracket (direction t u)
+      (HeisenbergSecondOrder.twoFrom ![0,0,0,0,0,0,0,t*u,0]) := LeanPhy.Examples.DeformationGaugeResearch.normalized_model_bracket t u
+example (t u : ℚ) (x y : Space × Space × Space) :
+    (LeanPhy.Examples.DeformationGaugeResearch.normalizationEquivalence t u).linearEquiv
+      ((LeanPhy.Examples.DeformationGaugeResearch.normalizationEquivalence t u).sourceModel.bracket x y) =
+    (LeanPhy.Examples.DeformationGaugeResearch.normalizationEquivalence t u).targetModel.bracket
+      ((LeanPhy.Examples.DeformationGaugeResearch.normalizationEquivalence t u).linearEquiv x) ((LeanPhy.Examples.DeformationGaugeResearch.normalizationEquivalence t u).linearEquiv y) := LeanPhy.Examples.DeformationGaugeResearch.normalization_preserves_bracket t u x y
+example (t u : ℚ) (x : Space × Space × Space) :
+    (LeanPhy.Examples.DeformationGaugeResearch.normalizationEquivalence t u).linearEquiv (secondEpsilon (R := ℚ) x) =
+      secondEpsilon (R := ℚ) ((LeanPhy.Examples.DeformationGaugeResearch.normalizationEquivalence t u).linearEquiv x) := LeanPhy.Examples.DeformationGaugeResearch.normalization_commutes_parameter t u x
+example (t u : ℚ) (h : t*u ≠ 0) :
+    HeisenbergSecondOrder.normalizedCorrection (direction t u) (direction_closed t u) ≠
+      HeisenbergSecondOrder.twoFrom (HeisenbergSecondOrder.correctionValues (cancellable t u)) := LeanPhy.Examples.DeformationGaugeResearch.chosen_corrections_differ t u h
+example (t u : ℚ) :
+    IsTwoCocycle HeisenbergSecondOrder.coefficients
+      (HeisenbergSecondOrder.normalizedCorrection (direction t u) (direction_closed t u) -
+        HeisenbergSecondOrder.twoFrom (HeisenbergSecondOrder.correctionValues (cancellable t u))) := LeanPhy.Examples.DeformationGaugeResearch.correction_difference_closed t u
+example (ω : HeisenbergSecondOrder.C2)
+    (E : Equivalence ω (HeisenbergSecondOrder.twoFrom (heisenbergFamily ![1,0,1,0,0]))) :
+    ¬SecondExtendable ω := LeanPhy.Examples.DeformationGaugeResearch.obstructed_class_no_extension ω E
+example (ω : Sl2Adjoint.C2)
+    (hω : IsTwoCocycle Sl2Adjoint.coefficients ω) : SecondExtendable ω := LeanPhy.Examples.DeformationGaugeResearch.sl2_closed_extends ω hω
+end DeformationGaugeSmoke
+
+
+
+end DegreeTwoCohomology
+
+namespace ThirdCohomologySmoke
+open LeanPhy.Mathematics.LieCohomology LeanPhy.Mathematics.LieDeformation
+open LeanPhy.Mathematics.LieCochainCoordinates LeanPhy.Generated
+open LeanPhy.Examples.ThirdCohomologyResearch
+set_option maxSynthPendingDepth 7
+example : Module.finrank ℚ (H3 AffineFourThird.coefficients) = 1 := LeanPhy.Examples.ThirdCohomologyResearch.affine_h3_dimension
+example : Module.finrank ℚ (H3 HeisenbergThird.coefficients) = 2 := LeanPhy.Examples.ThirdCohomologyResearch.heisenberg_h3_dimension
+example : Module.finrank ℚ (H3 AbelianThird.coefficients) = 3 := LeanPhy.Examples.ThirdCohomologyResearch.abelian_h3_dimension
+example : Module.finrank ℚ (H3 Sl2Third.coefficients) = 0 := LeanPhy.Examples.ThirdCohomologyResearch.sl2_h3_dimension
+example :
+    differential3 AffineFourThird.coefficients nonclosed (e 0) (e 1) (e 2) (e 3) 0 = -1 := LeanPhy.Examples.ThirdCohomologyResearch.outgoing_differential_nonzero
+example : ¬IsThreeCocycle AffineFourThird.coefficients nonclosed := LeanPhy.Examples.ThirdCohomologyResearch.nonclosed_not_cocycle
+example : AffineFourThird.thirdReduction.project nonclosed = 0 := LeanPhy.Examples.ThirdCohomologyResearch.nonclosed_projection_zero
+example : ¬IsThreeCoboundary AffineFourThird.coefficients nonclosed := LeanPhy.Examples.ThirdCohomologyResearch.nonclosed_not_boundary
+example :
+    classOfThree AffineFourThird.coefficients (AffineFourThird.thirdReduction.represent ![1])
+      (AffineFourThird.thirdReduction.represent_closed ![1]) ≠ 0 := LeanPhy.Examples.ThirdCohomologyResearch.affine_generator_nonzero
+example (a : Fin 5 → ℚ) :
+    HeisenbergThird.intrinsicObstruction (HeisenbergThird.reduction.represent a) =
+      ![a 0*a 4-a 1*a 3,-(a 0*a 2+a 1*a 4)] := LeanPhy.Examples.ThirdCohomologyResearch.heisenberg_intrinsic_equations a
+example :
+    obstructionClass (HeisenbergThird.reduction.represent ![1,0,1,0,0])
+      (HeisenbergThird.reduction.represent_closed _) ≠ 0 := LeanPhy.Examples.ThirdCohomologyResearch.heisenberg_intrinsic_nonzero
+example :
+    ¬SecondExtendable (HeisenbergThird.reduction.represent ![1,0,1,0,0]) := LeanPhy.Examples.ThirdCohomologyResearch.heisenberg_no_extension
+example (ω : Sl2Third.C2) (hω : IsTwoCocycle Sl2Third.coefficients ω) :
+    SecondExtendable ω := LeanPhy.Examples.ThirdCohomologyResearch.sl2_extends_from_h3 ω hω
+example (ω η : HeisenbergThird.C2) (E : Equivalence ω η) :
+    obstructionClass ω E.source_cocycle = obstructionClass η E.target_cocycle := LeanPhy.Examples.ThirdCohomologyResearch.heisenberg_class_invariant ω η E
+
+section Generic
+variable {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V] {L : LieAlgebra R V}
+example (ω : Cochain L) : differential3 (adjointLieModule L)
+    (differential2Cochain (adjointLieModule L) ω) = 0 := differential3_differential2 _ ω
+example (ω : Cochain L) (hω : IsTwoCocycle (adjointLieModule L) ω) :
+    IsThreeCocycle (adjointLieModule L) (obstructionCochain ω) := obstruction_isThreeCocycle ω hω
+example (ω : Cochain L) (hω : IsTwoCocycle (adjointLieModule L) ω) :
+    SecondExtendable ω ↔ obstructionClass ω hω = 0 := secondExtendable_iff_obstructionClass_zero ω hω
+example {ω η : Cochain L} (E : Equivalence ω η) :
+    obstructionClass ω E.source_cocycle = obstructionClass η E.target_cocycle := obstructionClass_equivalence E
+example (r : R) (ω : Cochain L) (hω : IsTwoCocycle (adjointLieModule L) ω)
+    (hrω : IsTwoCocycle (adjointLieModule L) (r • ω)) :
+    obstructionClass (r • ω) hrω = (r*r) • obstructionClass ω hω := obstructionClass_smul r ω hω hrω
+example (ω : Cochain L) (hω : IsTwoCocycle (adjointLieModule L) ω) :
+    obstructionMap (classOf (adjointLieModule L) ω hω) = obstructionClass ω hω := obstructionMap_classOf ω hω
+end Generic
+end ThirdCohomologySmoke
+
+namespace ParameterizedObstructionSmoke
+open LeanPhy.Mathematics.LieCohomology LeanPhy.Mathematics.LieDeformation LeanPhy.Generated
+open LeanPhy.Examples.ParameterizedObstructionResearch
+open scoped _root_.Classical
+variable {K : Type*} [Field K] [CharZero K]
+set_option maxSynthPendingDepth 7
+example (g : K) :
+    Module.finrank K (H3 (HeisenbergThirdParameter.coefficients ![g] ⟨⟩)) = if g=0 then 3 else 2 := LeanPhy.Examples.ParameterizedObstructionResearch.heisenberg_dimension g
+example (a t : K) :
+    Module.finrank K (H3 (AffineFourThirdCharacter.coefficients ![a,t] ⟨⟩)) =
+      (if t=a then 3 else 0) + (if t=0 then 1 else 0) := LeanPhy.Examples.ParameterizedObstructionResearch.scalar_resonance_dimension a t
+example (a t : K) (hta : t ≠ a) (ht : t ≠ 0) :
+    Module.finrank K (H3 (AffineFourThirdCharacter.coefficients ![a,t] ⟨⟩)) = 0 := LeanPhy.Examples.ParameterizedObstructionResearch.scalar_generic_vanishes a t hta ht
+example :
+    Module.finrank K (H3 (AffineFourThirdCharacter.coefficients (K := K) ![0,0] ⟨⟩)) = 4 := LeanPhy.Examples.ParameterizedObstructionResearch.scalar_resonance_intersection (K := K)
+example (a u : K) : AffineFourThirdVector.Conditions ![a,u] ↔ a=u := LeanPhy.Examples.ParameterizedObstructionResearch.vector_validity_iff a u
+example (a u : K) (hp : AffineFourThirdVector.Conditions ![a,u]) :
+    Module.finrank K (H3 (AffineFourThirdVector.coefficients ![a,u] hp)) = if u=0 then 4 else 0 := LeanPhy.Examples.ParameterizedObstructionResearch.vector_dimension a u hp
+example (a u : K) (h : a ≠ u) :
+    ¬AffineFourThirdVector.ModelLaws ![a,u] := LeanPhy.Examples.ParameterizedObstructionResearch.invalid_vector_has_no_model a u h
+example (g t u : K) :
+    IsTwoCocycle (HeisenbergThirdParameter.coefficients ![g] ⟨⟩) (direction g t u) := LeanPhy.Examples.ParameterizedObstructionResearch.direction_closed g t u
+example (g t u : K) (hg : g ≠ 0) :
+    secondResidual (direction g t u) (displayedCorrection g t u) = 0 := LeanPhy.Examples.ParameterizedObstructionResearch.displayedCorrection_cancels g t u hg
+example (g t u : K) (hg : g ≠ 0) : SecondExtendable (direction g t u) := LeanPhy.Examples.ParameterizedObstructionResearch.nonzero_coupling_extends g t u hg
+example (t u : K) : SecondExtendable (direction 0 t u) ↔ t*u=0 := LeanPhy.Examples.ParameterizedObstructionResearch.zero_coupling_extension_iff t u
+example (g t u : K) : SecondExtendable (direction g t u) ↔ g ≠ 0 ∨ t*u=0 := LeanPhy.Examples.ParameterizedObstructionResearch.family_extension_iff g t u
+example : ¬SecondExtendable (direction (0 : K) 1 1) := LeanPhy.Examples.ParameterizedObstructionResearch.degeneration_obstructs (K := K)
+example (g t u : K) (h : g ≠ 0 ∨ t*u=0) :
+    (computedModel g t u h).bracket = secondBracket (direction g t u)
+      (HeisenbergThirdParameter.intrinsicCorrection ![g] ⟨⟩ (direction g t u)) := LeanPhy.Examples.ParameterizedObstructionResearch.computed_model_bracket g t u h
+example (g t u : K) :
+    obstructionClass (direction g t u) (direction_closed g t u) = 0 ↔ g ≠ 0 ∨ t*u=0 := LeanPhy.Examples.ParameterizedObstructionResearch.actual_obstruction_zero_iff g t u
+example (g t u : K) :
+    HeisenbergThirdParameter.intrinsicObstruction ![g] ⟨⟩ (direction g t u) = 0 ↔ g ≠ 0 ∨ t*u=0 := LeanPhy.Examples.ParameterizedObstructionResearch.computed_coordinates_zero_iff g t u
+end ParameterizedObstructionSmoke
+
 /-! ## Finite spectral and ladder interface -/
 
 example {n : Nat} (H A : Operator n) (e c : ℂ) (v : Ket n)
@@ -1311,7 +1887,7 @@ example (eps Delta : ℂ) :
     LeanPhy.Condensed.bdg eps Delta = eps • pauliZ + Delta • pauliX :=
   LeanPhy.Condensed.bdg_eq_pauli eps Delta
 
--- Bogoliubov invariance: a rotation of a Majorana pair preserves g^2 = 1
+-- Complex-orthogonal Clifford invariance does not infer self-adjointness.
 example (P : LeanPhy.Condensed.CliffordPair) (c s : ℂ) (h : c * c + s * s = 1) :
     (c • P.g1 + s • P.g2) * (c • P.g1 + s • P.g2) = 1 :=
   LeanPhy.Condensed.CliffordPair.bogoliubov_rotation P c s h
@@ -2082,7 +2658,7 @@ example (c s : Complex) (h : c^2 - s^2 = 1) :
     LeanPhy.Relativity.boost c s * LeanPhy.Relativity.boost c (-s) = 1 :=
   LeanPhy.Relativity.boost_inv c s h
 
-/-! ## Condensed matter: Berry curvature of a qubit -/
+/-! ## Condensed matter: spherical Bloch-vector geometry -/
 
 -- the Bloch vector is a unit vector
 example (theta phi : ℝ) :
@@ -2090,7 +2666,7 @@ example (theta phi : ℝ) :
       (LeanPhy.Condensed.dhat theta phi) = 1 :=
   LeanPhy.Condensed.dhat_unit theta phi
 
--- the Berry curvature density is the monopole field sin theta
+-- The spherical triple product is sin theta; selected-band curvature needs a bridge.
 example (theta phi : ℝ) :
     LeanPhy.Condensed.dot3 (LeanPhy.Condensed.dhat theta phi)
       (LeanPhy.Condensed.cross3 (LeanPhy.Condensed.dTheta theta phi)
@@ -4557,10 +5133,256 @@ example :
 
 end FirstClassConstraintSmoke
 
+namespace LieGhostSmoke
+open LeanPhy.GaugeTheory.GhostPolynomial
+
+example {R : Type*} [CommRing R] {n : Nat} (F : Fin n → GhostPolynomial R n)
+    (hF : ∀ i, parityInvolution (F i) = F i) :
+    (∀ x, vectorField F (vectorField F x) = 0) ↔ ∀ i, vectorField F (F i) = 0 :=
+  vectorField_sq_iff F hF
+
+example {R : Type*} [CommRing R] {n : Nat} (F : Fin n → GhostPolynomial R n)
+    (hF : ∀ i, parityInvolution (F i) = F i) (x y : GhostPolynomial R n) :
+    vectorField F (x * y) = vectorField F x * y + parityInvolution x * vectorField F y :=
+  vectorField_mul F hF x y
+
+example {R : Type*} [CommRing R] {n : Nat} (L : Mathematics.LieAlgebra R (Fin n → R))
+    (k : Fin n) : lieImages L k = ∑ i, ∑ j, if i < j then
+      (-L.bracket (Pi.single i 1) (Pi.single j 1) k) • (generator i * generator j) else 0 :=
+  lieImages_formula L k
+
+example {R : Type*} [CommRing R] {n : Nat} (L : Mathematics.LieAlgebra R (Fin n → R))
+    (φ : Module.Dual R (Fin n → R)) : lieDifferential L (ghostOne φ) =
+      ghostTwo L (LieCohomology.differential1 (trivialLieModule L) φ) :=
+  lieDifferential_ghostOne L φ
+
+example : LeanPhy.Generated.Sl2Ghost.brst (generator 0) ≠ 0 := LieGhostResearch.sl2_nonzero
+example (x : GhostPolynomial ℚ 3) :
+    LeanPhy.Generated.Sl2Ghost.brst (LeanPhy.Generated.Sl2Ghost.brst x) = 0 :=
+  LieGhostResearch.sl2_nilpotent x
+example : LeanPhy.Generated.HeisenbergGhost.brst (generator 2) = -(generator 0 * generator 1) :=
+  LieGhostResearch.heisenberg_image
+example (x : GhostPolynomial ℚ 4) :
+    LeanPhy.Generated.OscillatorGhost.brst (LeanPhy.Generated.OscillatorGhost.brst x) = 0 :=
+  LieGhostResearch.oscillator_nilpotent x
+example : ¬∀ x, vectorField LieGhostResearch.incompatibleImages
+    (vectorField LieGhostResearch.incompatibleImages x) = 0 := LieGhostResearch.incompatible_not_nilpotent
+example : LieGhostResearch.project.claimCount = 54 ∧ LieGhostResearch.project.obligationCount = 1 :=
+  ⟨rfl, rfl⟩
+
+example {R : Type} [CommRing R] {n : Nat} (L : Mathematics.LieAlgebra R (Fin n → R))
+    (x : GhostPolynomial R n) : canonicalLieBRST L (canonicalLieBRST L x) = 0 :=
+  LieGhostResearch.all_ring_nilpotent L x
+example {R : Type} [CommRing R] {n : Nat} (L : Mathematics.LieAlgebra R (Fin n → R))
+    (ω : LieCochain2 L (trivialLieModule L : LieModule L R)) :
+    lieDifferential L (ghostTwo L ω) = ghostThree L (LieCohomology.differential2Cochain (trivialLieModule L) ω) :=
+  lieDifferential_ghostTwo L ω
+example {R : Type} [CommRing R] {n : Nat} (L : Mathematics.LieAlgebra R (Fin n → R))
+    (k : Fin n) : lieDifferential L (lieImages L k) = 0 := lieImages_closed L k
+example {R : Type} [CommRing R] (a b : R) (x : GhostPolynomial R 3) :
+    LieGhostFamily.differential a b (LieGhostFamily.differential a b x) = 0 :=
+  LieGhostFamily.nilpotent a b x
+example {R : Type} [CommRing R] (a b : R) :
+    LieGhostFamily.differential a b (generator 1 * generator 2) = 0 ↔ a + b = 0 :=
+  LieGhostFamily.pair_closed_iff a b
+example : LieGhostFamily.differential (1 : ZMod 2) 1 (generator 1 * generator 2) = 0 :=
+  LieGhostResearch.characteristic_two_closed
+example (x : GhostPolynomial (Polynomial ℚ) 3) :
+    LieGhostFamily.differential Polynomial.X (-Polynomial.X)
+      (LieGhostFamily.differential Polynomial.X (-Polynomial.X) x) = 0 :=
+  LieGhostResearch.polynomial_parameter_nilpotent x
+example {R : Type} [CommRing R] (r : R) :
+    ExteriorAlgebra.algebraMapInv (derivative 2 (derivative 1 (derivative 0
+      (r • (generator (R := R) (0 : Fin 3) * (generator 1 * generator 2)))))) = r :=
+  LieGhostFamily.triple_coefficient r
+end LieGhostSmoke
+
+namespace GhostDegreeSmoke
+open LeanPhy.GaugeTheory.GhostPolynomial
+
+example {R : Type*} [CommRing R] {n : Nat} (i : Fin n) :
+    generator (R := R) i ∈ GhostPolynomial.degree 1 := generator_mem_degree i
+example {R : Type*} [CommRing R] {n : Nat} (r : R) :
+    algebraMap R (GhostPolynomial R n) r ∈ GhostPolynomial.degree 0 := scalar_mem_degree r
+example {R : Type*} [CommRing R] {n : Nat} {d e : Int} {x y : GhostPolynomial R n}
+    (hx : x ∈ GhostPolynomial.degree d) (hy : y ∈ GhostPolynomial.degree e) : x * y ∈ GhostPolynomial.degree (d + e) := mul_mem_degree hx hy
+example {R : Type*} [CommRing R] {n : Nat} {d e : Int} {x : GhostPolynomial R n}
+    (hx : x ∈ GhostPolynomial.degree d) (hy : x ∈ GhostPolynomial.degree e) (h : x ≠ 0) : d = e := degree_unique hx hy h
+example {R : Type*} [CommRing R] {n : Nat} {d : Int} (h : d < 0) :
+    GhostPolynomial.degree (R := R) (n := n) d = ⊥ := degree_negative h
+example {R : Type*} [CommRing R] {n k : Nat} (h : n < k) :
+    GhostPolynomial.natDegree (R := R) (n := n) k = ⊥ := natDegree_eq_bot_of_lt h
+example {R : Type*} [CommRing R] {n : Nat} (x : GhostPolynomial R n) :
+    ∃ s : Finset Nat, ∑ k ∈ s, degreeProjection k x = x := exists_degree_decomposition x
+example {R : Type*} [CommRing R] {n : Nat} (k : Nat) (x : GhostPolynomial R n) :
+    degreeProjection k x ∈ GhostPolynomial.natDegree k := degreeProjection_mem k x
+example {R : Type*} [CommRing R] {n : Nat} (L : Mathematics.LieAlgebra R (Fin n → R))
+    {d : Int} {x : GhostPolynomial R n} (h : x ∈ GhostPolynomial.degree d) :
+    integerLieBRST L x ∈ GhostPolynomial.degree (d + 1) := lieDifferential_mem_degree L h
+example {R : Type*} [CommRing R] {n : Nat} (f : Module.Dual R (Fin n → R))
+    {d : Int} {x : GhostPolynomial R n} (h : x ∈ GhostPolynomial.degree d) :
+    integerKoszul f x ∈ GhostPolynomial.degree (d - 1) := contract_mem_degree f h
+example {R : Type*} [CommRing R] {n : Nat} (L : Mathematics.LieAlgebra R (Fin n → R))
+    (k : Nat) (x : GhostPolynomial R n) :
+    degreeProjection (k + 1) (lieDifferential L x) = lieDifferential L (degreeProjection k x) :=
+  degreeProjection_lieDifferential L k x
+example {R : Type*} [CommRing R] {n : Nat} (L : Mathematics.LieAlgebra R (Fin n → R))
+    {x : GhostPolynomial R n} (h : lieDifferential L x = 0) (k : Nat) :
+    lieDifferential L (degreeProjection k x) = 0 := closed_degreeProjection L h k
+example {R : Type*} [CommRing R] {n : Nat} (L : Mathematics.LieAlgebra R (Fin n → R))
+    {k : Nat} {x : GhostPolynomial R n} (h : x ∈ GhostPolynomial.natDegree (k + 1)) :
+    (∃ y, lieDifferential L y = x) ↔ ∃ y ∈ GhostPolynomial.natDegree k, lieDifferential L y = x :=
+  homogeneous_exact_iff L h
+example {R : Type*} [CommRing R] {n : Nat} (L : Mathematics.LieAlgebra R (Fin n → R)) (r : R) :
+    (∃ y, lieDifferential L y = algebraMap R (GhostPolynomial R n) r) ↔ r = 0 := scalar_exact_iff L r
+example {R : Type*} [CommRing R] {n : Nat} (L : Mathematics.LieAlgebra R (Fin n → R))
+    {x : GhostPolynomial R n} (h : x ∈ GhostPolynomial.natDegree n) : lieDifferential L x = 0 := top_degree_closed L h
+example : (1 : GhostPolynomial (ZMod 2) 1) ∈ homogeneous .odd ∧
+    (1 : GhostPolynomial (ZMod 2) 1) ∉ GhostPolynomial.degree 1 := LieGhostResearch.characteristic_two_degree_separation
+example (k : Nat) : (1 + LieGhostResearch.c 0) ∉ GhostPolynomial.natDegree k := LieGhostResearch.mixed_not_homogeneous k
+example {R : Type*} [CommRing R] {n : Nat} {d : Int} {x : GhostPolynomial R n}
+    (h : x ∈ GhostPolynomial.degree d) : parityInvolution x = Parity.sign (integerParity d) x := parity_degree h
+example {R : Type*} [CommRing R] {n : Nat} (L : Mathematics.LieAlgebra R (Fin n → R))
+    (ω : LieCochain2 L (trivialLieModule L : LieModule L R)) : ghostTwo L ω ∈ GhostPolynomial.natDegree 2 :=
+  ghostTwo_mem_natDegree L ω
+example {R : Type*} [CommRing R] {n : Nat} (L : Mathematics.LieAlgebra R (Fin n → R))
+    (t : LieCochain3 L (trivialLieModule L : LieModule L R)) : ghostThree L t ∈ GhostPolynomial.natDegree 3 :=
+  ghostThree_mem_natDegree L t
+end GhostDegreeSmoke
+
+namespace GhostCohomologySmoke
+open LeanPhy.GaugeTheory.GhostPolynomial LeanPhy.Mathematics.LieCohomology
+
+example {R : Type*} [CommRing R] {n : Nat} (L : Mathematics.LieAlgebra R (Fin n → R))
+    (ω : LieCochain2 L (trivialLieModule L : LieModule L R)) (i j : Fin n) (h : i < j) :
+    pairCoefficient i j (ghostTwo L ω) = ω (Pi.single i 1) (Pi.single j 1) :=
+  pairCoefficient_ghostTwo L ω i j h
+example {R : Type*} [CommRing R] {n : Nat} (L : Mathematics.LieAlgebra R (Fin n → R))
+    (t : LieCochain3 L (trivialLieModule L : LieModule L R)) (i j k : Fin n) (h : i < j) (h' : j < k) :
+    tripleCoefficient i j k (ghostThree L t) = t (Pi.single i 1) (Pi.single j 1) (Pi.single k 1) :=
+  tripleCoefficient_ghostThree L t i j k h h'
+example {R : Type*} [CommRing R] {n : Nat} (L : Mathematics.LieAlgebra R (Fin n → R)) :
+    Function.Injective (ghostTwo L) := ghostTwo_injective L
+example {R : Type*} [CommRing R] {n : Nat} (L : Mathematics.LieAlgebra R (Fin n → R)) :
+    Nonempty (LieCochain2 L (trivialLieModule L : LieModule L R) ≃ₗ[R]
+      GhostPolynomial.natDegree (R := R) (n := n) 2) := ⟨ghostTwoEquiv L⟩
+example {R : Type*} [CommRing R] {n : Nat} (L : Mathematics.LieAlgebra R (Fin n → R))
+    (ω : LieCochain2 L (trivialLieModule L : LieModule L R)) :
+    lieDifferential L (ghostTwo L ω) = 0 ↔ IsTwoCocycle (trivialLieModule L) ω := ghostTwo_closed_iff L ω
+example {R : Type*} [CommRing R] {n : Nat} (L : Mathematics.LieAlgebra R (Fin n → R))
+    (ω : LieCochain2 L (trivialLieModule L : LieModule L R)) :
+    (∃ y, lieDifferential L y = ghostTwo L ω) ↔ IsTwoCoboundary (trivialLieModule L) ω := ghostTwo_exact_iff L ω
+example {R : Type*} [CommRing R] {n : Nat} (L : Mathematics.LieAlgebra R (Fin n → R))
+    (ω η : LieCochain2 L (trivialLieModule L : LieModule L R)) :
+    (integerLieBRST L).Cohomologous (ghostTwo L ω) (ghostTwo L η) ↔
+      Cohomologous2 (trivialLieModule L) ω η := ghostTwo_cohomologous_iff L ω η
+example {R : Type*} [CommRing R] {n : Nat} (L : Mathematics.LieAlgebra R (Fin n → R)) :
+    Nonempty (H2 (trivialLieModule L : LieModule L R) ≃ₗ[R] GhostH2 L) := ⟨h2GhostEquiv L⟩
+example {R : Type*} [CommRing R] {n : Nat} (L : Mathematics.LieAlgebra R (Fin n → R))
+    {H : Type*} [AddCommGroup H] [Module R H] (S : LieCohomology.Reduction (trivialLieModule L : LieModule L R) H) :
+    Nonempty (GhostH2 L ≃ₗ[R] H) := ⟨ghostH2ReductionEquiv L S⟩
+example : Module.finrank ℚ (GhostH2 HeisenbergCohomology.algebra) = 2 := GhostCohomology.heisenberg_dimension
+example {x : GhostPolynomial ℚ 3} (hx : x ∈ GhostPolynomial.natDegree 2) :
+    lieDifferential HeisenbergCohomology.algebra x = 0 := GhostCohomology.heisenberg_all_degree_two_closed hx
+example {x : GhostPolynomial ℚ 3} (hx : x ∈ GhostPolynomial.natDegree 2) :
+    (∃ y, lieDifferential HeisenbergCohomology.algebra y = x) ↔
+      pairCoefficient 0 2 x = 0 ∧ pairCoefficient 1 2 x = 0 := GhostCohomology.heisenberg_all_boundaries hx
+example (ω : HeisenbergCohomology.C2) :
+    GhostCohomology.heisenbergEquiv
+      (twoGhostClass HeisenbergCohomology.algebra (ghostTwo HeisenbergCohomology.algebra ω)
+        (ghostTwo_mem_natDegree _ ω) ((ghostTwo_closed_iff _ ω).mpr (HeisenbergCohomology.all_closed ω))) =
+      HeisenbergCohomology.parameters ω := GhostCohomology.heisenberg_class_coordinates ω
+example {R : Type*} [CommRing R] [Nontrivial R] (a b : R) :
+    ¬∃ y, lieDifferential (LieGhostFamily.algebra a b) y = generator 1 * generator 2 :=
+  GhostCohomology.family_pair_not_exact a b
+example {R : Type*} [CommRing R] [Nontrivial R] (a b : R) (h : a + b = 0) :
+    twoGhostClass (LieGhostFamily.algebra a b) (generator 1 * generator 2)
+      (mul_mem_natDegree (generator_mem_natDegree 1) (generator_mem_natDegree 2))
+      (GhostCohomology.family_pair_closed a b h) ≠ 0 := GhostCohomology.family_pair_class_nonzero a b h
+example : Module.finrank ℚ (GhostH2 (LieGhostFamily.algebra (1 : ℚ) 1)) = 0 := GhostCohomology.family_generic
+example : Module.finrank ℚ (GhostH2 (LieGhostFamily.algebra (1 : ℚ) (-1))) = 1 := GhostCohomology.family_resonant
+example : Module.finrank ℚ (GhostH2 (LieGhostFamily.algebra (0 : ℚ) 0)) = 3 := GhostCohomology.family_abelian
+example : Module.finrank (ZMod 2) (GhostH2 (LieGhostFamily.algebra (1 : ZMod 2) 1)) = 1 :=
+  GhostCohomology.characteristic_two_dimension
+example : twoGhostClass (LieGhostFamily.algebra (3 : ZMod 6) 3) (generator 1 * generator 2)
+    (mul_mem_natDegree (generator_mem_natDegree 1) (generator_mem_natDegree 2))
+    (GhostCohomology.family_pair_closed 3 3 (by decide)) ≠ 0 := GhostCohomology.zero_divisor_pair_nonzero
+end GhostCohomologySmoke
+
+
+
+namespace GhostMatterSmoke
+open LeanPhy.GaugeTheory.GhostPolynomial LeanPhy.Mathematics.LieCohomology
+open scoped TensorProduct
+variable {R M : Type*} [CommRing R] [AddCommGroup M] [Module R M]
+variable {n : Nat} {L : Mathematics.LieAlgebra R (Fin n → R)}
+example (𝒨 : LieModule L M) (x : MatterGhost R n M) :
+    matterDifferential 𝒨 (matterDifferential 𝒨 x) = 0 := matterDifferential_sq 𝒨 x
+example (𝒨 : LieModule L M) (g : GhostPolynomial R n) (x : MatterGhost R n M) :
+    matterDifferential 𝒨 (matterMultiply g x) = matterMultiply (lieDifferential L g) x +
+      matterMultiply (parityInvolution g) (matterDifferential 𝒨 x) := matterDifferential_multiply 𝒨 g x
+example (𝒨 : LieModule L M) {d : Int} {x : MatterGhost R n M} (h : x ∈ matterDegree d) :
+    matterDifferential 𝒨 x ∈ matterDegree (d + 1) := matterDifferential_mem_degree 𝒨 h
+example (𝒨 : LieModule L M) (m : M) :
+    matterDifferential 𝒨 (matterZero m) = matterOne 𝒨 (differential0 𝒨 m) := matterDifferential_zero 𝒨 m
+example (𝒨 : LieModule L M) (φ : LieCochain1 L 𝒨) :
+    matterDifferential 𝒨 (matterOne 𝒨 φ) = matterTwo 𝒨 (differential1 𝒨 φ) := matterDifferential_one 𝒨 φ
+example (𝒨 : LieModule L M) : Function.Injective (matterOne 𝒨) := matterOne_injective 𝒨
+example (𝒨 : LieModule L M) : Function.Injective (matterTwo 𝒨) := matterTwo_injective 𝒨
+example (𝒨 : LieModule L M) (φ : LieCochain1 L 𝒨) :
+    matterDifferential 𝒨 (matterOne 𝒨 φ) = 0 ↔ IsOneCocycle 𝒨 φ := matterOne_closed_iff 𝒨 φ
+example (𝒨 : LieModule L M) (m : M) :
+    matterDifferential 𝒨 (matterZero m) = 0 ↔ ∀ v, 𝒨.act v m = 0 := matterZero_closed_iff 𝒨 m
+example : Function.Injective (matterZero (R := R) (n := n) (M := M)) := matterZero_injective
+example : matterDegree (R := R) (n := n) (M := M) 0 = LinearMap.range matterZero :=
+  matterDegree_zero_eq_range
+example (𝒨 : LieModule L M) {x : MatterGhost R n M} (hx : x ∈ matterDegree 0) :
+    matterDifferential 𝒨 x = 0 ↔ ∃! m : M, matterZero m = x ∧ ∀ v, 𝒨.act v m = 0 :=
+  matter_degree_zero_closed_iff 𝒨 hx
+example (𝒨 : LieModule L M) (m : M) :
+    (∃ y, matterDifferential 𝒨 y = matterZero m) ↔ m = 0 := matterZero_exact_iff 𝒨 m
+example (x : MatterGhost R n M) :
+    matterDifferential (trivialLieModule L : LieModule L M) x =
+      TensorProduct.map (lieDifferential L) LinearMap.id x := matterDifferential_trivial L x
+example (a b t m : R) : matterDifferential (GhostMatter.character a b t) (matterZero m) = 0 ↔ t * m = 0 :=
+  GhostMatter.character_constant_closed_iff a b t m
+example (a b : R) (m : Fin 3 → R) :
+    matterDifferential (adjointLieModule (LieGhostFamily.algebra a b)) (matterZero m) = 0 ↔
+      a * m 0 = 0 ∧ b * m 0 = 0 ∧ a * m 1 = 0 ∧ b * m 2 = 0 := GhostMatter.adjoint_constant_closed_iff a b m
+example : matterDifferential (GhostMatter.character (1 : ℚ) 1 1) (matterZero (1 : ℚ)) ≠ 0 :=
+  GhostMatter.charged_constant_not_closed
+example : matterDifferential (GhostMatter.character (1 : ZMod 6) 1 2) (matterZero (3 : ZMod 6)) = 0 :=
+  GhostMatter.zero_divisor_constant_closed
+example : ¬∃ y, matterDifferential (GhostMatter.character (1 : ZMod 6) 1 2) y = matterZero (3 : ZMod 6) :=
+  GhostMatter.zero_divisor_constant_not_exact
+example : ¬∃ y, matterDifferential (adjointLieModule (LieGhostFamily.algebra (2 : ZMod 6) 3)) y =
+    matterZero (![0, 3, 2] : Fin 3 → ZMod 6) := GhostMatter.torsion_adjoint_not_exact
+end GhostMatterSmoke
+
 /-! ## Executable acceptance report -/
 
 def capabilities : List (String × String) :=
-   [("Banach contraction fixed point", "a certified contraction on any nonempty complete metric space has a kernel-checked unique fixed point and convergent iteration"),
+   [("matter ghost nilpotency", "all tensor states square to zero"),
+   ("matter ghost module rule", "the odd differential respects the ghost algebra action"),
+   ("matter ghost integer degree", "the differential raises degree by one"),
+   ("matter CE zero bridge", "the action agrees with CE d0"),
+   ("matter CE one bridge", "the differential agrees with CE d1"),
+   ("matter one coordinates injective", "one-cochains are recovered over any ring"),
+   ("matter two coordinates injective", "two-cochains are recovered over any ring"),
+   ("matter one closed reflection", "closure is the full CE cocycle condition"),
+   ("matter invariant constants", "constant closure is gauge invariance"),
+   ("matter constants injective", "the tensor embedding loses no vectors"),
+   ("matter degree zero coverage", "every degree-zero state is a constant"),
+   ("matter degree zero complete cycles", "cycles have unique invariant vector coordinates"),
+   ("matter constant boundary criterion", "only zero is a constant boundary"),
+   ("matter trivial action reduction", "trivial action recovers the pure ghost differential"),
+   ("matter character annihilator", "closure retains weight times vector"),
+   ("matter adjoint center", "all degenerations of the center are retained"),
+   ("charged matter nonclosure", "a charged rational constant is not closed"),
+   ("matter torsion closure", "zero divisors give a closed nonzero charged vector"),
+   ("matter torsion nonexactness", "the torsion vector has no primitive"),
+   ("matter adjoint torsion nonexactness", "the torsion adjoint invariant has no primitive"),
+   ("Banach contraction fixed point", "a certified contraction on any nonempty complete metric space has a kernel-checked unique fixed point and convergent iteration"),
    ("first-class constraint ideal", "declared constraint generators form a first-class ideal whose Poisson bracket closure is checked"),
    ("Dirac weak equality", "equality modulo the generated constraint ideal is an explicit equivalence relation"),
    ("Dirac observable normalizer", "observables whose brackets with every constraint are weakly zero are represented by a checked predicate"),
@@ -4580,6 +5402,153 @@ def capabilities : List (String × String) :=
    ("finite CAR ghost pair", "a finite 2 x 2 matrix adapter checks ghost/antighost square-zero products and their CAR anticommutator"),
    ("finite ghost grading", "diagonal and off-diagonal matrix subspaces are closed under the declared parity product"),
    ("finite ghost BRST differential", "a concrete odd square-zero differential checks the signed Leibniz rule, ghost closedness and exactness of the identity"),
+   ("finite Grassmann algebra", "arbitrarily many finite ghost generators satisfy square-zero and anticommutation identities in the exterior algebra"),
+   ("Grassmann left derivatives", "left derivatives satisfy the signed product rule and CAR identity on every ghost polynomial"),
+   ("ghost contraction nilpotency", "covector contraction squares to zero and distinct contractions anticommute"),
+   ("Koszul contraction homotopy", "a supplied unit-pairing witness makes closed ghost polynomials exact"),
+   ("zero constraint obstruction", "the identity is not exact when the Koszul constraints vanish"),
+   ("inner ghost charge degeneracy", "an inner graded commutator on the pure exterior algebra is proved identically zero"),
+   ("quadratic ghost differential", "c_i c_j partial_j satisfies the odd Leibniz rule and squares to zero for distinct i,j"),
+   ("quadratic ghost nontriviality", "the same differential has a proved nonzero action over a nontrivial coefficient ring"),
+   ("finite ghost research ledger", "a runnable example registers eleven proof-bearing claims and two open interpretation obligations"),
+   ("polynomial constraint syzygy", "a Koszul differential with polynomial coefficients derives a closed constraint relation from a ghost-pair boundary"),
+   ("finite ghost nilpotency criterion", "even generator images define a square-zero vector field exactly when every image is closed"),
+   ("general ghost vector field", "finite sums F_i partial_i satisfy the odd Leibniz law for even images over any commutative ring"),
+   ("canonical Lie ghost formula", "increasing-pair sums implement the CE sign without division by two"),
+   ("general degree-one CE ghost bridge", "all scalar one-cochains intertwine with the canonical finite Lie ghost differential"),
+   ("sl2 ghost nontriviality", "the generated differential acts nontrivially on a generator"),
+   ("sl2 ghost nilpotency", "finite polynomial certificates prove square-zero action on the whole ghost algebra"),
+   ("Heisenberg ghost differential", "the central-generator image is minus the nonzero wedge of the other ghosts"),
+   ("oscillator ghost differential", "a generated four-dimensional nonabelian algebra has a checked polynomial BRST differential"),
+   ("incompatible ghost images", "a candidate with separately nilpotent terms has a proved nonzero mixed cubic square"),
+   ("Lie ghost research ledger", "fifty-four proof-bearing claims retain the physical interpretation obligation"),
+   ("Jacobi implies ghost nilpotency", "every finite coordinate Lie algebra over a commutative ring determines its canonical square-zero differential"),
+   ("degree-two CE ghost bridge", "increasing triples identify the polynomial differential with CE degrees two and three"),
+   ("automatic ghost certificates", "all generator images are closed by the universal CE identity d2 d1 = 0"),
+   ("parameter ghost nilpotency", "all parameter choices define a differential, including zero weights"),
+   ("complete ghost resonance locus", "the ghost pair is closed exactly when its two weights sum to zero"),
+   ("characteristic two ghost resonance", "weights one and one retain their closed pair in characteristic two"),
+   ("polynomial coefficient ghost complex", "canonical nilpotency applies over polynomial coefficient rings"),
+   ("ghost triple coefficient detection", "ordered contraction detects coefficients over rings with zero divisors"),
+   ("ghost generator integer degree", "every generator has actual degree one"),
+   ("ghost scalar integer degree", "scalars have actual degree zero"),
+   ("ghost degree product", "multiplication adds actual degrees"),
+   ("ghost degree uniqueness", "nonzero homogeneous elements have a unique degree"),
+   ("negative pure ghost degree", "negative-degree components of the pure ghost algebra vanish"),
+   ("finite ghost degree cutoff", "degrees above the number of generators vanish"),
+   ("ghost degree decomposition", "every polynomial is the sum of finitely many homogeneous components"),
+   ("ghost degree projections", "each projection belongs to its declared exterior power"),
+   ("integer Lie ghost BRST", "the canonical differential raises integer ghost degree by one"),
+   ("integer Koszul differential", "contraction lowers integer ghost degree by one"),
+   ("ghost differential projection", "homogeneous projection commutes with the differential shift"),
+   ("closed ghost components", "each homogeneous component of a closed polynomial is closed"),
+   ("homogeneous ghost primitives", "a homogeneous boundary has a primitive of the preceding degree"),
+   ("scalar ghost boundaries", "scalar boundaries in the pure Lie ghost complex are precisely zero"),
+   ("top ghost degree closed", "every top-degree element is closed"),
+   ("characteristic two degree separation", "integer degree remains separated when parity eigenspaces overlap"),
+   ("mixed ghost polynomial degree", "one plus a generator has no single homogeneous degree"),
+   ("integer ghost parity compatibility", "degree determines the signed parity action"),
+   ("degree-two ghost coordinates", "two-cochain coordinates lie in the actual second exterior power"),
+   ("degree-three ghost coordinates", "three-cochain coordinates lie in the actual third exterior power"),
+   ("ghost pair coefficient recovery", "ordered contraction recovers every scalar two-cochain coordinate"),
+   ("ghost triple coefficient recovery", "ordered triple contraction recovers three-cochain coordinates"),
+   ("ghost two-cochain injection", "distinct scalar two-cochains give distinct ghost polynomials"),
+   ("complete quadratic ghost coordinates", "all degree-two exterior polynomials have unique CE coordinates"),
+   ("ghost closedness equivalence", "quadratic ghost closedness reflects CE closedness"),
+   ("ghost boundary equivalence", "arbitrary polynomial primitives reflect exactly CE boundaries"),
+   ("ghost class equivalence", "the polynomial cohomologous relation agrees with CE classes"),
+   ("actual ghost H2 quotient", "the degree-two ghost quotient is linearly equivalent to CE H2"),
+   ("ghost H2 reduction transfer", "a certified CE reduction computes the ghost quotient"),
+   ("Heisenberg ghost H2 dimension", "the actual ghost H2 is two-dimensional"),
+   ("Heisenberg quadratic closedness", "all degree-two polynomials are closed"),
+   ("Heisenberg complete boundary criterion", "two extracted coefficients decide every quadratic boundary"),
+   ("Heisenberg ghost class coordinates", "the transferred reduction returns the certified class coordinates"),
+   ("parameter ghost pair not exact", "arbitrary polynomial primitives cannot produce the distinguished pair"),
+   ("parameter ghost nonzero class", "the resonant pair is a nonzero cohomology class over nontrivial rings"),
+   ("generic ghost cohomology", "rational weights one and one have zero H2"),
+   ("resonant ghost cohomology", "opposite rational weights have one-dimensional H2"),
+   ("abelian ghost cohomology", "zero weights have three-dimensional H2"),
+   ("characteristic two ghost cohomology", "equal unit weights in characteristic two have one-dimensional H2"),
+   ("ghost class over zero divisors", "the resonant ZMod 6 pair represents a nonzero quotient class"),
+   ("discovered parameter equations", "automatically extracted equations define the full plane-and-axis parameter domain"),
+   ("necessary and sufficient model laws", "the full Jacobi and representation laws are equivalent to the discovered equations"),
+   ("actual model existence locus", "actual Lie algebra and module structures exist exactly on the computed domain"),
+   ("legal parameter plane", "the entire a=0 plane satisfies the model laws"),
+   ("preserved legal axis", "the b=t=0 axis is retained even when a is nonzero"),
+   ("excluded illegal point", "a point violating the representation law is proved illegal"),
+   ("H2 on discovered domain", "cohomology is computed on every legal parameter point"),
+   ("nonzero character vanishing", "the legal scalar-character branch has zero H2 away from t=0"),
+   ("discovered domain origin", "the origin retains three independent classes"),
+   ("discovered vector domain", "the full noncommuting vector representation laws are equivalent to a=u"),
+   ("impossible raw laws", "the invalid fixed bracket is proved unable to satisfy the laws"),
+   ("no model with invalid bracket", "actual Lie/module structures with the invalid supplied operations cannot exist"),
+   ("symbolic bracket H2 formula", "polynomial brackets generate actual H2 with all parameter branches"),
+   ("nonzero Heisenberg parameter", "nonzero bracket parameter retains two cohomology classes"),
+   ("zero Heisenberg parameter", "zero bracket parameter has three cohomology classes"),
+   ("symbolic exactness", "the generated coordinate criterion retains the closedness premise"),
+   ("symbolic normal form", "generated primitives and representatives decompose closed cochains for every parameter"),
+   ("representation parameter domain", "the affine-vector representation requires equality of its character and bracket parameter"),
+   ("vector coefficient dimension formula", "on its valid domain the affine-vector family computes a complete H2 dimension formula"),
+   ("nonzero affine-vector parameter", "nonzero valid vector parameter yields zero H2"),
+   ("zero affine-vector parameter", "the declared nontrivial vector action retains one class at zero bracket"),
+   ("invalid representation point", "the wrong character is proved outside the declared model conditions"),
+   ("Jacobi parameter domain", "the bracket conditions are proved equivalent to the union of two coordinate axes"),
+   ("invalid Jacobi point", "a parameter point violating Jacobi is proved outside the model conditions"),
+   ("constrained Jacobi dimension", "the generated Lie quotient dimension holds on the full declared constraint locus"),
+   ("Jacobi intersection", "the intersection of the admissible axes retains three classes"),
+   ("automatic first CE bridge", "the generated first parameter matrix is identified with the full CE differential"),
+   ("automatic next CE bridge", "the generated next matrix matches the detecting CE coordinates"),
+   ("automatic parameter H2", "an exhaustive generated decision tree computes actual H2 for every parameter"),
+   ("independent resonance comparison", "the automatic tree equals the independent all-parameter resonance formula"),
+   ("automatic parameter exactness", "closedness and computed class coordinates characterize exact cochains"),
+   ("automatic parameter normal form", "computed primitive and representative matrices decompose every closed cochain"),
+   ("automatic generic point", "the generated Lie certificate gives dimension zero at the generic real point"),
+   ("automatic double resonance", "the generated Lie certificate retains two classes at a double resonance"),
+   ("automatic full degeneracy", "the generated Lie certificate retains all three classes at zero parameters"),
+   ("determinant generic region", "two explicit nonzero determinant factors imply zero cohomology"),
+   ("positive determinant locus", "the first determinant-zero line carries a nonzero class"),
+   ("negative determinant locus", "the second determinant-zero line also carries a nonzero class"),
+   ("determinant intersection", "the intersection has two independent classes"),
+   ("symbolic H2 dimension", "a universal three-parameter formula counts the exact resonance conditions over any field"),
+   ("generic cohomology vanishing", "three explicit nonresonance conditions imply H2 vanishing"),
+   ("double resonance", "intersecting resonance conditions contribute independent classes"),
+   ("closure resonance", "the third class appears exactly on its closure locus"),
+   ("fully degenerate cohomology", "the zero bracket and action yield three H2 coordinates"),
+   ("parameter-dependent nontrivial class", "a unit cocycle class is nonzero precisely on its resonance locus"),
+   ("parameter-dependent cocycle condition", "a supplied unit cochain is closed only on the declared parameter locus"),
+   ("parameter-dependent primitive", "generic closed cochains have a supplied exact primitive"),
+   ("resonant primitive failure", "a proved counterexample blocks using a generic inverse on a resonance"),
+   ("uniform parameter normal form", "the representative-plus-boundary decomposition remains valid at every parameter point"),
+   ("field-extension dimension invariance", "rational-to-complex extension preserves the full family dimension formula"),
+   ("resonance-stratum equivalence", "matching resonance patterns give explicit cohomology equivalences"),
+   ("generated affine trivial cohomology", "structure constants with trivial coefficients produce a checked zero-dimensional H2"),
+   ("generated affine character cohomology", "the supplied nontrivial character produces a checked one-dimensional H2"),
+   ("fixed affine Lie bracket", "the two coefficient experiments use the identical declared Lie algebra"),
+   ("coefficient-dependent cohomology", "different coefficient actions are proved to give different H2 dimensions"),
+   ("generated vector cohomology", "the generated three-dimensional solvable model with two-dimensional coefficients has H2 dimension four"),
+   ("nonzero next CE differential", "a supplied cochain is proved nonclosed, exercising the d2 condition"),
+   ("zero projection without closedness", "a nonclosed cochain has zero coordinate projection, so the cocycle premise is essential"),
+   ("generated exactness decision", "class-coordinate vanishing characterizes boundaries for supplied closed cochains"),
+   ("generated cochain normal form", "the automatically derived CE reduction supplies representatives and primitives"),
+   ("increasing-triple cocycle check", "alternation and basis completeness reduce cocycle verification to increasing triples"),
+   ("complete two-cochain coordinates", "all three-dimensional alternating two-cochains have a checked coordinate equivalence"),
+   ("Heisenberg two-cocycle completeness", "every alternating two-cochain of the declared Heisenberg algebra is closed"),
+   ("generated CE matrix identification", "the exact rational differential matrix is proved to match the declared Lie bracket"),
+   ("computed Heisenberg H2 dimension", "the actual Heisenberg H2 quotient is linearly equivalent to two rational parameters"),
+   ("computed boundary criterion", "the two Heisenberg class coordinates decide exactness"),
+   ("computed cohomology normal form", "every Heisenberg cochain decomposes into a representative and a boundary with primitive"),
+   ("computed central extension parameters", "parameter equality characterizes base- and center-preserving extension equivalence"),
+   ("certified quotient coordinates", "five reduction identities construct a linear equivalence from the cohomology quotient"),
+   ("native Lie cochain bridge", "explicit Lie models convert to native mathlib two-cochains with a checked round trip"),
+   ("degree-two CE nilpotency", "d2 d1 = 0 holds for every declared Lie module and linear one-cochain"),
+   ("H2 quotient module", "a two-cocycle has zero class in the actual quotient exactly when it is a coboundary"),
+   ("central extension Jacobi", "a two-cocycle constructs a Lie bracket satisfying Jacobi on the product carrier"),
+   ("central extension exactness", "the central inclusion is the kernel of the base projection"),
+   ("central extension classification", "H2 class equality is equivalent to a bracket-preserving linear equivalence fixing base and center"),
+   ("Heisenberg cohomology obstruction", "the area cocycle has nonzero H2 class and defines a nontrivial central extension"),
+   ("nonzero exact affine cocycle", "a concrete nonzero cocycle represents zero in H2"),
+   ("central term removal", "an explicit linear shear removes a coboundary central term"),
+   ("affine CE ghost correspondence", "the quadratic ghost differential intertwines the degree-one CE differential with the declared affine bracket sign"),
    ("constraint-preserving symmetry", "admissible and constrained physical states are preserved by a declared group action"),
    ("covariant constraint equation", "a value-valued equivariant constraint yields a checked zero-fibre physical-state predicate when the group fixes zero"),
    ("gauge-orbit equivalence", "the orbit relation is kernel-checked as an equivalence and transports physical-state predicates"),
@@ -4853,7 +5822,7 @@ def capabilities : List (String × String) :=
    ("finite multi-field Wick kernel", "a covariance kernel over four typed field slots expands into all three bosonic contractions; time ordering, distributions and renormalisation remain explicit"),
    ("fermionic algebra", "CAR: number operator is a projector, raising/lowering"),
    ("condensed matter", "Hubbard site: commuting spin projectors, double occupancy, Cooper-pair operator"),
-   ("Majorana fermions", "g1² = 1, g2² = -1, {g1,g2} = 0 (Cl(1,1)), and c†c = (1 - i γ₁γ₂)/2 recovered"),
+   ("Majorana fermions", "g1² = 1, g2² = -1, {g1,g2} = 0 (Cl(1,1)); for γ₂ = -i g2, c†c = (1 + i γ₁γ₂)/2"),
    ("quantum channels", "Kraus operator-sum: trace preservation, unitality and channel composition; positive-semidefinite and IsDensity preservation; amplitude-damping completeness; depolarising decoherence"),
    ("finite complete positivity", "every finite ancillary extension of a Kraus operator-sum has the explicit I⊗K form and preserves positive semidefiniteness"),
    ("finite POVM", "positive effects with an identity completeness relation; Born weights are real and nonnegative and sum to one for density matrices"),
@@ -4976,7 +5945,7 @@ def capabilities : List (String × String) :=
    ("finite second moments and collision entropy", "a shared second-moment and collision-probability API for Gibbs states, Markov states and POVM outputs; nonnegativity, the [0,1] bound and the uniform-state value are kernel-checked, while logarithmic/continuum entropy remains an explicit analysis boundary"),
    ("finite Markov kernels", "nonnegative row-normalized transitions push finite distributions to finite distributions; composition and the dual observable expectation identity are kernel-checked, and doubly-stochastic kernels preserve the uniform state"),
    ("finite Gibbs ensembles", "positive finite partition function, normalized Gibbs distribution, nonnegative weights, and invariance under an additive energy shift; thermodynamic limits and entropy derivatives remain explicit analysis layers"),
-   ("BCS / Bogoliubov", "Bogoliubov rotation preserves the Majorana Clifford pair; the BdG matrix squares to (eps²+Delta²)1, is traceless with det -(eps²+Delta²); a finite real BdG family gets a common spectral-gap certificate; the gap equation"),
+   ("BCS / Bogoliubov", "complex-orthogonal rotations preserve Clifford relations; the complex-symmetric block squares to (eps²+Delta²)1; real parameters use the finite gap adapter; a supplied gap relation is preserved"),
    ("coupled spins", "total su(2), singlet state, Casimir spectrum {0,2} (1/2 ⊗ 1/2 = 0 ⊕ 1)"),
    ("Clifford / gamma algebra", "anticommuting generators, Dirac gamma matrices"),
    ("gamma-matrix traces", "traceless gammas, tr(γ^μ γ^ν) = 4 η^{μν}, the four-point trace, chiral traces"),
@@ -5019,7 +5988,7 @@ def capabilities : List (String × String) :=
    ("no-cloning theorem", "a linear U copying the basis states |0>, |1> (with a blank ancilla) must send the superposition |0> + |1> to the entangled |00> + |11>, which is not a product state: no linear operation clones every state.  The algebraic core, over C on explicit qubit vectors"),
    ("angular momentum one (spin-1)", "explicit 3x3 Cartesian generators S_1, S_2, S_3: the su(2) commutators [S_i,S_j] = i eps_ijk S_k, the Casimir S.S = 2 * 1 = l(l+1) 1 for l = 1, the cubic identity S_i^3 = S_i (eigenvalues -1, 0, 1), and the raising/lowering operators J_+/- = S_1 +/- i S_2 with [S_3, J_+] = J_+, [S_3, J_-] = -J_-"),
    ("Jordan-Wigner transformation", "the two-site fermion chain as explicit 4x4 matrices: c_0 = sigma^- (x) 1 and c_1 = sigma^z (x) sigma^-, the full canonical anticommutation relations ({c_0,c_0^dag} = 1, {c_0,c_1^dag} = 0, c_0^2 = 0, ...) checked entrywise, the stringless candidate proved nonzero (the sigma^z string is needed), each number operator a projector, and the hopping term equal to (1/2)(sigma^x (x) sigma^x + sigma^y (x) sigma^y) and conserving particle number"),
-   ("Berry curvature of a qubit", "the two-level Bloch vector in spherical coordinates: it has unit norm; the Berry curvature density dhat . (d_theta dhat x d_phi dhat) is exactly sin theta (the charge-one Dirac monopole field), with the spherical frame orthonormal; the Chern-number integral itself is out of scope"),
+   ("spherical Bloch-vector geometry", "unit norm and tangent identities; the spherical scalar triple product equals sin theta; selected-band curvature, its normalization and the Chern integral require separate bridges"),
    ("Dirac covariant completeness", "the 16 Dirac Gamma matrices: trace orthogonality tr(Gamma_A Gamma_B) = 4 w_A delta_AB with the axial sign w = -1, entrywise Fierz completeness sum_A w_A (Gamma_A)_ij (Gamma_A)_kl = 4 delta_il delta_jk, and the closure form sum_A w_A tr(Gamma_A M) Gamma_A = 4 M"),
    ("theory-package workflow", "assumptions, kernel-checked claims and explicit scope boundaries share one replaceable research-package interface"),
    ("proof-producing derivation chain", "addDerivedTheorem consumes the predecessor proposition and proof term, so a ledger dependency is enforced by Lean rather than recorded only as metadata"),
@@ -5057,17 +6026,19 @@ def researcherBase : TheoryPackage :=
 
 def researcherObligationWitness : ExternalObligationWitness where
   metadata :=
-    { name := "continuum interpretation"
-      statement := "provide the external analysis needed to lift the finite result"
+    { name := "finite involution"
+      statement := "Pauli X squares to the identity"
       source := "research project" }
-  proposition := True
+  proposition := LeanPhy.Quantum.pauliX * LeanPhy.Quantum.pauliX = LeanPhy.Quantum.identity
 
 def researcherTypedClosed : TheoryPackage :=
-  researcherBase.resolveObligationWitness researcherObligationWitness
-    (by native_decide)
-    "typed continuum bridge"
-    "the declared finite result is transported through the typed bridge"
-    "researcher_extension.lean" [] [] (fun h => h) True.intro
+  (TheoryPackage.empty "typed finite research" "finite operator model"
+    |>.addObligationWitness researcherObligationWitness).resolveObligationWitness
+    ((TheoryPackage.empty "typed finite research" "finite operator model").addedObligationRef
+      researcherObligationWitness)
+    "typed finite bridge"
+    "the registered finite target is proved; no continuum claim is made"
+    "researcher_extension.lean" [] [] (fun h => h) LeanPhy.Quantum.pauliX_sq
 
 example : researcherTypedClosed.claimCount = 1 := rfl
 example : researcherTypedClosed.obligationCount = 0 := rfl
@@ -5396,7 +6367,275 @@ def duplicatePackageProject : ResearchProject :=
 
 example : duplicatePackageProject.hasErrors = true := by decide
 
+namespace ThirdOrderDeformationSmoke
+open LeanPhy.Mathematics LeanPhy.Mathematics.LieCohomology
+open LeanPhy.Mathematics.LieDeformation LeanPhy.Mathematics.LieCochainCoordinates
+open LeanPhy.Generated LeanPhy.Examples.ParameterizedObstructionResearch
+open LeanPhy.Examples.ThirdOrderDeformationResearch
+open scoped _root_.Classical
+set_option maxSynthPendingDepth 7
+variable {K : Type*} [Field K] [CharZero K]
+example (g t u : K) :
+    thirdObstructionCochain (direction g t u) (displayedCorrection g t u) (e 0) (e 1) (e 2) =
+      ![t*u^2/g,t^2*u/g,0] := LeanPhy.Examples.ThirdOrderDeformationResearch.displayed_third_obstruction g t u
+example (g : K) (ρ : HeisenbergThirdParameter.C2 ![g] ⟨⟩) :
+    differential2 (HeisenbergThirdParameter.coefficients ![g] ⟨⟩) ρ (e 0) (e 1) (e 2) 0 = 0 := LeanPhy.Examples.ThirdOrderDeformationResearch.third_differential_first_zero g ρ
+example (g t u : K) (hg : g ≠ 0) (ht : t ≠ 0) (hu : u ≠ 0) :
+    ¬ThirdExtendable (direction g t u) (displayedCorrection g t u) := LeanPhy.Examples.ThirdOrderDeformationResearch.displayed_correction_blocked g t u hg ht hu
+example (g t u s : K) (hg : g ≠ 0) :
+    secondResidual (direction g t u) (adjustedSecond g t u s) = 0 := LeanPhy.Examples.ThirdOrderDeformationResearch.adjusted_second_valid g t u s hg
+example (g t u s : K) :
+    thirdObstructionCochain (direction g t u) (adjustedSecond g t u s) (e 0) (e 1) (e 2) =
+      ![0,0,-s*u] := LeanPhy.Examples.ThirdOrderDeformationResearch.adjusted_third_obstruction g t u s
+example (g t u s : K) (hg : g ≠ 0) :
+    thirdResidual (direction g t u) (adjustedSecond g t u s) (displayedThird g u s) = 0 := LeanPhy.Examples.ThirdOrderDeformationResearch.displayed_third_valid g t u s hg
+example (g t u s : K) (hg : g ≠ 0) :
+    (displayedModel g t u s hg).bracket =
+      thirdBracket (direction g t u) (adjustedSecond g t u s) (displayedThird g u s) := LeanPhy.Examples.ThirdOrderDeformationResearch.displayed_model_bracket g t u s hg
+example (g t u s : K) (hg : g ≠ 0) :
+    ThirdExtendable (direction g t u) (adjustedSecond g t u s) := LeanPhy.Examples.ThirdOrderDeformationResearch.adjusted_second_extends g t u s hg
+example (g : K) (hg : g ≠ 0) :
+    secondResidual (direction g 1 1) (displayedCorrection g 1 1) = 0 ∧
+    ¬ThirdExtendable (direction g 1 1) (displayedCorrection g 1 1) ∧
+    ThirdExtendable (direction g 1 1) (adjustedSecond g 1 1 1) := LeanPhy.Examples.ThirdOrderDeformationResearch.second_choice_matters g hg
+example (g t u s : K) (hu : u ≠ 0) (hs : s ≠ 0) :
+    thirdResidual (direction g t u) (adjustedSecond g t u s) 0 ≠ 0 := LeanPhy.Examples.ThirdOrderDeformationResearch.zero_third_correction_fails g t u s hu hs
+example (g t u s : K) (hg : g ≠ 0) :
+    LieDeformation.ThirdReduction.thirdCoordinates (HeisenbergThirdParameter.thirdReduction ![g] ⟨⟩)
+      (direction g t u) (adjustedSecond g t u s) = 0 := LeanPhy.Examples.ThirdOrderDeformationResearch.computed_coordinates_vanish g t u s hg
+example (g t u s : K) (hg : g ≠ 0) (x y : ThirdJet (HSpace K)) :
+    ((computedThirdModel g t u s hg).bracket x y).1 =
+      secondBracket (direction g t u) (adjustedSecond g t u s) x.1 y.1 := LeanPhy.Examples.ThirdOrderDeformationResearch.computed_model_truncates g t u s hg x y
+example (ω ν : Sl2Third.C2)
+    (hω : IsTwoCocycle Sl2Third.coefficients ω) (hν : secondResidual ω ν = 0) :
+    ThirdExtendable ω ν := LeanPhy.Examples.ThirdOrderDeformationResearch.sl2_every_second_choice_extends ω ν hω hν
+section Generic
+variable {R V H : Type*} [CommRing R] [AddCommGroup V] [Module R V]
+  [AddCommGroup H] [Module R H] {L : LieAlgebra R V}
+example (ω : Cochain L) (w x y z : V) :
+    mixedDifferential3 ω (obstructionCochain ω) w x y z = 0 := obstruction_self_bianchi ω w x y z
+example (ω ν : Cochain L) (hω : IsTwoCocycle (adjointLieModule L) ω) (hν : secondResidual ω ν = 0) :
+    IsThreeCocycle (adjointLieModule L) (thirdObstructionCochain ω ν) := thirdObstruction_isThreeCocycle ω ν hω hν
+example (ω ν ρ : Cochain L) :
+    (∃ D : LieAlgebra R (ThirdJet V), D.bracket = thirdBracket ω ν ρ) ↔
+    IsTwoCocycle (adjointLieModule L) ω ∧ secondResidual ω ν = 0 ∧ thirdResidual ω ν ρ = 0 :=
+  thirdAlgebra_exists_iff ω ν ρ
+example (ω ν : Cochain L) (hω : IsTwoCocycle (adjointLieModule L) ω) (hν : secondResidual ω ν = 0) :
+    ThirdExtendable ω ν ↔ thirdObstructionClass ω ν hω hν = 0 := thirdExtendable_iff_obstructionClass_zero ω ν hω hν
+example [Subsingleton (H3 (adjointLieModule L))] (ω ν : Cochain L)
+    (hω : IsTwoCocycle (adjointLieModule L) ω) (hν : secondResidual ω ν = 0) :
+    ThirdExtendable ω ν := thirdExtendable_of_subsingleton_h3 ω ν hω hν
+example (S : LieCohomology.ThirdReduction (adjointLieModule L) H) (ω ν : Cochain L)
+    (hω : IsTwoCocycle (adjointLieModule L) ω) (hν : secondResidual ω ν = 0)
+    (h : LieDeformation.ThirdReduction.thirdCoordinates S ω ν = 0) :
+    thirdResidual ω ν (LieDeformation.ThirdReduction.thirdCorrection S ω ν) = 0 :=
+  LieDeformation.ThirdReduction.thirdCorrection_cancels S ω ν hω hν h
+example (S : LieCohomology.ThirdReduction (adjointLieModule L) H) (ω ν ρ : Cochain L)
+    (hω : IsTwoCocycle (adjointLieModule L) ω) (hν : secondResidual ω ν = 0)
+    (h : LieDeformation.ThirdReduction.thirdCoordinates S ω ν = 0) :
+    thirdResidual ω ν ρ = 0 ↔
+      IsTwoCocycle (adjointLieModule L) (ρ - LieDeformation.ThirdReduction.thirdCorrection S ω ν) :=
+  LieDeformation.ThirdReduction.all_third_corrections S ω ν ρ hω hν h
+end Generic
+end ThirdOrderDeformationSmoke
+
+namespace ThirdOrderSearchSmoke
+open LeanPhy.Mathematics LeanPhy.Mathematics.LieCohomology
+open LeanPhy.Mathematics.LieDeformation LeanPhy.Generated
+open LeanPhy.Examples.ThirdOrderSearchResearch
+set_option maxSynthPendingDepth 7
+example : ThirdDirectionExtendable HeisenbergThirdSearch.direction := LeanPhy.Examples.ThirdOrderSearchResearch.heisenberg_search_succeeds
+example :
+    secondResidual HeisenbergThirdSearch.direction HeisenbergThirdSearch.secondCandidate = 0 := LeanPhy.Examples.ThirdOrderSearchResearch.heisenberg_first_choice_valid
+example :
+    ¬ThirdExtendable HeisenbergThirdSearch.direction HeisenbergThirdSearch.secondCandidate := LeanPhy.Examples.ThirdOrderSearchResearch.heisenberg_first_choice_blocked
+example :
+    HeisenbergThirdSearch.pairTwoCoordinates HeisenbergThirdSearch.searchedCorrections =
+      ![0,0,0,1,-1,0,1,0,0,0,0,0,0,0,0,0,0,0] := LeanPhy.Examples.ThirdOrderSearchResearch.heisenberg_computed_pair
+example :
+    HeisenbergThirdSearch.certifiedModel.bracket = thirdBracket HeisenbergThirdSearch.direction
+      HeisenbergThirdSearch.searchedCorrections.1 HeisenbergThirdSearch.searchedCorrections.2 := LeanPhy.Examples.ThirdOrderSearchResearch.heisenberg_actual_model
+example (ν ρ : HeisenbergThirdSearch.C2) :
+    (∃ D : LeanPhy.Mathematics.LieAlgebra ℚ (ThirdJet HeisenbergThirdSearch.Space),
+      D.bracket = thirdBracket HeisenbergThirdSearch.direction ν ρ) ↔
+    HeisenbergThirdSearchJointImage.d1.toLin'
+      (HeisenbergThirdSearch.pairTwoCoordinates (ν,ρ) - HeisenbergThirdSearch.correctionValues) = 0 := LeanPhy.Examples.ThirdOrderSearchResearch.heisenberg_all_models ν ρ
+example : SecondExtendable Filiform4ThirdObstructed.direction := LeanPhy.Examples.ThirdOrderSearchResearch.filiform_second_order_succeeds
+example : Filiform4ThirdObstructed.obstructionValues 4 = 2 := LeanPhy.Examples.ThirdOrderSearchResearch.filiform_obstruction_nonzero
+example : ¬ThirdDirectionExtendable Filiform4ThirdObstructed.direction := LeanPhy.Examples.ThirdOrderSearchResearch.filiform_no_third_direction_extension
+example (ν : Filiform4ThirdObstructed.C2) :
+    ¬ThirdExtendable Filiform4ThirdObstructed.direction ν := LeanPhy.Examples.ThirdOrderSearchResearch.filiform_every_second_choice_blocked ν
+example : NonclosedThirdSearch.obstructionValues = 0 := LeanPhy.Examples.ThirdOrderSearchResearch.nonclosed_zero_projection
+example : ¬ThirdDirectionExtendable NonclosedThirdSearch.direction := LeanPhy.Examples.ThirdOrderSearchResearch.nonclosed_no_model
+example : ¬ThirdDirectionExtendable SecondObstructedThirdSearch.direction := LeanPhy.Examples.ThirdOrderSearchResearch.second_order_obstruction_no_model
+example :
+    SecondExtendable Filiform4ThirdObstructed.direction ∧
+      ¬ThirdDirectionExtendable Filiform4ThirdObstructed.direction := LeanPhy.Examples.ThirdOrderSearchResearch.filiform_separates_orders
+section Generic
+variable {R V H : Type*} [CommRing R] [AddCommGroup V] [Module R V]
+  [AddCommGroup H] [Module R H] {L : LieAlgebra R V}
+example (ω ν ρ : Cochain L) : jointDifferential ω (ν,ρ) = jointTarget ω ↔
+    secondResidual ω ν = 0 ∧ thirdResidual ω ν ρ = 0 := joint_equation_iff ω ν ρ
+example (ω : Cochain L) : ThirdDirectionExtendable ω ↔
+    IsTwoCocycle (adjointLieModule L) ω ∧ ∃ q, jointDifferential ω q = jointTarget ω :=
+  thirdDirectionExtendable_iff_joint ω
+example {ω : Cochain L} (S : JointReduction ω H) : ThirdDirectionExtendable ω ↔
+    IsTwoCocycle (adjointLieModule L) ω ∧ JointReduction.obstructionCoordinates S = 0 :=
+  JointReduction.extendable_iff S
+example {ω : Cochain L} (S : JointReduction ω H) (h : JointReduction.obstructionCoordinates S = 0) :
+    secondResidual ω (JointReduction.corrections S).1 = 0 ∧
+      thirdResidual ω (JointReduction.corrections S).1 (JointReduction.corrections S).2 = 0 :=
+  JointReduction.corrections_cancel S h
+example {ω : Cochain L} (S : JointReduction ω H) (ν ρ : Cochain L)
+    (hω : IsTwoCocycle (adjointLieModule L) ω) (h : JointReduction.obstructionCoordinates S = 0) :
+    (∃ D : LieAlgebra R (ThirdJet V), D.bracket = thirdBracket ω ν ρ) ↔
+      jointDifferential ω ((ν,ρ) - JointReduction.corrections S) = 0 :=
+  JointReduction.all_models_iff S ν ρ hω h
+example {ω : Cochain L} (S : JointReduction ω H) (h : JointReduction.obstructionCoordinates S ≠ 0) :
+    ¬ThirdDirectionExtendable ω := JointReduction.no_model S h
+end Generic
+end ThirdOrderSearchSmoke
+
 def main : IO Unit := do
+  IO.println "  [ok] quadratic inverse term: the inverse identity generator change retains its necessary quadratic term"
+  IO.println "  [ok] five-coordinate obstruction equations: the complete Heisenberg obstruction is expressed in five H2 coordinates"
+  IO.println "  [ok] extension test on H2: a closed direction extends exactly when its representative obstruction vanishes"
+  IO.println "  [ok] obstruction invariance: first-order equivalence preserves the actual computed obstruction coordinates"
+  IO.println "  [ok] closed unnormalized family: the original two-parameter direction is closed"
+  IO.println "  [ok] computed H2 coordinates: the two-parameter direction has coordinates minus u and t"
+  IO.println "  [ok] solvable normalized family: the representative obstruction equations vanish for the displayed family"
+  IO.println "  [ok] transported correction: normalized solving produces t times u in the e1,e2 bracket"
+  IO.println "  [ok] transported actual Lie model: the actual second-jet Lie algebra has the transported correction bracket"
+  IO.println "  [ok] second-order bracket equivalence: the computed invertible normalization map preserves the full second-jet bracket"
+  IO.println "  [ok] formal parameter compatibility: the computed normalization commutes with multiplication by the formal parameter"
+  IO.println "  [ok] distinct valid corrections: direct and normalized solvers choose different corrections when t times u is nonzero"
+  IO.println "  [ok] correction freedom is a cocycle: the difference of the two computed corrections is a closed adjoint cochain"
+  IO.println "  [ok] whole-class obstruction: every direction equivalent to the obstructed representative fails to extend"
+  IO.println "  [ok] sl2 second-order extension: every closed sl2 direction admits a second-order extension through its trivializing equivalence"
+  IO.println "  [ok] Heisenberg closed family: the five-parameter family is closed for the canonical adjoint differential"
+  IO.println "  [ok] Heisenberg quadratic equations: the complete projected obstruction is the displayed pair of quadratic polynomials"
+  IO.println "  [ok] Heisenberg extension locus: any second-order correction exists exactly when both quadratic equations vanish"
+  IO.println "  [ok] Heisenberg nonexistence: the displayed direction admits no second-order Lie model for any correction"
+  IO.println "  [ok] solvable exact obstruction: the non-normalized two-parameter family satisfies both closedness and obstruction conditions"
+  IO.println "  [ok] nonzero exact Jacobi term: the raw quadratic Jacobi term is minus t times u in the central coordinate"
+  IO.println "  [ok] computed nonzero correction: the solver supplies t times u in the e0,e2 bracket"
+  IO.println "  [ok] actual corrected Lie model: the constructed second-jet Lie algebra has the specified computed bracket"
+  IO.println "  [ok] correction is necessary: when t times u is nonzero, the zero correction fails Jacobi"
+  IO.println "  [ok] all correction freedom: all valid corrections differ from the computed one by an adjoint cocycle"
+  IO.println "  [ok] quadratic test is insufficient: a nonclosed direction can have zero projected quadratic obstruction"
+  IO.println "  [ok] closedness is necessary: the displayed nonclosed direction admits no second-order model despite zero quadratic obstruction"
+  IO.println "  [ok] abelian extension locus: the abelian two-parameter family extends through order two exactly on a times b equals zero"
+  IO.println "  [ok] affine adjoint dimension: the computed dimension is two at bracket degeneration and zero otherwise"
+  IO.println "  [ok] Heisenberg adjoint dimension: the canonical adjoint quotient has nine classes at zero and five otherwise"
+  IO.println "  [ok] computed affine rigidity: all closed directions at a nonzero parameter have an invertible trivializing generator change"
+  IO.println "  [ok] affine origin closed direction: the degenerate algebra retains an explicit computed cocycle"
+  IO.println "  [ok] affine origin nontrivial direction: the origin cocycle cannot be removed by the allowed generator changes"
+  IO.println "  [ok] Heisenberg representatives: every five-tuple defines a closed first-order direction"
+  IO.println "  [ok] unique deformation coordinates: different representative tuples give inequivalent first-order deformations"
+  IO.println "  [ok] computed normalizing map: the reduction primitive supplies an actual invertible bracket-preserving generator change"
+  IO.println "  [ok] nonzero adjoint classes: every nonzero representative tuple yields a nonzero actual H2 class"
+  IO.println "  [ok] sl2 adjoint H2: the generated canonical adjoint quotient has dimension zero"
+  IO.println "  [ok] sl2 infinitesimal rigidity: every closed first-order direction has an explicit trivializing equivalence"
+  IO.println "  [ok] computed sl2 primitive: the generated primitive differentiates back to every closed direction"
+
+  IO.println "  [ok] deformation cocycles: every direction in the abelian example gives a first-order Lie model"
+  IO.println "  [ok] deformation H2 zero criterion: zero class is distinguished from a merely closed direction"
+  IO.println "  [ok] deformation generator equivalence: a removable direction is proved to be a coboundary"
+  IO.println "  [ok] quadratic Jacobi obstruction: the exact obstruction coefficient a*b is checked"
+  IO.println "  [ok] second-order extension locus: arbitrary second-order corrections exist exactly on a*b=0"
+  IO.println "  [ok] nonzero obstructed class: a nonzero H2 direction can fail to extend through order two"
+  IO.println "  [ok] no arbitrary second-order rescue: corrections outside the sampled family are also ruled out"
+  IO.println "  [ok] polynomial Lie family: legal directions have actual Lie brackets for every scalar parameter"
+  IO.println "  [ok] deformation base point: the polynomial family recovers the original algebra at zero"
+  IO.println "  [ok] nonzero scaling cochain: a nonzero bracket variation need not be a nonzero H2 class"
+  IO.println "  [ok] scaling is a boundary: the explicit scaling variation has zero adjoint class"
+  IO.println "  [ok] invertible generator change: the concrete gauge map preserves deformed brackets"
+  IO.println "  [ok] jet Jacobi iff cocycle: full first-order Jacobi is equivalent to the adjoint CE condition"
+  IO.println "  [ok] first-order model existence: cocycles construct actual Lie algebra structures on jets"
+  IO.println "  [ok] adjoint H2 classification: class equality exactly characterizes equivalence fixing reduction and tangent"
+  IO.println "  [ok] second-order model existence: full Jacobi exactly requires cocycle and obstruction cancellation"
+
+  IO.println "  [ok] affine h3 dimension: actual H3 theorem checked"
+  IO.println "  [ok] heisenberg h3 dimension: actual H3 theorem checked"
+  IO.println "  [ok] abelian h3 dimension: actual H3 theorem checked"
+  IO.println "  [ok] sl2 h3 dimension: actual H3 theorem checked"
+  IO.println "  [ok] outgoing differential nonzero: actual H3 theorem checked"
+  IO.println "  [ok] nonclosed not cocycle: actual H3 theorem checked"
+  IO.println "  [ok] nonclosed projection zero: actual H3 theorem checked"
+  IO.println "  [ok] nonclosed not boundary: actual H3 theorem checked"
+  IO.println "  [ok] affine generator nonzero: actual H3 theorem checked"
+  IO.println "  [ok] heisenberg intrinsic equations: actual H3 theorem checked"
+  IO.println "  [ok] heisenberg intrinsic nonzero: actual H3 theorem checked"
+  IO.println "  [ok] heisenberg no extension: actual H3 theorem checked"
+  IO.println "  [ok] sl2 extends from h3: actual H3 theorem checked"
+  IO.println "  [ok] heisenberg class invariant: actual H3 theorem checked"
+  IO.println "  [ok] degree three CE chain identity: actual H3 theorem checked"
+  IO.println "  [ok] quadratic obstruction closedness: actual H3 theorem checked"
+  IO.println "  [ok] intrinsic H3 extension iff: actual H3 theorem checked"
+  IO.println "  [ok] intrinsic H3 gauge invariance: actual H3 theorem checked"
+  IO.println "  [ok] quadratic H3 scaling: actual H3 theorem checked"
+  IO.println "  [ok] obstruction descends to H2: actual H3 theorem checked"
+
+
+  IO.println "  [ok] parameter heisenberg dimension: complete parameter-family theorem checked"
+  IO.println "  [ok] parameter scalar resonance dimension: complete parameter-family theorem checked"
+  IO.println "  [ok] parameter scalar generic vanishes: complete parameter-family theorem checked"
+  IO.println "  [ok] parameter scalar resonance intersection: complete parameter-family theorem checked"
+  IO.println "  [ok] parameter vector validity iff: complete parameter-family theorem checked"
+  IO.println "  [ok] parameter vector dimension: complete parameter-family theorem checked"
+  IO.println "  [ok] parameter invalid vector has no model: complete parameter-family theorem checked"
+  IO.println "  [ok] parameter direction closed: complete parameter-family theorem checked"
+  IO.println "  [ok] parameter displayedCorrection cancels: complete parameter-family theorem checked"
+  IO.println "  [ok] parameter nonzero coupling extends: complete parameter-family theorem checked"
+  IO.println "  [ok] parameter zero coupling extension iff: complete parameter-family theorem checked"
+  IO.println "  [ok] parameter family extension iff: complete parameter-family theorem checked"
+  IO.println "  [ok] parameter degeneration obstructs: complete parameter-family theorem checked"
+  IO.println "  [ok] parameter computed model bracket: complete parameter-family theorem checked"
+  IO.println "  [ok] parameter actual obstruction zero iff: complete parameter-family theorem checked"
+  IO.println "  [ok] parameter computed coordinates zero iff: complete parameter-family theorem checked"
+
+  IO.println "  [ok] third order displayed third obstruction: the previous second correction leaves the displayed cubic obstruction"
+  IO.println "  [ok] third order third differential first zero: every third correction has zero CE differential in the first output coordinate"
+  IO.println "  [ok] third order displayed correction blocked: nonzero g, t and u forbid all third corrections for the previous second choice"
+  IO.println "  [ok] third order adjusted second valid: the adjusted second correction preserves the second-order Jacobi equation"
+  IO.println "  [ok] third order adjusted third obstruction: the adjusted choice leaves exactly the central obstruction minus s times u"
+  IO.println "  [ok] third order displayed third valid: the explicit third coefficient cancels the new residual at nonzero coupling"
+  IO.println "  [ok] third order displayed model bracket: the actual third-jet Lie algebra has the declared convolution bracket"
+  IO.println "  [ok] third order adjusted second extends: the adjusted second-order model extends through third order"
+  IO.println "  [ok] third order second choice matters: one direction has both a blocked and an extendable valid second-order choice"
+  IO.println "  [ok] third order zero third correction fails: a nonzero s times u requires a nonzero third-order correction"
+  IO.println "  [ok] third order computed coordinates vanish: the certified parameter H3 reduction detects the same third-order extension"
+  IO.println "  [ok] third order computed model truncates: the computed third-order model truncates to the specified second-order bracket"
+  IO.println "  [ok] third order sl2 every second choice extends: every valid rational sl2 second-order model extends through third order"
+  IO.println "  [ok] third order self Bianchi identity: generic commutative-ring theorem checked"
+  IO.println "  [ok] third order obstruction closedness: generic commutative-ring theorem checked"
+  IO.println "  [ok] third order actual model existence criterion: generic commutative-ring theorem checked"
+  IO.println "  [ok] third order intrinsic extension criterion: generic commutative-ring theorem checked"
+  IO.println "  [ok] third order vanishing H3 extension: generic commutative-ring theorem checked"
+  IO.println "  [ok] third order certified third correction: generic commutative-ring theorem checked"
+  IO.println "  [ok] third order all correction freedom: generic commutative-ring theorem checked"
+
+  IO.println "  [ok] joint search heisenberg search succeeds: joint search finds second and third corrections for the declared Heisenberg direction"
+  IO.println "  [ok] joint search heisenberg first choice valid: the sequential second-order primitive satisfies the second-order Jacobi equation"
+  IO.println "  [ok] joint search heisenberg first choice blocked: that valid sequential primitive cannot be extended for any third correction"
+  IO.println "  [ok] joint search heisenberg computed pair: all independent coordinates of the automatically repaired pair are checked"
+  IO.println "  [ok] joint search heisenberg actual model: the computed pair defines the declared actual third-jet Lie algebra"
+  IO.println "  [ok] joint search heisenberg all models: all possible Heisenberg pairs are exactly the computed solution plus the joint kernel"
+  IO.println "  [ok] joint search filiform second order succeeds: the four-dimensional nilpotent direction admits a checked second-order correction"
+  IO.println "  [ok] joint search filiform obstruction nonzero: a joint image obstruction coordinate is exactly two"
+  IO.println "  [ok] joint search filiform no third direction extension: no second and third correction pair extends the four-dimensional direction"
+  IO.println "  [ok] joint search filiform every second choice blocked: every second-order choice for that direction fails at third order"
+  IO.println "  [ok] joint search nonclosed zero projection: a nonclosed direction can have zero joint obstruction coordinates"
+  IO.println "  [ok] joint search nonclosed no model: the missing first-order cocycle equation still forbids every joint model"
+  IO.println "  [ok] joint search second order obstruction no model: a direction already obstructed at second order also fails joint search"
+  IO.println "  [ok] joint search filiform separates orders: second-order existence does not imply third-order existence even after changing the second correction"
+  IO.println "  [ok] joint search block equation bridge: generic complete-search theorem checked"
+  IO.println "  [ok] joint search actual model existence: generic complete-search theorem checked"
+  IO.println "  [ok] joint search complete image criterion: generic complete-search theorem checked"
+  IO.println "  [ok] joint search both residuals canceled: generic complete-search theorem checked"
+  IO.println "  [ok] joint search all correction pairs: generic complete-search theorem checked"
+  IO.println "  [ok] joint search no correction pair: generic complete-search theorem checked"
+
   IO.println "LeanPhy kernel-checked smoke test"
   IO.println "=================================="
   for (name, detail) in capabilities do

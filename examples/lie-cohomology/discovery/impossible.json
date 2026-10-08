@@ -1,0 +1,9 @@
+{
+  "name": "ImpossibleLieDomain",
+  "parameters": [],
+  "dimension": 3,
+  "brackets": [
+    {"i": 0, "j": 1, "value": [1, 0, 0]},
+    {"i": 1, "j": 2, "value": [0, 1, 0]}
+  ]
+}

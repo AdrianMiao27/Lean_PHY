@@ -1,5 +1,7 @@
 import LeanPhy.Minimal
-import LeanPhy.Workflow
+import LeanPhy.Workflow.Core
+import LeanPhy.Workflow.Exploration
+import LeanPhy.Verification
 
 /-! Research-project entry point.
 

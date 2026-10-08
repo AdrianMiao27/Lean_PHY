@@ -1,0 +1,20 @@
+{
+  "name": "ComplexHeavy",
+  "dimension": 2,
+  "input_sha256": "fea367236e5cb0f1a0246a72a53d5e2d45d185a08e351a2004cb30cd3a977962",
+  "status": "candidate_requires_lean_check",
+  "norm": "linfinity_operator_with_rational_l1_complex_entry_bounds",
+  "exact_precheck": true,
+  "inverse_row_bounds": [
+    "1/4",
+    "1/4"
+  ],
+  "residual_row_bounds": [
+    "1/4",
+    "1/4"
+  ],
+  "total_residual": "1/2",
+  "model_radius": "1",
+  "inverse_norm_bound": "1/2",
+  "inverse_error_bound": "1/4"
+}

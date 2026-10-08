@@ -1,7 +1,7 @@
 cff-version: 1.2.0
 title: "LeanPhy: conditional verification for theoretical physics"
-version: 1.0.0
-date-released: 2026-10-03
+version: 1.1.0
+date-released: 2026-10-08
 abstract: >-
   A Lean 4 and mathlib library for checking theoretical-physics derivations
   from explicit mathematical and physical assumptions.
